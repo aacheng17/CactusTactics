@@ -10,14 +10,13 @@ import (
 	"net/http"
 )
 
-var addr = flag.String("addr", ":8080", "http service address")
+var (
+	addr = flag.String("addr", ":8080", "http service address")
+	hubs = map[string]*Hub{}
+)
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
 	log.Println(r.URL)
-	if r.URL.Path != "/" {
-		http.Error(w, "Not found", http.StatusNotFound)
-		return
-	}
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
@@ -25,14 +24,29 @@ func serveHome(w http.ResponseWriter, r *http.Request) {
 	http.ServeFile(w, r, "home.html")
 }
 
+func handleWs(w http.ResponseWriter, r *http.Request) {
+	urlString := r.URL.String()
+	hub, ok := hubs[urlString]
+	if !ok {
+		hub = newHub()
+		go hub.run()
+		hubs[urlString] = hub
+	}
+	serveWs(hub, w, r)
+}
+
+func handler(w http.ResponseWriter, r *http.Request) {
+	log.Println(r.URL)
+	if r.URL.Path[:min(3, len(r.URL.Path))] == "/ws" {
+		handleWs(w, r)
+	} else {
+		serveHome(w, r)
+	}
+}
+
 func main() {
 	flag.Parse()
-	hub := newHub()
-	go hub.run()
-	http.HandleFunc("/", serveHome)
-	http.HandleFunc("/ws", func(w http.ResponseWriter, r *http.Request) {
-		serveWs(hub, w, r)
-	})
+	http.HandleFunc("/", handler)
 	err := http.ListenAndServe(*addr, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
