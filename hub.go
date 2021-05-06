@@ -33,6 +33,12 @@ func newHub() *Hub {
 	}
 }
 
+func removeClient(h *Hub, client *Client, debugMessage string) {
+	delete(h.clients, client)
+	close(client.send)
+	log.Println(debugMessage)
+}
+
 func (h *Hub) run() {
 	for {
 		select {
@@ -40,17 +46,16 @@ func (h *Hub) run() {
 			h.clients[client] = true
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
-				delete(h.clients, client)
-				close(client.send)
+				removeClient(h, client, "Removed client that disconnected.")
 			}
 		case message := <-h.messages:
+			log.Println("Received message\n\tType: " + fmt.Sprint(message.messageType) + "\n\tData: " + string(message.data))
+			log.Println(len(h.clients))
 			for client := range h.clients {
-				select {
-				case client.send <- message.data:
-					log.Println("Received message\n\tType: " + fmt.Sprint(message.messageType) + "\n\tData: " + string(message.data))
-				default:
-					close(client.send)
-					delete(h.clients, client)
+				if len(client.send) <= cap(client.send) {
+					client.send <- message.data
+				} else {
+					removeClient(h, client, "Detected and removed client with full send buffer.")
 				}
 			}
 		}
