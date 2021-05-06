@@ -33,10 +33,19 @@ func newHub() *Hub {
 	}
 }
 
-func removeClient(h *Hub, client *Client, debugMessage string) {
+func (h *Hub) removeClient(client *Client, debugMessage string) {
 	delete(h.clients, client)
 	close(client.send)
 	log.Println(debugMessage)
+}
+
+func (h *Hub) sendData(client *Client, messageType byte, data []byte) {
+	if len(client.send) <= cap(client.send) {
+		toSend := append([]byte{messageType}, data...)
+		client.send <- toSend
+	} else {
+		h.removeClient(client, "Detected and removed client with full send buffer.")
+	}
 }
 
 func (h *Hub) run() {
@@ -46,17 +55,17 @@ func (h *Hub) run() {
 			h.clients[client] = true
 		case client := <-h.unregister:
 			if _, ok := h.clients[client]; ok {
-				removeClient(h, client, "Removed client that disconnected.")
+				h.removeClient(client, "Removed client that disconnected.")
 			}
 		case message := <-h.messages:
 			log.Println("Received message\n\tType: " + fmt.Sprint(message.messageType) + "\n\tData: " + string(message.data))
-			log.Println(len(h.clients))
-			for client := range h.clients {
-				if len(client.send) <= cap(client.send) {
-					client.send <- message.data
-				} else {
-					removeClient(h, client, "Detected and removed client with full send buffer.")
+			switch message.messageType {
+			case 0:
+				for client := range h.clients {
+					h.sendData(client, 0, message.data)
 				}
+			case 1:
+				h.sendData(message.client, byte(1), []byte("request received"))
 			}
 		}
 	}
