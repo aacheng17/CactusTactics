@@ -59,14 +59,7 @@ func (h *Hub) run() {
 			}
 		case message := <-h.messages:
 			log.Println("Received message\n\tType: " + fmt.Sprint(message.messageType) + "\n\tData: " + string(message.data))
-			switch message.messageType {
-			case 0:
-				for client := range h.clients {
-					h.sendData(client, 0, message.data)
-				}
-			case 1:
-				h.sendData(message.client, byte(1), []byte("request received"))
-			}
+			handleMessage(h, message)
 		}
 	}
 }
