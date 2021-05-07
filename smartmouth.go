@@ -2,7 +2,6 @@ package main
 
 import (
 	"encoding/csv"
-	"fmt"
 	"io"
 	"log"
 	"math/rand"
@@ -33,6 +32,15 @@ func handleHubMessage(h *SpecializedHub, m *Message) {
 		for client := range h.clients {
 			h.sendData(client, byte('0'), []byte(client.name+": "+string(m.data)))
 		}
+		if m.data[0] == byte(h.start) && m.data[len(m.data)-1] == byte(h.end) && isWord(string(m.data)) {
+			for client := range h.clients {
+				h.sendData(client, byte('0'), []byte(m.client.name+" got it!\n"))
+			}
+			m.client.score += 10
+			h.sendData(m.client, byte('1'), []byte(h.getScores()))
+		}
+		h.genNextLetters()
+		h.sendData(m.client, byte('2'), []byte(string(h.start)+"*"+string(h.end)))
 	case byte('1'):
 		name := string(m.data)
 		if m.client.name == "" {
@@ -41,7 +49,7 @@ func handleHubMessage(h *SpecializedHub, m *Message) {
 		for client := range h.clients {
 			h.sendData(client, byte('0'), []byte(name+" joined"))
 		}
-		h.sendData(m.client, byte('1'), []byte(fmt.Sprint(m.client.score)))
+		h.sendData(m.client, byte('1'), []byte(h.getScores()))
 		h.sendData(m.client, byte('2'), []byte(string(h.start)+"*"+string(h.end)))
 	}
 }
@@ -81,6 +89,15 @@ func buildWords() []string {
 
 func getRandomWord() string {
 	return words[rand.Intn(len(words))]
+}
+
+func isWord(str string) bool {
+	for _, v := range words {
+		if v == str {
+			return true
+		}
+	}
+	return false
 }
 
 func specializedInit() {

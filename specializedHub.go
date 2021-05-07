@@ -1,6 +1,9 @@
 package main
 
-import "math/rand"
+import (
+	"fmt"
+	"math/rand"
+)
 
 // declaring a struct
 type SpecializedHub struct {
@@ -13,15 +16,28 @@ type SpecializedHub struct {
 	end rune
 }
 
+func (h *SpecializedHub) genNextLetters() {
+	h.start = letters[rand.Intn(len(letters))]
+	h.end = letters[rand.Intn(len(letters))]
+}
+
+func (h *SpecializedHub) getScores() string {
+	scores := ""
+	for client := range h.clients {
+		scores += client.name + ": " + fmt.Sprint(client.score) + "; "
+	}
+	return scores
+}
+
 func newHub() *SpecializedHub {
-	return &SpecializedHub{
+	h := &SpecializedHub{
 		Hub: Hub{
 			register:   make(chan *SpecializedClient),
 			unregister: make(chan *SpecializedClient),
 			messages:   make(chan *Message),
 			clients:    make(map[*SpecializedClient]bool),
 		},
-		start: letters[rand.Intn(len(letters))],
-		end:   letters[rand.Intn(len(letters))],
 	}
+	h.genNextLetters()
+	return h
 }
