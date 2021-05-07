@@ -13,33 +13,24 @@ import (
 // clients.
 type Hub struct {
 	// Registered clients.
-	clients map[*Client]bool
+	clients map[*SpecializedClient]bool
 
 	// Register requests from the clients.
-	register chan *Client
+	register chan *SpecializedClient
 
 	// Unregister requests from clients.
-	unregister chan *Client
+	unregister chan *SpecializedClient
 
 	messages chan *Message
 }
 
-func newHub() *Hub {
-	return &Hub{
-		register:   make(chan *Client),
-		unregister: make(chan *Client),
-		messages:   make(chan *Message),
-		clients:    make(map[*Client]bool),
-	}
-}
-
-func (h *Hub) removeClient(client *Client, debugMessage string) {
+func (h *Hub) removeClient(client *SpecializedClient, debugMessage string) {
 	delete(h.clients, client)
 	close(client.send)
 	log.Println(debugMessage)
 }
 
-func (h *Hub) sendData(client *Client, messageType byte, data []byte) {
+func (h *Hub) sendData(client *SpecializedClient, messageType byte, data []byte) {
 	if len(client.send) <= cap(client.send) {
 		toSend := append([]byte{messageType}, data...)
 		client.send <- toSend

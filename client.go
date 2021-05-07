@@ -39,7 +39,7 @@ var upgrader = websocket.Upgrader{
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
-	hub *Hub
+	hub *SpecializedHub
 
 	// The websocket connection.
 	conn *websocket.Conn
@@ -55,7 +55,7 @@ type Client struct {
 // The application runs readPump in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
-func (c *Client) readPump() {
+func (c *SpecializedClient) readPump() {
 	defer func() {
 		c.hub.unregister <- c
 		c.conn.Close()
@@ -123,13 +123,13 @@ func (c *Client) writePump() {
 }
 
 // serveWs handles websocket requests from the peer.
-func serveWs(hub *Hub, w http.ResponseWriter, r *http.Request) {
+func serveWs(hub *SpecializedHub, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	client := &Client{hub: hub, conn: conn, send: make(chan []byte, 256)}
+	client := newClient(hub, conn)
 	client.hub.register <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in

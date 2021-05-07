@@ -2,6 +2,7 @@ package main
 
 import (
 	"encoding/csv"
+	"fmt"
 	"io"
 	"log"
 	"math/rand"
@@ -20,7 +21,7 @@ var (
 	currentWord = ""
 )
 
-func handleClientMessage(c *Client, d []byte) {
+func handleClientMessage(c *SpecializedClient, d []byte) {
 	log.Println(string(d))
 	c.hub.messages <- newMessage(c, byte(d[0]), d[1:])
 }
@@ -36,7 +37,10 @@ func handleHubMessage(h *Hub, m *Message) {
 		if m.client.name == "" {
 			m.client.name = name
 		}
-		h.sendData(m.client, byte('0'), []byte(name+" joined"))
+		for client := range h.clients {
+			h.sendData(client, byte('0'), []byte(name+" joined"))
+		}
+		h.sendData(m.client, byte('1'), []byte(fmt.Sprint(m.client.score)))
 	}
 }
 
@@ -77,7 +81,7 @@ func getRandomWord() string {
 	return words[rand.Intn(len(words))]
 }
 
-func smartmouthInit() {
+func specializedInit() {
 	rand.Seed(time.Now().Unix())
 	words = buildWords()
 }

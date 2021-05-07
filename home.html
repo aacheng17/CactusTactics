@@ -57,10 +57,15 @@ window.onload = function () {
                 var m = messages[i]
                 var messageType = m.charAt(0);
                 var message = m.substring(1,m.length)
-                if (messageType == '0') {
+                switch (messageType) {
+                case '0':
                     var item = document.createElement("div");
                     item.innerText = message;
                     appendLog(item);
+                    break;
+                case '1':
+                    document.getElementById("status").innerText = "Score: " + message;
+                    break
                 }
             }
         };

@@ -12,7 +12,7 @@ import (
 
 var (
 	addr = flag.String("addr", ":8080", "http service address")
-	hubs = map[string]*Hub{}
+	hubs = map[string]*SpecializedHub{}
 )
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
@@ -47,7 +47,7 @@ func handler(w http.ResponseWriter, r *http.Request) {
 func main() {
 	flag.Parse()
 	http.HandleFunc("/", handler)
-	smartmouthInit()
+	specializedInit()
 	err := http.ListenAndServe(*addr, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
