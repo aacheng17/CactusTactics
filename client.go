@@ -44,6 +44,8 @@ type Client struct {
 	// The websocket connection.
 	conn *websocket.Conn
 
+	name string
+
 	// Buffered channel of outbound messages.
 	send chan []byte
 }

@@ -1,7 +1,7 @@
 package main
 
 import (
-	"fmt"
+	"log"
 )
 
 var (
@@ -10,16 +10,21 @@ var (
 )
 
 func handleClientMessage(c *Client, d []byte) {
-	c.hub.messages <- newMessage(c, byte(0), d)
+	log.Println(string(d))
+	c.hub.messages <- newMessage(c, byte(d[0]), d[1:])
 }
 
 func handleHubMessage(h *Hub, m *Message) {
 	switch m.messageType {
-	case 0:
+	case byte('0'):
 		for client := range h.clients {
-			h.sendData(client, 0, m.data)
+			h.sendData(client, byte('0'), []byte(client.name+": "+string(m.data)))
 		}
-	case 1:
-		h.sendData(m.client, byte(1), []byte(fmt.Sprint(startFreq["a"])))
+	case byte('1'):
+		name := string(m.data)
+		if m.client.name == "" {
+			m.client.name = name
+		}
+		h.sendData(m.client, byte('0'), []byte(name+" joined"))
 	}
 }

@@ -4,7 +4,10 @@
 <title>Chat Example</title>
 <script type="text/javascript">
 window.onload = function () {
-    var conn;
+    var conn, name;
+    var nameForm = document.getElementById("name_form")
+    var nameField = document.getElementById("name_field");
+    var show = document.getElementById("show");
     var msg = document.getElementById("msg");
     var log = document.getElementById("log");
 
@@ -16,14 +19,27 @@ window.onload = function () {
         }
     }
 
+    nameForm.onsubmit = function () {
+        if (!conn) {
+            return false;
+        }
+        if (!nameField.value.trim()) {
+            return false;
+        }
+        name = nameField.value;
+        conn.send("1" + name);
+        nameForm.parentNode.removeChild(nameForm);
+        show.style.visibility = "visible";
+    }
+
     document.getElementById("form").onsubmit = function () {
         if (!conn) {
             return false;
         }
-        if (!msg.value) {
+        if (!msg.value.trim()) {
             return false;
         }
-        conn.send(msg.value);
+        conn.send("0" + msg.value);
         msg.value = "";
         return false;
     };
@@ -38,9 +54,14 @@ window.onload = function () {
         conn.onmessage = function (evt) {
             var messages = evt.data.split('\n');
             for (var i = 0; i < messages.length; i++) {
-                var item = document.createElement("div");
-                item.innerText = messages[i];
-                appendLog(item);
+                var m = messages[i]
+                var messageType = m.charAt(0);
+                var message = m.substring(1,m.length)
+                if (messageType == '0') {
+                    var item = document.createElement("div");
+                    item.innerText = message;
+                    appendLog(item);
+                }
             }
         };
     } else {
@@ -48,6 +69,8 @@ window.onload = function () {
         item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
         appendLog(item);
     }
+
+    show.style.visibility = "hidden";
 };
 </script>
 <style type="text/css">
@@ -62,6 +85,11 @@ body {
     width: 100%;
     height: 100%;
     background: gray;
+}
+
+#name_form {
+    text-align: center;
+    padding: 0.5em 0.5em 0.5em 0.5em;
 }
 
 #log {
@@ -108,17 +136,18 @@ body {
 </style>
 </head>
 <body>
-<input 
-    type="submit" 
-    value="Click Me" 
-    style="display:block;" 
-    onclick="this.style.display='none'">
-<div id="log"></div>
-<div id="status">status</div>
-<div id="prompt">prompt</div>
-<form id="form">
-    <input type="submit" value="Send" />
-    <input type="text" id="msg" size="64" autofocus />
-</form>
+    <form id="name_form">
+        <input type="submit" value="Set Name" />
+        <input type="text" id="name_field" size="64" maxlength="20" placeholder="Name" autofocus />
+    </form>
+    <div id="show">
+        <div id="log"></div>
+        <div id="status">status</div>
+        <div id="prompt">prompt</div>
+        <form id="form">
+            <input type="submit" value="Send" />
+            <input type="text" id="msg" size="64" />
+        </form>
+    </div>
 </body>
 </html>
