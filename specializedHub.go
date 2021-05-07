@@ -1,12 +1,16 @@
 package main
 
+import "math/rand"
+
 // declaring a struct
 type SpecializedHub struct {
 
 	// declaring struct variable
 	Hub
 
-	score int
+	start rune
+
+	end rune
 }
 
 func newHub() *SpecializedHub {
@@ -17,5 +21,7 @@ func newHub() *SpecializedHub {
 			messages:   make(chan *Message),
 			clients:    make(map[*SpecializedClient]bool),
 		},
+		start: letters[rand.Intn(len(letters))],
+		end:   letters[rand.Intn(len(letters))],
 	}
 }

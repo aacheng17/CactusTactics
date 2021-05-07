@@ -39,7 +39,7 @@ func (h *Hub) sendData(client *SpecializedClient, messageType byte, data []byte)
 	}
 }
 
-func (h *Hub) run() {
+func (h *SpecializedHub) run() {
 	for {
 		select {
 		case client := <-h.register:
