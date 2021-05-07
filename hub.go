@@ -59,7 +59,7 @@ func (h *Hub) run() {
 			}
 		case message := <-h.messages:
 			log.Println("Received message\n\tType: " + fmt.Sprint(message.messageType) + "\n\tData: " + string(message.data))
-			handleMessage(h, message)
+			handleHubMessage(h, message)
 		}
 	}
 }
