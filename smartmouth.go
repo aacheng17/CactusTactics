@@ -31,19 +31,20 @@ func handleHubMessage(h *SpecializedHub, m *Message) {
 	switch m.messageType {
 	case byte('0'):
 		for client := range h.clients {
-			h.sendData(client, byte('0'), []byte(client.name+": "+string(m.data)))
+			h.sendData(client, byte('0'), []byte(m.client.name+": "+string(m.data)))
 		}
 		if len(m.data) >= 3 && m.data[0] == byte(h.start) && m.data[len(m.data)-1] == byte(h.end) && isWord(string(m.data)) {
 			worth := h.getWorth()
 			worth *= len(m.data) - 2
 			m.client.score += worth
+			h.genNextLetters()
 			for client := range h.clients {
+				h.resetPass()
 				h.sendData(client, byte('0'), []byte(m.client.name+" earned "+fmt.Sprint((h.getWorth()))+"x"+fmt.Sprint(len(m.data)-2)+"="+fmt.Sprint(worth)+" points"))
 				h.sendData(client, byte('0'), []byte("."))
-				h.genNextLetters()
-				h.sendData(m.client, byte('2'), []byte(h.getPrompt()))
+				h.sendData(client, byte('2'), []byte(h.getPrompt()))
+				h.sendData(client, byte('1'), []byte(h.getScores()))
 			}
-			h.sendData(m.client, byte('1'), []byte(h.getScores()))
 		} else if string(m.data) == "pass" {
 			m.client.pass = true
 			if h.getMajorityPass() {
@@ -73,7 +74,9 @@ func handleHubMessage(h *SpecializedHub, m *Message) {
 		for client := range h.clients {
 			h.sendData(client, byte('0'), []byte(name+" joined"))
 		}
-		h.sendData(m.client, byte('1'), []byte(h.getScores()))
+		for client := range h.clients {
+			h.sendData(client, byte('1'), []byte(h.getScores()))
+		}
 		h.sendData(m.client, byte('2'), []byte(h.getPrompt()))
 	}
 }
