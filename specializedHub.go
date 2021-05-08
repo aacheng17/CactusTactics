@@ -16,6 +16,8 @@ type SpecializedHub struct {
 	end rune
 
 	usedWords []string
+
+	passedLetters []string
 }
 
 func (h *SpecializedHub) isWord(str string) bool {
@@ -62,8 +64,27 @@ func (h *SpecializedHub) getMajorityPass() bool {
 }
 
 func (h *SpecializedHub) genNextLetters() {
-	h.start = letters[rand.Intn(len(letters))]
-	h.end = letters[rand.Intn(len(letters))]
+	i := 1000
+	for {
+		i--
+		h.start = letters[rand.Intn(len(letters))]
+		for {
+			h.end = letters[rand.Intn(len(letters))]
+			if h.end != 'q' {
+				break
+			}
+		}
+		str := string(h.start) + string(h.end)
+		passed := false
+		for _, v := range h.usedWords {
+			if v == str {
+				passed = true
+			}
+		}
+		if !passed || i <= 0 {
+			break
+		}
+	}
 }
 
 func (h *SpecializedHub) getWorth() int {
