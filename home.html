@@ -41,7 +41,7 @@ window.onload = function () {
         }
         if (msg.value.trim()=="/rules") {
             var item = document.createElement("div");
-            item.innerHTML = "<br/><b>Rules</b><br/>At the bottom are two letters. Try to think of a word that starts with the first letter and ends with the second.<br/>You get points for harder letters and longer words. Words must be >3 letters.<br/>You can also enter 'pass' if the letters are too hard to vote to skip the current letters.<br/>You can enter 'restart' to restart the game.<br/>";
+            item.innerHTML = "<br/><b>Rules</b><br/>At the bottom are two letters. Try to think of a word that starts with the first letter and ends with the second.<br/>You get points for harder letters and longer words. Words must be >2 letters.<br/>You can also enter 'pass' if the letters are too hard to vote to skip the current letters.<br/>You can enter 'restart' to restart the game.<br/>";
             appendLog(item);
             msg.value = "";
             return false;
