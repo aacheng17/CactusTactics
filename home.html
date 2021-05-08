@@ -69,6 +69,11 @@ window.onload = function () {
                 case '2':
                     document.getElementById("prompt").innerText = message;
                     break
+                case '3':
+                    while (log.firstChild) {
+                        log.removeChild(log.firstChild);
+                    }
+                    break
                 }
             }
         };

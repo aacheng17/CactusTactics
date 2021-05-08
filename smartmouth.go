@@ -48,16 +48,19 @@ func handleHubMessage(h *SpecializedHub, m *Message) {
 			m.client.pass = true
 			if h.getMajorityPass() {
 				h.resetPass()
-				h.sendData(m.client, byte('0'), []byte("Letters passed, new letters generated"))
-				h.sendData(client, byte('0'), []byte("."))
 				h.genNextLetters()
-				h.sendData(m.client, byte('2'), []byte(h.getPrompt()))
+				for client := range h.clients {
+					h.sendData(client, byte('0'), []byte("Letters passed, new letters generated"))
+					h.sendData(client, byte('0'), []byte("."))
+					h.sendData(client, byte('2'), []byte(h.getPrompt()))
+				}
 			}
 		} else if string(m.data) == "restart" {
 			h.reset()
 			for client := range h.clients {
 				h.sendData(client, byte('1'), []byte(h.getScores()))
 				h.sendData(client, byte('2'), []byte(h.getPrompt()))
+				h.sendData(client, byte('3'), []byte(""))
 				h.sendData(m.client, byte('0'), []byte("Game restarted"))
 				h.sendData(client, byte('0'), []byte("."))
 			}
