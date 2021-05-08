@@ -14,6 +14,26 @@ type SpecializedHub struct {
 	start rune
 
 	end rune
+
+	usedWords []string
+}
+
+func (h *SpecializedHub) isWord(str string) bool {
+	for _, v := range h.usedWords {
+		if v == str {
+			return false
+		}
+	}
+	for _, v := range words {
+		if v == str {
+			return true
+		}
+	}
+	return false
+}
+
+func (h *SpecializedHub) useWord(word string) {
+	h.usedWords = append(h.usedWords, word)
 }
 
 func (h *SpecializedHub) reset() {
@@ -43,6 +63,8 @@ func (h *SpecializedHub) getMajorityPass() bool {
 func (h *SpecializedHub) genNextLetters() {
 	h.start = letters[rand.Intn(len(letters))]
 	h.end = letters[rand.Intn(len(letters))]
+	h.start = 'b'
+	h.end = 'o'
 }
 
 func (h *SpecializedHub) getWorth() int {
@@ -72,6 +94,7 @@ func newHub() *SpecializedHub {
 			messages:   make(chan *Message),
 			clients:    make(map[*SpecializedClient]bool),
 		},
+		usedWords: []string{},
 	}
 	h.genNextLetters()
 	return h

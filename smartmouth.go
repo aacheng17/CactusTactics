@@ -33,13 +33,14 @@ func handleHubMessage(h *SpecializedHub, m *Message) {
 		for client := range h.clients {
 			h.sendData(client, byte('0'), []byte(m.client.name+": "+string(m.data)))
 		}
-		if len(m.data) >= 3 && m.data[0] == byte(h.start) && m.data[len(m.data)-1] == byte(h.end) && isWord(string(m.data)) {
+		if len(m.data) >= 3 && m.data[0] == byte(h.start) && m.data[len(m.data)-1] == byte(h.end) && h.isWord(string(m.data)) {
 			worth := h.getWorth()
 			worth *= len(m.data) - 2
 			m.client.score += worth
 			h.genNextLetters()
 			for client := range h.clients {
 				h.resetPass()
+				h.useWord(string(m.data))
 				h.sendData(client, byte('0'), []byte(m.client.name+" earned "+fmt.Sprint((h.getWorth()))+"x"+fmt.Sprint(len(m.data)-2)+"="+fmt.Sprint(worth)+" points"))
 				h.sendData(client, byte('0'), []byte("."))
 				h.sendData(client, byte('2'), []byte(h.getPrompt()))
@@ -62,7 +63,7 @@ func handleHubMessage(h *SpecializedHub, m *Message) {
 				h.sendData(client, byte('1'), []byte(h.getScores()))
 				h.sendData(client, byte('2'), []byte(h.getPrompt()))
 				h.sendData(client, byte('3'), []byte(""))
-				h.sendData(m.client, byte('0'), []byte("Game restarted"))
+				h.sendData(client, byte('0'), []byte(m.client.name+" restarted thea game"))
 				h.sendData(client, byte('0'), []byte("."))
 			}
 		}
@@ -116,15 +117,6 @@ func buildWords() []string {
 
 func getRandomWord() string {
 	return words[rand.Intn(len(words))]
-}
-
-func isWord(str string) bool {
-	for _, v := range words {
-		if v == str {
-			return true
-		}
-	}
-	return false
 }
 
 func specializedInit() {
