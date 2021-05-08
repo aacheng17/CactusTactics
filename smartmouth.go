@@ -35,13 +35,14 @@ func handleHubMessage(h *SpecializedHub, m *Message) {
 		}
 		if len(m.data) >= 3 && m.data[0] == byte(h.start) && m.data[len(m.data)-1] == byte(h.end) && h.isWord(string(m.data)) {
 			worth := h.getWorth()
-			worth *= len(m.data) - 2
-			m.client.score += worth
+			bonus := len(m.data) - 2
+			finalWorth := worth * bonus
+			m.client.score += finalWorth
 			h.genNextLetters()
 			for client := range h.clients {
 				h.resetPass()
 				h.useWord(string(m.data))
-				h.sendData(client, byte('0'), []byte(m.client.name+" earned "+fmt.Sprint((h.getWorth()))+"x"+fmt.Sprint(len(m.data)-2)+"="+fmt.Sprint(worth)+" points"))
+				h.sendData(client, byte('0'), []byte(m.client.name+" earned "+fmt.Sprint(worth)+"x"+fmt.Sprint(bonus)+"="+fmt.Sprint(finalWorth)+" points"))
 				h.sendData(client, byte('0'), []byte("."))
 				h.sendData(client, byte('2'), []byte(h.getPrompt()))
 				h.sendData(client, byte('1'), []byte(h.getScores()))
