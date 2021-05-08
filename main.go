@@ -12,7 +12,6 @@ import (
 )
 
 var (
-	addr = flag.String("addr", ":8080", "http service address")
 	hubs = map[string]*SpecializedHub{}
 )
 
@@ -47,8 +46,11 @@ func handler(w http.ResponseWriter, r *http.Request) {
 
 func main() {
 	port := os.Getenv("PORT")
+	var addr *string
 	if port != "" {
 		addr = flag.String("addr", ":"+port, "http service address")
+	} else {
+		addr = flag.String("addr", ":8080", "http service address")
 	}
 	flag.Parse()
 	http.HandleFunc("/", handler)
