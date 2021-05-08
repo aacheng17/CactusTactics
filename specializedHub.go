@@ -41,6 +41,7 @@ func (h *SpecializedHub) reset() {
 		client.score = 0
 		client.pass = false
 	}
+	h.usedWords = []string{}
 	h.genNextLetters()
 }
 
