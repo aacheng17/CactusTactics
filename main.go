@@ -8,6 +8,7 @@ import (
 	"flag"
 	"log"
 	"net/http"
+	"os"
 )
 
 var (
@@ -45,6 +46,10 @@ func handler(w http.ResponseWriter, r *http.Request) {
 }
 
 func main() {
+	port := os.Getenv("PORT")
+	if port != "" {
+		addr = flag.String("addr", ":"+port, "http service address")
+	}
 	flag.Parse()
 	http.HandleFunc("/", handler)
 	specializedInit()
