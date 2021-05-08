@@ -64,8 +64,6 @@ func (h *SpecializedHub) getMajorityPass() bool {
 func (h *SpecializedHub) genNextLetters() {
 	h.start = letters[rand.Intn(len(letters))]
 	h.end = letters[rand.Intn(len(letters))]
-	h.start = 'b'
-	h.end = 'o'
 }
 
 func (h *SpecializedHub) getWorth() int {
