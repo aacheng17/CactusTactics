@@ -1,1 +1,1 @@
-web: websocketChat
+go run .
