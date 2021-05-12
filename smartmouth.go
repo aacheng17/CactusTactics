@@ -7,6 +7,7 @@ import (
 	"log"
 	"math/rand"
 	"os"
+	"strings"
 	"time"
 )
 
@@ -33,7 +34,7 @@ func handleHubMessage(h *SpecializedHub, m *Message) {
 		for client := range h.clients {
 			h.sendData(client, byte('0'), []byte(m.client.name+": "+string(m.data)))
 		}
-		if len(m.data) >= 3 && m.data[0] == byte(h.start) && m.data[len(m.data)-1] == byte(h.end) && h.isWord(string(m.data)) {
+		if len(m.data) >= 3 && m.data[0] == byte(h.start) && m.data[len(m.data)-1] == byte(h.end) && h.isWord(strings.TrimSpace(strings.ToLower(string(m.data)))) {
 			worth := h.getWorth()
 			bonus := len(m.data) - 2
 			finalWorth := worth * bonus
@@ -45,6 +46,7 @@ func handleHubMessage(h *SpecializedHub, m *Message) {
 				h.sendData(client, byte('0'), []byte(m.client.name+" earned "+fmt.Sprint(worth)+"x"+fmt.Sprint(bonus)+"="+fmt.Sprint(finalWorth)+" points"))
 				h.sendData(client, byte('0'), []byte("."))
 				h.sendData(client, byte('2'), []byte(h.getPrompt()))
+				h.sendData(client, byte('0'), []byte("New letters: "+h.getPrompt()))
 				h.sendData(client, byte('1'), []byte(h.getScores()))
 			}
 		} else if string(m.data) == "pass" {
@@ -55,17 +57,19 @@ func handleHubMessage(h *SpecializedHub, m *Message) {
 				for client := range h.clients {
 					h.sendData(client, byte('0'), []byte("Letters passed, new letters generated"))
 					h.sendData(client, byte('0'), []byte("."))
+					h.sendData(client, byte('0'), []byte("New letters: "+h.getPrompt()))
 					h.sendData(client, byte('2'), []byte(h.getPrompt()))
 				}
 			}
 		} else if string(m.data) == "restart" {
 			h.reset()
 			for client := range h.clients {
+				h.sendData(client, byte('3'), []byte(""))
+				h.sendData(client, byte('0'), []byte(m.client.name+" restarted the game"))
 				h.sendData(client, byte('1'), []byte(h.getScores()))
 				h.sendData(client, byte('2'), []byte(h.getPrompt()))
-				h.sendData(client, byte('3'), []byte(""))
-				h.sendData(client, byte('0'), []byte(m.client.name+" restarted thea game"))
 				h.sendData(client, byte('0'), []byte("."))
+				h.sendData(client, byte('0'), []byte("New letters: "+h.getPrompt()))
 			}
 		}
 	case byte('1'):

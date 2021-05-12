@@ -3,6 +3,7 @@ package main
 import (
 	"fmt"
 	"math/rand"
+	"sort"
 )
 
 // declaring a struct
@@ -60,7 +61,7 @@ func (h *SpecializedHub) getMajorityPass() bool {
 			count++
 		}
 	}
-	return count*2 >= len(h.clients)
+	return count*2 > len(h.clients)
 }
 
 func (h *SpecializedHub) genNextLetters() {
@@ -99,8 +100,18 @@ func (h *SpecializedHub) getPrompt() string {
 }
 
 func (h *SpecializedHub) getScores() string {
+	keys := make([]*SpecializedClient, 0, len(h.clients))
+	for k := range h.clients {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i].score > keys[j].score
+	})
 	scores := ""
-	for client := range h.clients {
+	for _, client := range keys {
+		if client.name == "" {
+			continue
+		}
 		scores += client.name + ": " + fmt.Sprint(client.score) + "; "
 	}
 	return scores
