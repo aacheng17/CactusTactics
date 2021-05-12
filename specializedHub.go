@@ -18,25 +18,23 @@ type SpecializedHub struct {
 
 	usedWords []string
 
-	passedLetters []string
+	letters map[string]int
+
+	wordsLeft int
 }
 
-func (h *SpecializedHub) isWord(str string) bool {
+func (h *SpecializedHub) validWord(str string) int {
 	for _, v := range h.usedWords {
 		if v == str {
-			return false
+			return 2
 		}
 	}
 	for _, v := range words {
 		if v == str {
-			return true
+			return 0
 		}
 	}
-	return false
-}
-
-func (h *SpecializedHub) useWord(word string) {
-	h.usedWords = append(h.usedWords, word)
+	return 1
 }
 
 func (h *SpecializedHub) reset() {
@@ -44,7 +42,10 @@ func (h *SpecializedHub) reset() {
 		client.score = 0
 		client.pass = false
 	}
-	h.usedWords = []string{}
+	h.wordsLeft = len(words)
+	for k, v := range letters {
+		h.letters[k] = v
+	}
 	h.genNextLetters()
 }
 
@@ -52,6 +53,13 @@ func (h *SpecializedHub) resetPass() {
 	for client := range h.clients {
 		client.pass = false
 	}
+}
+
+func (h *SpecializedHub) pass() int {
+	h.resetPass()
+	h.wordsLeft -= h.letters[string(h.start)+string(h.end)]
+	h.letters[string(h.start)+string(h.end)] = 0
+	return h.genNextLetters()
 }
 
 func (h *SpecializedHub) getMajorityPass() bool {
@@ -64,38 +72,39 @@ func (h *SpecializedHub) getMajorityPass() bool {
 	return count*2 > len(h.clients)
 }
 
-func (h *SpecializedHub) genNextLetters() {
-	i := 1000
-	for {
-		i--
-		h.start = letters[rand.Intn(len(letters))]
-		for {
-			h.end = letters[rand.Intn(len(letters))]
-			if h.end != 'q' {
-				break
-			}
-		}
-		str := string(h.start) + string(h.end)
-		passed := false
-		for _, v := range h.usedWords {
-			if v == str {
-				passed = true
-			}
-		}
-		if !passed || i <= 0 {
+func (h *SpecializedHub) gotIt(word string) int {
+	h.resetPass()
+	h.usedWords = append(h.usedWords, word)
+	h.wordsLeft--
+	h.letters[string(h.start)+string(h.end)]--
+	return h.genNextLetters()
+}
+
+func (h *SpecializedHub) genNextLetters() int {
+	if h.wordsLeft <= 0 {
+		return 1
+	}
+	r := rand.Intn(h.wordsLeft)
+	c := 0
+	for lets, freq := range h.letters {
+		c += freq
+		if r < c {
+			h.start = rune(lets[0])
+			h.end = rune(lets[1])
 			break
 		}
 	}
+	return 0
 }
 
 func (h *SpecializedHub) getWorth() int {
-	return int(100.0 * (1.0 - float32(startFreq[h.start]+endFreq[h.start])/3000.0))
+	return int(50-50*(float32(letters[string(h.start)+string(h.end)]-minFreq)/float32(maxFreq-minFreq))) + 50
 }
 
 func (h *SpecializedHub) getPrompt() string {
 	ret := string(h.start) + "*" + string(h.end)
 	bonus := h.getWorth()
-	ret += ", worth " + fmt.Sprint(bonus) + " points"
+	ret += ", worth " + fmt.Sprint(bonus) + " points. There are " + fmt.Sprint(h.letters[string(h.start)+string(h.end)]) + " possible words"
 	return ret
 }
 
@@ -125,8 +134,8 @@ func newHub() *SpecializedHub {
 			messages:   make(chan *Message),
 			clients:    make(map[*SpecializedClient]bool),
 		},
-		usedWords: []string{},
+		letters: make(map[string]int),
 	}
-	h.genNextLetters()
+	h.reset()
 	return h
 }
