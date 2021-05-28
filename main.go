@@ -35,7 +35,9 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL)
+	log.Println("wakawaka")
+	log.Println(r.URL.String())
+	log.Println(r.URL.Host)
 	if r.URL.Path[:min(3, len(r.URL.Path))] == "/ws" {
 		handleWs(w, r)
 	} else {
