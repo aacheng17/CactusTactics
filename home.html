@@ -19,7 +19,7 @@ window.onload = function () {
         }
     }
 
-    nameForm.onsubmit = function () {
+    nameForm.onsubmit = function (e) {
         if (!conn) {
             return false;
         }
@@ -28,6 +28,7 @@ window.onload = function () {
         }
         name = nameField.value;
         conn.send("1" + name);
+        e.preventDefault();
         nameForm.parentNode.removeChild(nameForm);
         show.style.visibility = "visible";
     }
