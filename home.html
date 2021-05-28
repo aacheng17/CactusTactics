@@ -52,7 +52,11 @@ window.onload = function () {
     };
 
     if (window["WebSocket"]) {
-        conn = new WebSocket("wss://" + document.location.host + "/ws" + document.location.pathname);
+        var websocketprotocol = "ws://";
+        if (document.location.protocol==="https:") {
+            websocketprotocol = "wss://";
+        }
+        conn = new WebSocket(websocketprotocol + document.location.host + "/ws" + document.location.pathname);
         conn.onclose = function (evt) {
             var item = document.createElement("div");
             item.innerHTML = "<b>Connection closed.</b>";
