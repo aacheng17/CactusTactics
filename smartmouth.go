@@ -8,6 +8,12 @@ import (
 	"time"
 )
 
+// MESSAGE TYPES
+// 0: regular chat messages
+// 1: scores
+// 2: prompt
+// 3: restart (data is inconsequential, probably empty string)
+
 func handleClientMessage(c *SpecializedClient, d []byte) {
 	log.Println(string(d))
 	c.hub.messages <- newMessage(c, byte(d[0]), d[1:])

@@ -3,6 +3,8 @@
 <head>
 <title>IdiotMouth</title>
 <script type="text/javascript">
+// when using conn.send(), the first character in the string represents the message type
+// 0 means regular chat message, 1 means setting player name
 window.onload = function () {
     var conn, name;
     var nameForm = document.getElementById("name_form")
