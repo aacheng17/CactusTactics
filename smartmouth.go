@@ -158,8 +158,6 @@ func buildFreqs() {
 			maxFreq = e
 		}
 	}
-	log.Println("min" + fmt.Sprint((minFreq)))
-	log.Println("max" + fmt.Sprint((maxFreq)))
 }
 
 func specializedInit() {
