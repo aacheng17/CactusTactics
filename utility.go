@@ -6,3 +6,12 @@ func min(x, y int) int {
 	}
 	return y
 }
+
+func find(slice []string, val string) (int, bool) {
+	for i, item := range slice {
+		if item == val {
+			return i, true
+		}
+	}
+	return -1, false
+}
