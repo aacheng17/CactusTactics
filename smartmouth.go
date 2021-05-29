@@ -8,7 +8,7 @@ import (
 	"time"
 )
 
-// MESSAGE TYPES
+// MESSAGE TYPES (SERVER TO CLIENT)
 // 0: regular chat messages
 // 1: scores
 // 2: prompt
