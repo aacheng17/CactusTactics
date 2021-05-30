@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 )
 
 var (
@@ -31,11 +32,15 @@ func fakeoutBuildQuestions() {
 	defer jsonFile.Close()
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 	json.Unmarshal(byteValue, &questions)
-	/*
-		for _, x := range questions.Questions {
-			log.Println(x.Question)
+	for i, x := range questions.Questions {
+		questions.Questions[i].Answer = strings.ToLower(x.Answer)
+		for j, y := range x.AlternateSpellings {
+			questions.Questions[i].AlternateSpellings[j] = strings.ToLower(y)
 		}
-	*/
+		for j, y := range x.Suggestions {
+			questions.Questions[i].Suggestions[j] = strings.ToLower(y)
+		}
+	}
 }
 
 func (q Questions) size() int {
