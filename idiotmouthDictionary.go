@@ -18,7 +18,7 @@ var (
 )
 
 func buildWords() {
-	csvfile, err := os.Open("english.csv")
+	csvfile, err := os.Open("idiotmouthEnglish.csv")
 	if err != nil {
 		log.Fatalln("Couldn't open the csv file", err)
 	}
