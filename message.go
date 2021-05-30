@@ -1,12 +1,12 @@
 package main
 
 type Message struct {
-	client      *SpecializedClient
+	client      Clientlike
 	messageType byte
 	data        []byte
 }
 
-func newMessage(c *SpecializedClient, t byte, d []byte) *Message {
+func newMessage(c Clientlike, t byte, d []byte) *Message {
 	return &Message{
 		client:      c,
 		messageType: t,

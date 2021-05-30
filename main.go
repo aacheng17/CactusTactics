@@ -11,7 +11,7 @@ import (
 )
 
 var (
-	hubs = map[string]*SpecializedHub{}
+	hubs = map[string]Hublike{}
 )
 
 func serveHome(w http.ResponseWriter, r *http.Request) {
@@ -27,7 +27,7 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 	urlString := r.URL.String()
 	hub, ok := hubs[urlString]
 	if !ok {
-		hub = newHub()
+		hub = newIdiotmouthHub()
 		go hub.run()
 		hubs[urlString] = hub
 	}

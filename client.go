@@ -37,9 +37,17 @@ var upgrader = websocket.Upgrader{
 	WriteBufferSize: 1024,
 }
 
+type Clientlike interface {
+	Name() string
+	Send() chan []byte
+	handleClientMessage(d []byte)
+}
+
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
-	hub *SpecializedHub
+	hub Hublike
+
+	child Clientlike
 
 	// The websocket connection.
 	conn *websocket.Conn
@@ -50,14 +58,27 @@ type Client struct {
 	send chan []byte
 }
 
+func (c *Client) Name() string {
+	return c.name
+}
+
+func (c *Client) Send() chan []byte {
+	return c.send
+}
+
+func (c *Client) handleClientMessage(d []byte) {
+	log.Println(string(d))
+	c.hub.Messages() <- newMessage(c, byte(d[0]), d[1:])
+}
+
 // readPump pumps messages from the websocket connection to the hub.
 //
 // The application runs readPump in a per-connection goroutine. The application
 // ensures that there is at most one reader on a connection by executing all
 // reads from this goroutine.
-func (c *SpecializedClient) readPump() {
+func (c *Client) readPump() {
 	defer func() {
-		c.hub.unregister <- c
+		c.hub.Unregister() <- c
 		c.conn.Close()
 	}()
 	c.conn.SetReadLimit(maxMessageSize)
@@ -72,7 +93,7 @@ func (c *SpecializedClient) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		handleClientMessage(c, message)
+		c.child.handleClientMessage(message)
 	}
 }
 
@@ -123,14 +144,14 @@ func (c *Client) writePump() {
 }
 
 // serveWs handles websocket requests from the peer.
-func serveWs(hub *SpecializedHub, w http.ResponseWriter, r *http.Request) {
+func serveWs(hub Hublike, w http.ResponseWriter, r *http.Request) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
-	client := newClient(hub, conn)
-	client.hub.register <- client
+	client := newIdiotmouthClient(hub, conn)
+	client.hub.Register() <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.
