@@ -179,6 +179,8 @@ func (h *FakeoutHub) handleHubMessage(m *Message) {
 						} else {
 							if h.answers[client.choice] != client {
 								h.answers[client.choice].score += 50
+							} else {
+								h.answers[client.choice].score -= 50
 							}
 						}
 					}
