@@ -11,7 +11,7 @@ import (
 // 2: prompt
 // 3: restart (data is inconsequential, probably empty string)
 
-func specializedInit() {
+func idiotmouthInit() {
 	rand.Seed(time.Now().Unix())
 	buildDictionary()
 }

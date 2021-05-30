@@ -79,7 +79,7 @@ func main() {
 		port = "8080"
 	}
 	http.HandleFunc("/", handler)
-	specializedInit()
+	idiotmouthInit()
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
