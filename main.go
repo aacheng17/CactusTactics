@@ -20,6 +20,8 @@ func getHtml(game string) string {
 	switch game {
 	case "idiotmouth":
 		return "idiotmouth.html"
+	case "fakeout":
+		return "fakeout.html"
 	}
 	return ""
 }
@@ -59,11 +61,18 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 		switch game {
 		case "idiotmouth":
 			hub = newIdiotmouthHub()
+		case "fakeout":
+			hub = newFakeoutHub()
 		}
 		go hub.run()
 		hubs[game][hubId] = hub
 	}
-	serveWs(hub, w, r)
+	switch game {
+	case "idiotmouth":
+		idiotmouthServeWs(hub, w, r)
+	case "fakeout":
+		fakeoutServeWs(hub, w, r)
+	}
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {

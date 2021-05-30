@@ -37,3 +37,11 @@ func fakeoutBuildQuestions() {
 		}
 	*/
 }
+
+func (q Questions) size() int {
+	return len(q.Questions)
+}
+
+func (q Questions) getQuestion(n int) Question {
+	return q.Questions[n]
+}

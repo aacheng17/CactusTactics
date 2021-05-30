@@ -34,3 +34,11 @@ func urlIndexGetPath(url string, n int) string {
 	}
 	return url
 }
+
+func makeRange(min, max int) []int {
+	a := make([]int, max-min)
+	for i := range a {
+		a[i] = min + i
+	}
+	return a
+}

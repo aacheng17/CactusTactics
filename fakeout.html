@@ -1,7 +1,7 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-<title>IdiotMouth</title>
+<title>Fakeout</title>
 <script type="text/javascript">
 // MESSAGE TYPES (CLIENT TO SERVER)
 // when using conn.send(), the first character in the string represents the message type
@@ -13,6 +13,11 @@ window.onload = function () {
     var show = document.getElementById("show");
     var msg = document.getElementById("msg");
     var log = document.getElementById("log");
+
+    function htmlize(s) {
+        s = s.replaceAll("<br/>", "\n");
+        return s;
+    }
 
     function appendLog(item) {
         var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
@@ -75,8 +80,7 @@ window.onload = function () {
                 switch (messageType) {
                 case '0':
                     var item = document.createElement("div");
-                    message = message.replaceAll("<br/>", "\n")
-                    item.innerText = message;
+                    item.innerText = htmlize(message);
                     appendLog(item);
                     break;
                 case '1':
