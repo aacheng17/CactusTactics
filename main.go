@@ -6,8 +6,10 @@ package main
 
 import (
 	"log"
+	"math/rand"
 	"net/http"
 	"os"
+	"time"
 )
 
 var (
@@ -79,6 +81,7 @@ func main() {
 		port = "8080"
 	}
 	http.HandleFunc("/", handler)
+	rand.Seed(time.Now().Unix())
 	idiotmouthInit()
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
