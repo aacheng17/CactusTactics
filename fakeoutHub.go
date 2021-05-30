@@ -131,7 +131,7 @@ func (h *FakeoutHub) handleHubMessage(m *Message) {
 				}
 			}
 			if c.answer != "" {
-			} else if playerAnswer == question.Answer || alternateSpelling {
+			} else if playerAnswer == strings.ToLower(question.Answer) || alternateSpelling {
 				h.sendData(c, byte('0'), []byte("Your answer is too close to the actual answer. Please choose another answer."))
 			} else {
 				h.sendData(c, byte('0'), []byte("Your answer has been recorded. Waiting for other players' answers."))
@@ -146,7 +146,7 @@ func (h *FakeoutHub) handleHubMessage(m *Message) {
 					for i, client := range h.answers {
 						s := ""
 						if client == nil {
-							s = question.Answer
+							s = strings.ToLower(question.Answer)
 						} else {
 							s = client.answer
 						}
@@ -185,7 +185,7 @@ func (h *FakeoutHub) handleHubMessage(m *Message) {
 					stringToSend := "Results:<br/>"
 					for i, client := range h.answers {
 						if client == nil {
-							stringToSend += question.Answer + " (ACTUAL ANSWER)"
+							stringToSend += strings.ToLower(question.Answer) + " (ACTUAL ANSWER)"
 						} else {
 							stringToSend += client.answer + " (" + client.name + ") faked out"
 							if len(choices[i]) == 0 {
