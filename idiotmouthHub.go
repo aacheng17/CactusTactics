@@ -176,7 +176,7 @@ func (h *IdiotmouthHub) handleHubMessage(m *Message) {
 					h.sendData(client, byte('0'), []byte("This word has already been used this game."))
 				}
 			}
-		} else if string(m.data) == "pass" {
+		} else if string(m.data) == "/pass" {
 			c.pass = true
 			if h.getMajorityPass() {
 				err := h.pass()
@@ -193,7 +193,7 @@ func (h *IdiotmouthHub) handleHubMessage(m *Message) {
 					h.sendData(client, byte('2'), []byte(h.getPrompt()))
 				}
 			}
-		} else if string(m.data) == "restart" {
+		} else if string(m.data) == "/restart" {
 			h.reset()
 			for client := range h.clients {
 				h.sendData(client, byte('3'), []byte(""))

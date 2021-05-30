@@ -117,7 +117,7 @@ func (h *FakeoutHub) handleHubMessage(m *Message) {
 	question := questions.getQuestion(h.question)
 	switch m.messageType {
 	case byte('0'):
-		if string(m.data) == "restart" {
+		if string(m.data) == "/restart" {
 			h.reset()
 			for client := range h.clients {
 				h.sendData(client, byte('3'), []byte(""))
