@@ -236,7 +236,7 @@ func (h *IdiotmouthHub) run() {
 	}
 }
 
-func newIdiotmouthHub() *IdiotmouthHub {
+func newIdiotmouthHub() Hublike {
 	h := &IdiotmouthHub{
 		Hub:     *newHub(),
 		letters: make(map[string]int),

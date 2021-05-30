@@ -10,6 +10,8 @@ import (
 	"net/http"
 	"os"
 	"time"
+
+	"github.com/gorilla/websocket"
 )
 
 var (
@@ -24,6 +26,26 @@ func getHtml(game string) string {
 		return "fakeout.html"
 	}
 	return ""
+}
+
+func getHubmaker(game string) func() Hublike {
+	switch game {
+	case "idiotmouth":
+		return newIdiotmouthHub
+	case "fakeout":
+		return newFakeoutHub
+	}
+	return nil
+}
+
+func getClientmaker(game string) func(hub Hublike, conn *websocket.Conn) Clientlike {
+	switch game {
+	case "idiotmouth":
+		return newIdiotmouthClient
+	case "fakeout":
+		return newFakeoutClient
+	}
+	return nil
 }
 
 func servePage(w http.ResponseWriter, r *http.Request) {
@@ -58,21 +80,12 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 	hubId := urlIndexGetPath(r.URL.String(), 1)
 	hub, ok := hubs[game][hubId]
 	if !ok {
-		switch game {
-		case "idiotmouth":
-			hub = newIdiotmouthHub()
-		case "fakeout":
-			hub = newFakeoutHub()
-		}
+		hub = getHubmaker(game)()
 		go hub.run()
 		hubs[game][hubId] = hub
 	}
-	switch game {
-	case "idiotmouth":
-		idiotmouthServeWs(hub, w, r)
-	case "fakeout":
-		fakeoutServeWs(hub, w, r)
-	}
+
+	serveWs(hub, w, r, getClientmaker(game))
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {

@@ -242,7 +242,7 @@ func (h *FakeoutHub) run() {
 	}
 }
 
-func newFakeoutHub() *FakeoutHub {
+func newFakeoutHub() Hublike {
 	h := &FakeoutHub{
 		Hub: *newHub(),
 	}

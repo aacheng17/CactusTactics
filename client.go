@@ -7,6 +7,7 @@ package main
 import (
 	"bytes"
 	"log"
+	"net/http"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -37,9 +38,12 @@ var upgrader = websocket.Upgrader{
 }
 
 type Clientlike interface {
+	Hub() Hublike
 	Name() string
 	Send() chan []byte
 	handleClientMessage(d []byte)
+	readPump()
+	writePump()
 }
 
 // Client is a middleman between the websocket connection and the hub.
@@ -55,6 +59,10 @@ type Client struct {
 
 	// Buffered channel of outbound messages.
 	send chan []byte
+}
+
+func (c *Client) Hub() Hublike {
+	return c.hub
 }
 
 func (c *Client) Name() string {
@@ -140,4 +148,20 @@ func (c *Client) writePump() {
 			}
 		}
 	}
+}
+
+// serveWs handles websocket requests from the peer.
+func serveWs(hub Hublike, w http.ResponseWriter, r *http.Request, f func(Hublike, *websocket.Conn) Clientlike) {
+	conn, err := upgrader.Upgrade(w, r, nil)
+	if err != nil {
+		log.Println(err)
+		return
+	}
+	client := f(hub, conn)
+	client.Hub().Register() <- client
+
+	// Allow collection of memory referenced by the caller by doing all work in
+	// new goroutines.
+	go client.writePump()
+	go client.readPump()
 }
