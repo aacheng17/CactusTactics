@@ -72,7 +72,13 @@ func (h *FakeoutHub) genNextQuestion() int {
 	if len(h.questions) <= 0 {
 		return 1
 	}
-	h.question = rand.Intn(len(h.questions))
+	for i, x := range h.questions {
+		if x == h.question {
+			h.questions[i] = h.questions[len(h.questions)-1]
+			h.questions = h.questions[:len(h.questions)-1]
+		}
+	}
+	h.question = h.questions[rand.Intn(len(h.questions))]
 	return 0
 }
 
@@ -108,6 +114,7 @@ func (h *FakeoutHub) getScores() string {
 
 func (h *FakeoutHub) handleHubMessage(m *Message) {
 	c := (m.client).(*FakeoutClient)
+	question := questions.getQuestion(h.question)
 	switch m.messageType {
 	case byte('0'):
 		if string(m.data) == "restart" {
@@ -122,7 +129,6 @@ func (h *FakeoutHub) handleHubMessage(m *Message) {
 			}
 		} else if h.phase == 0 {
 			playerAnswer := strings.TrimSpace(strings.ToLower(string(m.data)))
-			question := questions.getQuestion(h.question)
 			alternateSpelling := false
 			for _, x := range question.AlternateSpellings {
 				if playerAnswer == x {
@@ -163,11 +169,18 @@ func (h *FakeoutHub) handleHubMessage(m *Message) {
 			choiceIndex, err := strconv.Atoi(playerChoice)
 			if err != nil || choiceIndex < 0 || choiceIndex >= len(h.answers) {
 				h.sendData(c, byte('0'), []byte("Invalid choice. Please enter a valid number choice."))
+			} else if h.answers[choiceIndex] == c {
+				h.sendData(c, byte('0'), []byte("Invalid choice. You can't pick your own answer."))
 			} else {
 				c.choice = choiceIndex
-				h.sendData(c, byte('0'), []byte("Your choice has been recorded. Waiting for other players' choices."))
+				wordChoice := ""
+				if h.answers[c.choice] == nil {
+					wordChoice = strings.ToLower(question.Answer)
+				} else {
+					wordChoice = h.answers[c.choice].answer
+				}
+				h.sendData(c, byte('0'), []byte("You chose ("+fmt.Sprint(c.choice)+") "+wordChoice+". Waiting for other players' choices."))
 				if h.isAllChosen() {
-					question := questions.getQuestion(h.question)
 					choices := make([][]*FakeoutClient, len(h.answers))
 					for i := range choices {
 						choices[i] = make([]*FakeoutClient, 0)
@@ -179,8 +192,6 @@ func (h *FakeoutHub) handleHubMessage(m *Message) {
 						} else {
 							if h.answers[client.choice] != client {
 								h.answers[client.choice].score += 50
-							} else {
-								h.answers[client.choice].score -= 50
 							}
 						}
 					}
