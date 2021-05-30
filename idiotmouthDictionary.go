@@ -17,7 +17,7 @@ var (
 	endFreq   = map[rune]int{'a': 532, 'l': 633, 'i': 84, 'm': 375, 'k': 113, 'f': 39, 'n': 847, 'c': 479, 'e': 1874, 'u': 22, 'b': 20, 'h': 203, 'y': 1174, 's': 1102, 't': 632, 'r': 656, 'd': 678, 'o': 97, 'p': 94, 'g': 273, 'w': 30, 'x': 34, 'z': 6, 'v': 2, 'j': 1, 'q': 0}
 )
 
-func buildWords() {
+func idiotmouthBuildWords() {
 	csvfile, err := os.Open("idiotmouthEnglish.csv")
 	if err != nil {
 		log.Fatalln("Couldn't open the csv file", err)
@@ -43,7 +43,7 @@ func buildWords() {
 	}
 }
 
-func buildLetters() {
+func idiotmouthBuildLetters() {
 	letters = make(map[string]int)
 	for _, word := range words {
 		first := word[0]
@@ -57,7 +57,7 @@ func buildLetters() {
 	}
 }
 
-func buildFreqs() {
+func idiotmouthBuildFreqs() {
 	values := make([]int, 0, len(letters))
 	for _, v := range letters {
 		values = append(values, v)
@@ -74,8 +74,8 @@ func buildFreqs() {
 	}
 }
 
-func buildDictionary() {
-	buildWords()
-	buildLetters()
-	buildFreqs()
+func idiotmouthBuildDictionary() {
+	idiotmouthBuildWords()
+	idiotmouthBuildLetters()
+	idiotmouthBuildFreqs()
 }
