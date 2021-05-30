@@ -11,25 +11,55 @@ import (
 )
 
 var (
-	hubs = map[string]Hublike{}
+	hubs = make(map[string]map[string]Hublike)
 )
 
-func serveHome(w http.ResponseWriter, r *http.Request) {
-	log.Println(r.URL)
+func getHtml(game string) string {
+	switch game {
+	case "idiotmouth":
+		return "idiotmouth.html"
+	}
+	return ""
+}
+
+func servePage(w http.ResponseWriter, r *http.Request) {
 	if r.Method != "GET" {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	http.ServeFile(w, r, "home.html")
+	game := urlIndexGetPath(r.URL.String(), 0)
+	if game == "" {
+		//serve home
+		return
+	}
+	html := getHtml(game)
+	if html == "" {
+		http.Error(w, "404 Page Not Found", http.StatusNotFound)
+		return
+	}
+	http.ServeFile(w, r, html)
 }
 
 func handleWs(w http.ResponseWriter, r *http.Request) {
-	urlString := r.URL.String()
-	hub, ok := hubs[urlString]
+	game := urlIndexGetPath(r.URL.String(), 0)
+	html := getHtml(game)
+	if html == "" {
+		return
+	}
+	_, ok := hubs[game]
 	if !ok {
-		hub = newIdiotmouthHub()
+		hubs[game] = make(map[string]Hublike)
+	}
+
+	hubId := urlIndexGetPath(r.URL.String(), 1)
+	hub, ok := hubs[game][hubId]
+	if !ok {
+		switch game {
+		case "idiotmouth":
+			hub = newIdiotmouthHub()
+		}
 		go hub.run()
-		hubs[urlString] = hub
+		hubs[game][hubId] = hub
 	}
 	serveWs(hub, w, r)
 }
@@ -37,7 +67,7 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 func handler(w http.ResponseWriter, r *http.Request) {
 	_, found := find(r.Header["Connection"], "Upgrade")
 	if !found {
-		serveHome(w, r)
+		servePage(w, r)
 	} else {
 		handleWs(w, r)
 	}
