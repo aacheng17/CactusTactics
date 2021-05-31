@@ -3,8 +3,6 @@ package main
 import (
 	"fmt"
 	"log"
-	"math/rand"
-	"sort"
 	"strings"
 )
 
