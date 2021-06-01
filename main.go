@@ -12,6 +12,8 @@ import (
 	"time"
 
 	"github.com/gorilla/websocket"
+
+	"example.com/hello/utility"
 )
 
 var (
@@ -53,7 +55,7 @@ func servePage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "Method not allowed", http.StatusMethodNotAllowed)
 		return
 	}
-	game := urlIndexGetPath(r.URL.String(), 0)
+	game := utility.UrlIndexGetPath(r.URL.String(), 0)
 	if game == "" {
 		//serve home
 		return
@@ -67,7 +69,7 @@ func servePage(w http.ResponseWriter, r *http.Request) {
 }
 
 func handleWs(w http.ResponseWriter, r *http.Request) {
-	game := urlIndexGetPath(r.URL.String(), 0)
+	game := utility.UrlIndexGetPath(r.URL.String(), 0)
 	html := getHtml(game)
 	if html == "" {
 		return
@@ -77,7 +79,7 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 		hubs[game] = make(map[string]Hublike)
 	}
 
-	hubId := urlIndexGetPath(r.URL.String(), 1)
+	hubId := utility.UrlIndexGetPath(r.URL.String(), 1)
 	hub, ok := hubs[game][hubId]
 	if !ok {
 		hub = getHubmaker(game)()
@@ -89,7 +91,7 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
-	_, found := find(r.Header["Connection"], "Upgrade")
+	_, found := utility.Find(r.Header["Connection"], "Upgrade")
 	if !found {
 		servePage(w, r)
 	} else {

@@ -5,6 +5,8 @@ import (
 	"math/rand"
 	"sort"
 	"strings"
+
+	"example.com/hello/utility"
 )
 
 func (h *FakeoutHub) reset() {
@@ -14,7 +16,7 @@ func (h *FakeoutHub) reset() {
 		client.choice = -1
 	}
 	h.phase = 0
-	h.questions = makeRange(0, questions.size())
+	h.questions = utility.MakeRange(0, questions.size())
 	h.genNextQuestion()
 }
 
