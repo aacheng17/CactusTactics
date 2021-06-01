@@ -1,4 +1,4 @@
-package main
+package idiotmouth
 
 import (
 	"encoding/csv"
@@ -18,7 +18,7 @@ var (
 )
 
 func idiotmouthBuildWords() {
-	csvfile, err := os.Open("idiotmouthEnglish.csv")
+	csvfile, err := os.Open("idiotmouth/idiotmouthEnglish.csv")
 	if err != nil {
 		log.Fatalln("Couldn't open the csv file", err)
 	}

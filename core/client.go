@@ -2,7 +2,7 @@
 // Use of this source code is governed by a BSD-style
 // license that can be found in the LICENSE file.
 
-package main
+package core
 
 import (
 	"bytes"
@@ -38,44 +38,44 @@ var upgrader = websocket.Upgrader{
 }
 
 type Clientlike interface {
-	Hub() Hublike
-	Name() string
-	Send() chan []byte
-	handleClientMessage(d []byte)
+	GetHub() Hublike
+	GetName() string
+	GetSend() chan []byte
+	HandleClientMessage(d []byte)
 	readPump()
 	writePump()
 }
 
 // Client is a middleman between the websocket connection and the hub.
 type Client struct {
-	hub Hublike
+	Hub Hublike
 
-	child Clientlike
+	Child Clientlike
 
 	// The websocket connection.
-	conn *websocket.Conn
+	Conn *websocket.Conn
 
-	name string
+	Name string
 
 	// Buffered channel of outbound messages.
-	send chan []byte
+	Send chan []byte
 }
 
-func (c *Client) Hub() Hublike {
-	return c.hub
+func (c *Client) GetHub() Hublike {
+	return c.Hub
 }
 
-func (c *Client) Name() string {
-	return c.name
+func (c *Client) GetName() string {
+	return c.Name
 }
 
-func (c *Client) Send() chan []byte {
-	return c.send
+func (c *Client) GetSend() chan []byte {
+	return c.Send
 }
 
-func (c *Client) handleClientMessage(d []byte) {
+func (c *Client) HandleClientMessage(d []byte) {
 	log.Println(string(d))
-	c.hub.Messages() <- newMessage(c, byte(d[0]), d[1:])
+	c.Hub.GetMessages() <- NewMessage(c, byte(d[0]), d[1:])
 }
 
 // readPump pumps messages from the websocket connection to the hub.
@@ -85,14 +85,14 @@ func (c *Client) handleClientMessage(d []byte) {
 // reads from this goroutine.
 func (c *Client) readPump() {
 	defer func() {
-		c.hub.Unregister() <- c
-		c.conn.Close()
+		c.Hub.GetUnregister() <- c
+		c.Conn.Close()
 	}()
-	c.conn.SetReadLimit(maxMessageSize)
-	c.conn.SetReadDeadline(time.Now().Add(pongWait))
-	c.conn.SetPongHandler(func(string) error { c.conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
+	c.Conn.SetReadLimit(maxMessageSize)
+	c.Conn.SetReadDeadline(time.Now().Add(pongWait))
+	c.Conn.SetPongHandler(func(string) error { c.Conn.SetReadDeadline(time.Now().Add(pongWait)); return nil })
 	for {
-		_, message, err := c.conn.ReadMessage()
+		_, message, err := c.Conn.ReadMessage()
 		if err != nil {
 			if websocket.IsUnexpectedCloseError(err, websocket.CloseGoingAway, websocket.CloseAbnormalClosure) {
 				log.Printf("error: %v", err)
@@ -100,7 +100,7 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.child.handleClientMessage(message)
+		c.Child.HandleClientMessage(message)
 	}
 }
 
@@ -113,37 +113,37 @@ func (c *Client) writePump() {
 	ticker := time.NewTicker(pingPeriod)
 	defer func() {
 		ticker.Stop()
-		c.conn.Close()
+		c.Conn.Close()
 	}()
 	for {
 		select {
-		case message, ok := <-c.send:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
+		case message, ok := <-c.Send:
+			c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
 			if !ok {
 				// The hub closed the channel.
-				c.conn.WriteMessage(websocket.CloseMessage, []byte{})
+				c.Conn.WriteMessage(websocket.CloseMessage, []byte{})
 				return
 			}
 
-			w, err := c.conn.NextWriter(websocket.TextMessage)
+			w, err := c.Conn.NextWriter(websocket.TextMessage)
 			if err != nil {
 				return
 			}
 			w.Write(message)
 
 			// Add queued chat messages to the current websocket message.
-			n := len(c.send)
+			n := len(c.Send)
 			for i := 0; i < n; i++ {
 				w.Write(newline)
-				w.Write(<-c.send)
+				w.Write(<-c.Send)
 			}
 
 			if err := w.Close(); err != nil {
 				return
 			}
 		case <-ticker.C:
-			c.conn.SetWriteDeadline(time.Now().Add(writeWait))
-			if err := c.conn.WriteMessage(websocket.PingMessage, nil); err != nil {
+			c.Conn.SetWriteDeadline(time.Now().Add(writeWait))
+			if err := c.Conn.WriteMessage(websocket.PingMessage, nil); err != nil {
 				return
 			}
 		}
@@ -151,14 +151,14 @@ func (c *Client) writePump() {
 }
 
 // serveWs handles websocket requests from the peer.
-func serveWs(hub Hublike, w http.ResponseWriter, r *http.Request, f func(Hublike, *websocket.Conn) Clientlike) {
+func ServeWs(hub Hublike, w http.ResponseWriter, r *http.Request, f func(Hublike, *websocket.Conn) Clientlike) {
 	conn, err := upgrader.Upgrade(w, r, nil)
 	if err != nil {
 		log.Println(err)
 		return
 	}
 	client := f(hub, conn)
-	client.Hub().Register() <- client
+	client.GetHub().GetRegister() <- client
 
 	// Allow collection of memory referenced by the caller by doing all work in
 	// new goroutines.

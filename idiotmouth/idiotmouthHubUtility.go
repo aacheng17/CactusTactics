@@ -1,4 +1,4 @@
-package main
+package idiotmouth
 
 import (
 	"fmt"
@@ -52,7 +52,7 @@ func (h *IdiotmouthHub) getMajorityPass() bool {
 			count++
 		}
 	}
-	return count*2 > len(h.clients)
+	return count*2 > len(h.Clients)
 }
 
 func (h *IdiotmouthHub) gotIt(word string) int {
@@ -92,7 +92,7 @@ func (h *IdiotmouthHub) getPrompt() string {
 }
 
 func (h *IdiotmouthHub) getScores() string {
-	keys := make([]*IdiotmouthClient, 0, len(h.clients))
+	keys := make([]*IdiotmouthClient, 0, len(h.Clients))
 	for k := range h.getAssertedClients() {
 		keys = append(keys, k)
 	}
@@ -101,10 +101,10 @@ func (h *IdiotmouthHub) getScores() string {
 	})
 	scores := ""
 	for _, client := range keys {
-		if client.name == "" {
+		if client.Name == "" {
 			continue
 		}
-		scores += client.name + ": " + fmt.Sprint(client.score) + "; "
+		scores += client.Name + ": " + fmt.Sprint(client.score) + "; "
 	}
 	return scores
 }

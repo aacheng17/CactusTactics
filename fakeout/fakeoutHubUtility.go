@@ -1,4 +1,4 @@
-package main
+package fakeout
 
 import (
 	"fmt"
@@ -66,7 +66,7 @@ func (h *FakeoutHub) getPrompt() string {
 }
 
 func (h *FakeoutHub) getScores() string {
-	keys := make([]*FakeoutClient, 0, len(h.clients))
+	keys := make([]*FakeoutClient, 0, len(h.Clients))
 	for k := range h.getAssertedClients() {
 		keys = append(keys, k)
 	}
@@ -75,10 +75,10 @@ func (h *FakeoutHub) getScores() string {
 	})
 	scores := ""
 	for _, client := range keys {
-		if client.name == "" {
+		if client.Name == "" {
 			continue
 		}
-		scores += client.name + ": " + fmt.Sprint(client.score) + "; "
+		scores += client.Name + ": " + fmt.Sprint(client.score) + "; "
 	}
 	return scores
 }

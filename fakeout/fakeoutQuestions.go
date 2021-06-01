@@ -1,4 +1,4 @@
-package main
+package fakeout
 
 import (
 	"encoding/json"
@@ -25,7 +25,7 @@ type Question struct {
 }
 
 func fakeoutBuildQuestions() {
-	jsonFile, err := os.Open("fakeoutQuestions.json")
+	jsonFile, err := os.Open("fakeout/fakeoutQuestions.json")
 	if err != nil {
 		log.Println(err)
 	}

@@ -13,39 +13,42 @@ import (
 
 	"github.com/gorilla/websocket"
 
+	"example.com/hello/core"
+	"example.com/hello/fakeout"
+	"example.com/hello/idiotmouth"
 	"example.com/hello/utility"
 )
 
 var (
-	hubs = make(map[string]map[string]Hublike)
+	hubs = make(map[string]map[string]core.Hublike)
 )
 
 func getHtml(game string) string {
 	switch game {
 	case "idiotmouth":
-		return "idiotmouth.html"
+		return "idiotmouth/idiotmouth.html"
 	case "fakeout":
-		return "fakeout.html"
+		return "fakeout/fakeout.html"
 	}
 	return ""
 }
 
-func getHubmaker(game string) func() Hublike {
+func getHubmaker(game string) func() core.Hublike {
 	switch game {
 	case "idiotmouth":
-		return newIdiotmouthHub
+		return idiotmouth.NewIdiotmouthHub
 	case "fakeout":
-		return newFakeoutHub
+		return fakeout.NewFakeoutHub
 	}
 	return nil
 }
 
-func getClientmaker(game string) func(hub Hublike, conn *websocket.Conn) Clientlike {
+func getClientmaker(game string) func(hub core.Hublike, conn *websocket.Conn) core.Clientlike {
 	switch game {
 	case "idiotmouth":
-		return newIdiotmouthClient
+		return idiotmouth.NewIdiotmouthClient
 	case "fakeout":
-		return newFakeoutClient
+		return fakeout.NewFakeoutClient
 	}
 	return nil
 }
@@ -76,18 +79,18 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 	}
 	_, ok := hubs[game]
 	if !ok {
-		hubs[game] = make(map[string]Hublike)
+		hubs[game] = make(map[string]core.Hublike)
 	}
 
 	hubId := utility.UrlIndexGetPath(r.URL.String(), 1)
 	hub, ok := hubs[game][hubId]
 	if !ok {
 		hub = getHubmaker(game)()
-		go hub.run()
+		go hub.Run()
 		hubs[game][hubId] = hub
 	}
 
-	serveWs(hub, w, r, getClientmaker(game))
+	core.ServeWs(hub, w, r, getClientmaker(game))
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -106,8 +109,8 @@ func main() {
 	}
 	http.HandleFunc("/", handler)
 	rand.Seed(time.Now().Unix())
-	idiotmouthInit()
-	fakeoutInit()
+	idiotmouth.IdiotmouthInit()
+	fakeout.FakeoutInit()
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
