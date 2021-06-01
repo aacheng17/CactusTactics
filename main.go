@@ -11,8 +11,6 @@ import (
 	"os"
 	"time"
 
-	"github.com/gorilla/websocket"
-
 	"example.com/hello/core"
 	"example.com/hello/fakeout"
 	"example.com/hello/idiotmouth"
@@ -20,37 +18,13 @@ import (
 )
 
 var (
-	hubs = make(map[string]map[string]core.Hublike)
+	games = make(map[string]core.Gamelike)
+	hubs  = make(map[string]map[string]core.Hublike)
 )
 
-func getHtml(game string) string {
-	switch game {
-	case "idiotmouth":
-		return "idiotmouth/idiotmouth.html"
-	case "fakeout":
-		return "fakeout/fakeout.html"
-	}
-	return ""
-}
-
-func getHubmaker(game string) func() core.Hublike {
-	switch game {
-	case "idiotmouth":
-		return idiotmouth.NewIdiotmouthHub
-	case "fakeout":
-		return fakeout.NewFakeoutHub
-	}
-	return nil
-}
-
-func getClientmaker(game string) func(hub core.Hublike, conn *websocket.Conn) core.Clientlike {
-	switch game {
-	case "idiotmouth":
-		return idiotmouth.NewIdiotmouthClient
-	case "fakeout":
-		return fakeout.NewFakeoutClient
-	}
-	return nil
+func Init() {
+	games["idiotmouth"] = idiotmouth.Init()
+	games["fakeout"] = fakeout.Init()
 }
 
 func servePage(w http.ResponseWriter, r *http.Request) {
@@ -63,21 +37,22 @@ func servePage(w http.ResponseWriter, r *http.Request) {
 		//serve home
 		return
 	}
-	html := getHtml(game)
-	if html == "" {
+	_, ok := games[game]
+	if !ok {
 		http.Error(w, "404 Page Not Found", http.StatusNotFound)
 		return
 	}
+	html := games[game].Html()
 	http.ServeFile(w, r, html)
 }
 
 func handleWs(w http.ResponseWriter, r *http.Request) {
 	game := utility.UrlIndexGetPath(r.URL.String(), 0)
-	html := getHtml(game)
-	if html == "" {
+	_, ok := games[game]
+	if !ok {
 		return
 	}
-	_, ok := hubs[game]
+	_, ok = hubs[game]
 	if !ok {
 		hubs[game] = make(map[string]core.Hublike)
 	}
@@ -85,12 +60,12 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 	hubId := utility.UrlIndexGetPath(r.URL.String(), 1)
 	hub, ok := hubs[game][hubId]
 	if !ok {
-		hub = getHubmaker(game)()
+		hub = games[game].NewHub()
 		go hub.Run()
 		hubs[game][hubId] = hub
 	}
 
-	core.ServeWs(hub, w, r, getClientmaker(game))
+	core.ServeWs(hub, w, r, games[game].NewClient)
 }
 
 func handler(w http.ResponseWriter, r *http.Request) {
@@ -109,8 +84,7 @@ func main() {
 	}
 	http.HandleFunc("/", handler)
 	rand.Seed(time.Now().Unix())
-	idiotmouth.Init()
-	fakeout.Init()
+	Init()
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
