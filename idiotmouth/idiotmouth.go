@@ -7,7 +7,7 @@ type Idiotmouth struct {
 }
 
 func Init() core.Gamelike {
-	idiotmouthBuildDictionary()
+	buildDictionary()
 	return &Idiotmouth{
 		Game: *core.NewGame("idiotmouth/idiotmouth.html", NewIdiotmouthHub, NewIdiotmouthClient),
 	}

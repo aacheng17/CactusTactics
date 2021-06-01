@@ -24,7 +24,7 @@ type Question struct {
 	Suggestions        []string `json:"suggestions"`
 }
 
-func fakeoutBuildQuestions() {
+func buildQuestions() {
 	jsonFile, err := os.Open("fakeout/fakeoutQuestions.json")
 	if err != nil {
 		log.Println(err)

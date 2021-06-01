@@ -7,7 +7,7 @@ type Fakeout struct {
 }
 
 func Init() core.Gamelike {
-	fakeoutBuildQuestions()
+	buildQuestions()
 	return &Fakeout{
 		Game: *core.NewGame("fakeout/fakeout.html", NewFakeoutHub, NewFakeoutClient),
 	}
