@@ -1,5 +1,5 @@
 package fakeout
 
-func FakeoutInit() {
+func Init() {
 	fakeoutBuildQuestions()
 }

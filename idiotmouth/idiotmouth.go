@@ -1,5 +1,5 @@
 package idiotmouth
 
-func IdiotmouthInit() {
+func Init() {
 	idiotmouthBuildDictionary()
 }

@@ -109,8 +109,8 @@ func main() {
 	}
 	http.HandleFunc("/", handler)
 	rand.Seed(time.Now().Unix())
-	idiotmouth.IdiotmouthInit()
-	fakeout.FakeoutInit()
+	idiotmouth.Init()
+	fakeout.Init()
 	err := http.ListenAndServe(":"+port, nil)
 	if err != nil {
 		log.Fatal("ListenAndServe: ", err)
