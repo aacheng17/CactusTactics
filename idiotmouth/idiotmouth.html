@@ -8,6 +8,7 @@
 // when using conn.send(), the first character in the string represents the message type
 // 0 means regular chat message, 1 means setting player name, 2 means skip, 3 means restart
 window.onload = function () {
+    
     //collapsible start
     var coll = document.getElementsByClassName("collapsible-button");
     var i;
@@ -30,6 +31,8 @@ window.onload = function () {
     var nameForm = document.getElementById("name-form");
     var nameField = document.getElementById("name-field");
     var ingame = document.getElementById("ingame");
+    var ingameHowtoplayButton = document.getElementById("ingame-howtoplay-button");
+    var ingameHowtoplay = document.getElementById("ingame-howtoplay");
     var restart = document.getElementById("restart");
     var startLetter = document.getElementById("start-letter");
     var endLetter = document.getElementById("end-letter");
@@ -61,6 +64,14 @@ window.onload = function () {
             ingame.style.visibility = "visible";
         }
     }
+
+    ingameHowtoplayButton.addEventListener("click", function() {
+        if (ingameHowtoplay.style.maxHeight){
+            ingameHowtoplay.style.maxHeight = null;
+        } else {
+            ingameHowtoplay.style.maxHeight = ingameHowtoplay.scrollHeight + "px";
+        } 
+    });
 
     restart.onclick = function (e) {
         if (!conn) {
@@ -153,16 +164,11 @@ window.onload = function () {
   background-color: #777;
   color: white;
   cursor: pointer;
-  padding: 18px;
+  padding: 15px;
   width: 100%;
   border: none;
   text-align: left;
   outline: none;
-  font-size: 15px;
-}
-
-.collapsible-button-active, .collapsible-button:hover {
-  background-color: #555;
 }
 
 .collapsible-button:after {
@@ -178,7 +184,7 @@ window.onload = function () {
 }
 
 .collapsible-content {
-  padding: 0 18px;
+  padding: 0 15px;
   max-height: 0;
   overflow: hidden;
   transition: max-height 0.2s ease-out;
@@ -344,8 +350,11 @@ button {
             <div id="ingame-title">
                 <h1>Idiotmouth</h1>
                 <div>
-                    <button>how to play</button>
+                    <button id="ingame-howtoplay-button">how to play</button>
                     <button id="restart">reset game</button>
+                </div>
+                <div id="ingame-howtoplay" class="collapsible-content">
+                    <p>This isn't finished yet go click on something else</p>
                 </div>
             </div>
             <div id="status">status</div>
