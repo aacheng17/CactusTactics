@@ -87,7 +87,7 @@ func (h *IdiotmouthHub) getWorth() int {
 }
 
 func (h *IdiotmouthHub) getPrompt() string {
-	return fmt.Sprint(string(h.start), "|", string(h.end), "|", h.getWorth(), "|", h.letters[string(h.start)+string(h.end)])
+	return fmt.Sprint(string(h.start), "\t", string(h.end), "\t", h.getWorth(), "\t", h.letters[string(h.start)+string(h.end)])
 }
 
 func (h *IdiotmouthHub) getPlayers() string {
@@ -103,7 +103,7 @@ func (h *IdiotmouthHub) getPlayers() string {
 		if client.Name == "" {
 			continue
 		}
-		players += fmt.Sprint(client.Name, "|", client.score, "|", client.highestWord, "|", client.highestScore, "|")
+		players += fmt.Sprint(client.Name, "\t", client.score, "\t", client.highestWord, "\t", client.highestScore, "\t")
 	}
 	if len(players) > 0 {
 		players = players[:len(players)-1]

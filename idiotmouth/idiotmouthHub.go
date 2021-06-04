@@ -132,7 +132,7 @@ func (h *IdiotmouthHub) Run() {
 				h.RemoveClient(client, "Removed client that disconnected.")
 			}
 		case message := <-h.Messages:
-			log.Println("Received message\n\tType: " + fmt.Sprint(message.MessageType) + "\n\tData: " + string(message.Data))
+			log.Println(fmt.Sprint("Received message\n\tType: ", message.MessageType), "\n\tData: ", string(message.Data))
 			h.HandleHubMessage(message)
 		}
 	}
