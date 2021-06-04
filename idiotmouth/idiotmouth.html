@@ -1,16 +1,35 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <title>IdiotMouth</title>
 <script type="text/javascript">
 // MESSAGE TYPES (CLIENT TO SERVER)
 // when using conn.send(), the first character in the string represents the message type
 // 0 means regular chat message, 1 means setting player name
 window.onload = function () {
+    //collapsible start
+    var coll = document.getElementsByClassName("collapsible-button");
+    var i;
+
+    for (i = 0; i < coll.length; i++) {
+        coll[i].addEventListener("click", function() {
+            this.classList.toggle("collapsible-button-active");
+            var content = this.nextElementSibling;
+            if (content.style.maxHeight){
+            content.style.maxHeight = null;
+            } else {
+            content.style.maxHeight = content.scrollHeight + "px";
+            } 
+        });
+    }
+    //collapsible end
+
     var conn, name;
-    var nameForm = document.getElementById("name_form")
-    var nameField = document.getElementById("name_field");
-    var show = document.getElementById("show");
+    var landing = document.getElementById("landing");
+    var nameForm = document.getElementById("name-form");
+    var nameField = document.getElementById("name-field");
+    var ingame = document.getElementById("ingame");
     var msg = document.getElementById("msg");
     var log = document.getElementById("log");
 
@@ -32,11 +51,11 @@ window.onload = function () {
         name = nameField.value;
         conn.send("1" + name);
         e.preventDefault();
-        nameForm.parentNode.removeChild(nameForm);
-        show.style.visibility = "visible";
+        landing.parentNode.removeChild(landing);
+        ingame.style.visibility = "visible";
     }
 
-    document.getElementById("form").onsubmit = function () {
+    document.getElementById("chat-form").onsubmit = function () {
         if (!conn) {
             return false;
         }
@@ -99,10 +118,48 @@ window.onload = function () {
         appendLog(item);
     }
 
-    show.style.visibility = "hidden";
+    ingame.style.visibility = "hidden";
 };
 </script>
 <style type="text/css">
+
+.menu {
+  margin: auto;
+  width: 20%;
+  text-align: center;
+}
+
+.menu a {
+  background-color: #e5e5e5;
+  padding: 8px;
+  margin-top: 7px;
+  display: block;
+  width: 100%;
+  color: black;
+}
+
+.main {
+  margin: auto;
+  width: 60%;
+  padding: 0 20px;
+}
+
+.right {
+  margin: auto;
+  background-color: #e5e5e5;
+  width: 20%;
+  padding: 15px;
+  margin-top: 7px;
+  text-align: center;
+}
+
+@media only screen and (max-width: 620px) {
+  /* For mobile phones: */
+  .menu, .main, .right {
+    width: 100%;
+  }
+}
+
 html {
     overflow: hidden;
 }
@@ -113,70 +170,132 @@ body {
     margin: 0;
     width: 100%;
     height: 100%;
-    background: red;
 }
 
-#name_form {
-    text-align: center;
+#name-form {
     padding: 0.5em 0.5em 0.5em 0.5em;
+    text-align: center;
+}
+
+#name-form > input {
+    margin: 5px 0px;
 }
 
 #log {
-    background: white;
-    margin: 0;
-    padding: 0.5em 0.5em 0.5em 0.5em;
-    position: absolute;
-    top: 0.5em;
-    left: 0.5em;
-    right: 0.5em;
-    bottom: 7em;
     overflow: auto;
 }
 
-#form {
-    padding: 0 0.5em 0 0.5em;
-    margin: 0;
-    position: absolute;
-    bottom: 1em;
-    left: 0px;
-    width: 100%;
-    overflow: hidden;
+.collapsible-button {
+  background-color: #777;
+  color: white;
+  cursor: pointer;
+  padding: 18px;
+  width: 100%;
+  border: none;
+  text-align: left;
+  outline: none;
+  font-size: 15px;
 }
 
-#prompt {
-    padding: 0 0.5em 0 0.5em;
-    margin: 0;
-    position: absolute;
-    bottom: 3em;
-    left: 0px;
-    width: 100%;
-    overflow: hidden;
+.collapsible-button-active, .collapsible-button:hover {
+  background-color: #555;
 }
 
-#status {
-    padding: 0 0.5em 0 0.5em;
-    margin: 0;
+.collapsible-button:after {
+  content: '\23F7';
+  color: white;
+  font-weight: bold;
+  float: right;
+  margin-left: 5px;
+}
+
+.collapsible-button-active:after {
+  content: "\23F6";
+}
+
+.collapsible-content {
+  padding: 0 18px;
+  max-height: 0;
+  overflow: hidden;
+  transition: max-height 0.2s ease-out;
+  background-color: #f1f1f1;
+}
+
+#landing {
+    padding: 15px 0px;
     position: absolute;
-    bottom: 5em;
-    left: 0px;
-    bottom: 5em;
+    width: 500px;
+    left: 50%;
+    margin-left: -250px;
+}
+
+#landing > div {
+    margin: 20px 0px;
+}
+
+#landing-title {
+    background-color: #e5e5e5;
+    padding: 15px;
+    text-align: center;
+}
+
+#ingame {
+    padding: 15px 0px;
+    position: absolute;
+    width: 500px;
+    left: 50%;
+    margin-left: -250px;
+    display: flex;
+    flex-direction: row;
+}
+
+#ingame-left {
+    width: 30%;
+}
+
+#ingame-right {
+    width: 70%;
+}
+
+#chat-form {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
 }
 
 </style>
 </head>
 <body>
-    <form id="name_form">
-        <input type="submit" value="Set Name" />
-        <input type="text" id="name_field" size="64" maxlength="20" placeholder="Name" autofocus />
-    </form>
-    <div id="show">
-        <div id="log"></div>
-        <div id="status">status</div>
-        <div id="prompt">prompt</div>
-        <form id="form">
-            <input type="submit" value="Send" />
-            <input type="text" id="msg" size="64" maxlength="100" placeholder="type /rules for rules" />
-        </form>
+    <div id="landing">
+        <div id="landing-title">
+            <h1>Idiotmouth</h1>
+        </div>
+        <div>
+            <form id="name-form">
+                <input type="text" id="name-field" size="64" maxlength="20" placeholder="Name" autofocus />
+                <input type="submit" value="Set Name" />
+            </form>
+        </div>
+        <div>
+            <button class="collapsible-button">How to play</button>
+            <div class="collapsible-content">
+                <p>This isn't finished yet go click on something else</p>
+            </div>
+        </div>
+    </div>
+
+    <div id="ingame">
+        <div id="ingame-left">
+            <div id="status">status</div>
+        </div>
+        <div id="ingame-right">
+            <div id="prompt">prompt</div>
+            <div id="log"></div>
+            <form id="chat-form">
+                <input type="text" id="msg" size="64" maxlength="100" placeholder="type /rules for rules" />
+                <input type="submit" value="Send" />
+            </form>
+        </div>
     </div>
 </body>
 </html>
