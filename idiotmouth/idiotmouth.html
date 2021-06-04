@@ -108,8 +108,11 @@ window.onload = function () {
                     break
                 case '2':
                     var data = message.split("|");
-                    startLetter.innerText = data[0].toUpperCase();
-                    endLetter.innerText = data[1].toUpperCase();
+                    var sl = data[0].toUpperCase();
+                    var el = data[1].toUpperCase();
+                    startLetter.innerText = sl;
+                    endLetter.innerText = el;
+                    msg.placeholder = "a word that starts with " + sl + " and ends with " + el;
                     promptExtraText.innerText = "Worth " + String(data[2]) + " points. There are " + String(data[3]) + " possible words.";
                     break
                 case '3':
@@ -211,6 +214,7 @@ button {
 #landing-title {
     background-color: #e5e5e5;
     text-align: center;
+    padding: 15px;
 }
 
 #name-form {
@@ -230,7 +234,7 @@ button {
     position: absolute;
     width: 800px;
     left: 50%;
-    margin-left: -250px;
+    margin-left: -400px;
     display: flex;
     flex-direction: row;
     gap: 20px;
@@ -342,7 +346,7 @@ button {
             <div id="chatbox">
                 <div id="log"></div>
                 <form id="chat-form">
-                    <input type="text" id="msg" size="64" maxlength="100" placeholder="type /rules for rules" />
+                    <input type="text" id="msg" size="64" maxlength="100"/>
                     <input type="submit" id="msg-send" value="Send" />
                 </form>
             </div>
