@@ -72,31 +72,6 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 					h.SendData(client, byte('0'), []byte("This word has already been used this game."))
 				}
 			}
-		} else if string(m.Data) == "/pass" {
-			c.pass = true
-			if h.getMajorityPass() {
-				err := h.pass()
-				if err == 1 {
-					for client := range h.Clients {
-						h.SendData(client, byte('0'), []byte("You have passed or gotten all possible words. Type restart to restart the game."))
-					}
-					break
-				}
-				for client := range h.Clients {
-					h.SendData(client, byte('0'), []byte("Letters passed, new letters generated"))
-					h.SendData(client, byte('0'), []byte("."))
-					h.SendData(client, byte('2'), []byte(h.getPrompt()))
-				}
-			}
-		} else if string(m.Data) == "/restart" {
-			h.reset()
-			for client := range h.Clients {
-				h.SendData(client, byte('3'), []byte(""))
-				h.SendData(client, byte('0'), []byte(c.Name+" restarted the game"))
-				h.SendData(client, byte('1'), []byte(h.getScores()))
-				h.SendData(client, byte('2'), []byte(h.getPrompt()))
-				h.SendData(client, byte('0'), []byte("."))
-			}
 		}
 	case byte('1'):
 		name := string(m.Data)
@@ -110,6 +85,31 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 			h.SendData(client, byte('1'), []byte(h.getScores()))
 		}
 		h.SendData(c, byte('2'), []byte(h.getPrompt()))
+	case byte('2'):
+		c.pass = true
+		if h.getMajorityPass() {
+			err := h.pass()
+			if err == 1 {
+				for client := range h.Clients {
+					h.SendData(client, byte('0'), []byte("You have passed or gotten all possible words. Type restart to restart the game."))
+				}
+				break
+			}
+			for client := range h.Clients {
+				h.SendData(client, byte('0'), []byte("Letters passed, new letters generated"))
+				h.SendData(client, byte('0'), []byte("."))
+				h.SendData(client, byte('2'), []byte(h.getPrompt()))
+			}
+		}
+	case byte('3'):
+		h.reset()
+		for client := range h.Clients {
+			h.SendData(client, byte('3'), []byte(""))
+			h.SendData(client, byte('0'), []byte(c.Name+" restarted the game"))
+			h.SendData(client, byte('1'), []byte(h.getScores()))
+			h.SendData(client, byte('2'), []byte(h.getPrompt()))
+			h.SendData(client, byte('0'), []byte("."))
+		}
 	}
 }
 

@@ -6,7 +6,7 @@
 <script type="text/javascript">
 // MESSAGE TYPES (CLIENT TO SERVER)
 // when using conn.send(), the first character in the string represents the message type
-// 0 means regular chat message, 1 means setting player name
+// 0 means regular chat message, 1 means setting player name, 2 means skip, 3 means restart
 window.onload = function () {
     //collapsible start
     var coll = document.getElementsByClassName("collapsible-button");
@@ -30,8 +30,10 @@ window.onload = function () {
     var nameForm = document.getElementById("name-form");
     var nameField = document.getElementById("name-field");
     var ingame = document.getElementById("ingame");
+    var restart = document.getElementById("restart");
     var startLetter = document.getElementById("start-letter");
     var endLetter = document.getElementById("end-letter");
+    var skip = document.getElementById("skip")
     var promptExtraText = document.getElementById("prompt-extra-text");
     var msg = document.getElementById("msg");
     var log = document.getElementById("log");
@@ -58,6 +60,20 @@ window.onload = function () {
             landing.parentNode.removeChild(landing);
             ingame.style.visibility = "visible";
         }
+    }
+
+    restart.onclick = function (e) {
+        if (!conn) {
+            return false;
+        }
+        conn.send("3");
+    }
+
+    skip.onclick = function (e) {
+        if (!conn) {
+            return false;
+        }
+        conn.send("2");
     }
     
     document.getElementById("chat-form").onsubmit = function () {
@@ -329,7 +345,7 @@ button {
                 <h1>Idiotmouth</h1>
                 <div>
                     <button>how to play</button>
-                    <button>reset game</button>
+                    <button id="restart">reset game</button>
                 </div>
             </div>
             <div id="status">status</div>
@@ -340,6 +356,7 @@ button {
                     <h2>Current Letters:</h2>
                     <h2 id="start-letter"></h2>
                     <h2 id="end-letter"></h2>
+                    <button id="skip">Vote to skip</button>
                 </div>
                 <a id="prompt-extra-text"></a>
             </div>
