@@ -54,18 +54,22 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 				bonus := len(word) - 2
 				finalWorth := worth * bonus
 				c.score += finalWorth
+				if finalWorth > c.highestScore {
+					c.highestWord = word
+					c.highestScore = finalWorth
+				}
 				err := h.gotIt(word)
 				if err == 1 {
 					for client := range h.Clients {
-						h.SendData(client, byte('0'), []byte("You have passed or gotten all possible words. Type restart to restart the game."))
+						h.SendData(client, byte('0'), []byte("You have passed or used all possible words. Type restart to restart the game."))
 					}
 					break
 				}
 				for client := range h.Clients {
-					h.SendData(client, byte('0'), []byte(c.Name+" earned "+fmt.Sprint(worth)+"x"+fmt.Sprint(bonus)+"="+fmt.Sprint(finalWorth)+" points"))
+					h.SendData(client, byte('0'), []byte(fmt.Sprint(c.Name, " earned ", worth, "x", bonus, "=", finalWorth, " points")))
 					h.SendData(client, byte('0'), []byte("."))
 					h.SendData(client, byte('2'), []byte(h.getPrompt()))
-					h.SendData(client, byte('1'), []byte(h.getScores()))
+					h.SendData(client, byte('1'), []byte(h.getPlayers()))
 				}
 			case 2:
 				for client := range h.Clients {
@@ -82,23 +86,28 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 			h.SendData(client, byte('0'), []byte(name+" joined"))
 		}
 		for client := range h.Clients {
-			h.SendData(client, byte('1'), []byte(h.getScores()))
+			h.SendData(client, byte('1'), []byte(h.getPlayers()))
 		}
 		h.SendData(c, byte('2'), []byte(h.getPrompt()))
 	case byte('2'):
-		c.pass = true
-		if h.getMajorityPass() {
-			err := h.pass()
-			if err == 1 {
-				for client := range h.Clients {
-					h.SendData(client, byte('0'), []byte("You have passed or gotten all possible words. Type restart to restart the game."))
-				}
-				break
-			}
+		if !c.pass {
+			c.pass = true
 			for client := range h.Clients {
-				h.SendData(client, byte('0'), []byte("Letters passed, new letters generated"))
-				h.SendData(client, byte('0'), []byte("."))
-				h.SendData(client, byte('2'), []byte(h.getPrompt()))
+				h.SendData(client, byte('0'), []byte(c.Name+" voted to skip."))
+			}
+			if h.getMajorityPass() {
+				err := h.pass()
+				if err == 1 {
+					for client := range h.Clients {
+						h.SendData(client, byte('0'), []byte("You have passed or gotten all possible words. Type restart to restart the game."))
+					}
+					break
+				}
+				for client := range h.Clients {
+					h.SendData(client, byte('0'), []byte("Majority has voted to skip. New letters generated"))
+					h.SendData(client, byte('0'), []byte("."))
+					h.SendData(client, byte('2'), []byte(h.getPrompt()))
+				}
 			}
 		}
 	case byte('3'):
@@ -106,7 +115,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 		for client := range h.Clients {
 			h.SendData(client, byte('3'), []byte(""))
 			h.SendData(client, byte('0'), []byte(c.Name+" restarted the game"))
-			h.SendData(client, byte('1'), []byte(h.getScores()))
+			h.SendData(client, byte('1'), []byte(h.getPlayers()))
 			h.SendData(client, byte('2'), []byte(h.getPrompt()))
 			h.SendData(client, byte('0'), []byte("."))
 		}

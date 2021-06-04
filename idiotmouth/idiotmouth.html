@@ -11,8 +11,6 @@ window.onload = function () {
     
     //collapsible start
     var coll = document.getElementsByClassName("collapsible-button");
-    var i;
-
     for (i = 0; i < coll.length; i++) {
         coll[i].addEventListener("click", function() {
             this.classList.toggle("collapsible-button-active");
@@ -34,6 +32,7 @@ window.onload = function () {
     var ingameHowtoplayButton = document.getElementById("ingame-howtoplay-button");
     var ingameHowtoplay = document.getElementById("ingame-howtoplay");
     var restart = document.getElementById("restart");
+    var players = document.getElementById("players");
     var startLetter = document.getElementById("start-letter");
     var endLetter = document.getElementById("end-letter");
     var skip = document.getElementById("skip")
@@ -131,7 +130,20 @@ window.onload = function () {
                     appendLog(item);
                     break;
                 case '1':
-                    document.getElementById("status").innerText = "Scores: " + message;
+                    while (players.firstChild) {
+                        players.removeChild(players.firstChild);
+                    }
+                    var data = message.split("|");
+                    for (var j = 0; j < data.length; j+=4) {
+                        var player = document.createElement("div");
+                        player.id = "player";
+                        var text = data[j] + " - " + data[j+1].toString() + " points";
+                        if (data[j+2] != "") {
+                            text += "\nBest word: " + data[j+2] + " " + data[j+3].toString() + " points";
+                        }
+                        player.innerText = text;
+                        players.appendChild(player);
+                    }
                     break
                 case '2':
                     var data = message.split("|");
@@ -259,14 +271,14 @@ button {
     margin-left: -400px;
     display: flex;
     flex-direction: row;
-    gap: 20px;
+    gap: 15px;
 }
 
 #ingame-left {
     width: 30%;
     display: flex;
     flex-direction: column;
-    gap: 20px;
+    gap: 15px;
 }
 
 #ingame-right {
@@ -284,6 +296,18 @@ button {
     align-items: center;
     gap: 10px;
     padding: 15px;
+}
+
+#players {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#player {
+    background-color: #f5f5f5;
+    padding: 15px;
+    overflow: hidden;
 }
 
 #prompt {
@@ -347,17 +371,19 @@ button {
 
     <div id="ingame">
         <div id="ingame-left">
-            <div id="ingame-title">
-                <h1>Idiotmouth</h1>
-                <div>
-                    <button id="ingame-howtoplay-button">how to play</button>
-                    <button id="restart">reset game</button>
+            <div id="ingame-title-holder">
+                <div id="ingame-title">
+                    <h1>Idiotmouth</h1>
+                    <div>
+                        <button id="ingame-howtoplay-button">how to play</button>
+                        <button id="restart">reset game</button>
+                    </div>
                 </div>
                 <div id="ingame-howtoplay" class="collapsible-content">
                     <p>This isn't finished yet go click on something else</p>
                 </div>
             </div>
-            <div id="status">status</div>
+            <div id="players">status</div>
         </div>
         <div id="ingame-right">
             <div id="prompt">

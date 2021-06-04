@@ -16,6 +16,10 @@ type IdiotmouthClient struct {
 	score int
 
 	pass bool
+
+	highestWord string
+
+	highestScore int
 }
 
 func (c *IdiotmouthClient) HandleClientMessage(d []byte) {
