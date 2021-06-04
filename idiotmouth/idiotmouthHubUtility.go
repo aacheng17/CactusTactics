@@ -85,10 +85,7 @@ func (h *IdiotmouthHub) getWorth() int {
 }
 
 func (h *IdiotmouthHub) getPrompt() string {
-	ret := string(h.start) + "*" + string(h.end)
-	bonus := h.getWorth()
-	ret += ", worth " + fmt.Sprint(bonus) + " points. There are " + fmt.Sprint(h.letters[string(h.start)+string(h.end)]) + " possible words"
-	return ret
+	return string(h.start) + "|" + string(h.end) + "|" + fmt.Sprint(h.getWorth()) + "|" + fmt.Sprint(h.letters[string(h.start)+string(h.end)])
 }
 
 func (h *IdiotmouthHub) getScores() string {

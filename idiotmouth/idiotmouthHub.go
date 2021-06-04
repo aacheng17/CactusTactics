@@ -65,7 +65,6 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 					h.SendData(client, byte('0'), []byte(c.Name+" earned "+fmt.Sprint(worth)+"x"+fmt.Sprint(bonus)+"="+fmt.Sprint(finalWorth)+" points"))
 					h.SendData(client, byte('0'), []byte("."))
 					h.SendData(client, byte('2'), []byte(h.getPrompt()))
-					h.SendData(client, byte('0'), []byte("New letters: "+h.getPrompt()))
 					h.SendData(client, byte('1'), []byte(h.getScores()))
 				}
 			case 2:
@@ -86,7 +85,6 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 				for client := range h.Clients {
 					h.SendData(client, byte('0'), []byte("Letters passed, new letters generated"))
 					h.SendData(client, byte('0'), []byte("."))
-					h.SendData(client, byte('0'), []byte("New letters: "+h.getPrompt()))
 					h.SendData(client, byte('2'), []byte(h.getPrompt()))
 				}
 			}
@@ -98,7 +96,6 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 				h.SendData(client, byte('1'), []byte(h.getScores()))
 				h.SendData(client, byte('2'), []byte(h.getPrompt()))
 				h.SendData(client, byte('0'), []byte("."))
-				h.SendData(client, byte('0'), []byte("New letters: "+h.getPrompt()))
 			}
 		}
 	case byte('1'):
@@ -113,7 +110,6 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 			h.SendData(client, byte('1'), []byte(h.getScores()))
 		}
 		h.SendData(c, byte('2'), []byte(h.getPrompt()))
-		h.SendData(c, byte('0'), []byte("New letters: "+h.getPrompt()))
 	}
 }
 
