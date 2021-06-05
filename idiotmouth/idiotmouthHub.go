@@ -39,13 +39,23 @@ func (h *IdiotmouthHub) getAssertedClients() map[*IdiotmouthClient]bool {
 // 0: regular chat messages
 // 1: scores
 // 2: prompt
-// 3: restart (data is inconsequential, probably empty string)
+// 3: winners
+// 4: restart (data is inconsequential, probably empty string)
+// 5: message that needs a "what?""
 
 func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*IdiotmouthClient)
-	if m.MessageType == byte('0') {
+	switch m.MessageType {
+	case byte('0'):
 		for client := range h.Clients {
 			h.SendData(client, byte('0'), []byte(c.Name+": "+string(m.Data)))
+		}
+	case byte('4'):
+		word := string(m.Data)
+		if definition, ok := dictionary[word]; ok {
+			for client := range h.Clients {
+				h.SendData(client, byte('0'), []byte(fmt.Sprint(c.Name+" asked, \"What?\" for the word ", word, ".<br/>", word, " - ", definition)))
+			}
 		}
 	}
 	if h.phase == 1 {
@@ -53,7 +63,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 			h.reset()
 			for client := range h.Clients {
 				h.SendData(client, byte('4'), []byte(""))
-				h.SendData(client, byte('0'), []byte(c.Name+" restarted the game\n"))
+				h.SendData(client, byte('0'), []byte(c.Name+" restarted the game<br/>"))
 				h.SendData(client, byte('1'), []byte(h.getPlayers()))
 				h.SendData(client, byte('2'), []byte(h.getPrompt()))
 			}
@@ -78,12 +88,12 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 				err := h.gotIt(word)
 				if err == 1 {
 					for client := range h.Clients {
-						h.SendData(client, byte('0'), []byte("You have passed or used all possible words. Type restart to restart the game."))
+						h.SendData(client, byte('0'), []byte("All possible words have been used or passed. Type restart to restart the game."))
 					}
 					break
 				}
 				for client := range h.Clients {
-					h.SendData(client, byte('0'), []byte(fmt.Sprint(c.Name, " earned ", worth, "x", bonus, "=", finalWorth, " points\n")))
+					h.SendData(client, byte('5'), []byte(fmt.Sprint(c.Name, " earned ", worth, "x", bonus, "=", finalWorth, " points for |", word)))
 					h.SendData(client, byte('2'), []byte(h.getPrompt()))
 					h.SendData(client, byte('1'), []byte(h.getPlayers()))
 				}
@@ -120,7 +130,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 					break
 				}
 				for client := range h.Clients {
-					h.SendData(client, byte('0'), []byte("Majority has voted to skip. New letters generated\n"))
+					h.SendData(client, byte('0'), []byte("Majority has voted to skip. New letters generated<br/>a"))
 					h.SendData(client, byte('2'), []byte(h.getPrompt()))
 				}
 			}

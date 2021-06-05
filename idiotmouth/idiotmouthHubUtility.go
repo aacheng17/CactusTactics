@@ -12,8 +12,8 @@ func (h *IdiotmouthHub) validWord(str string) int {
 			return 2
 		}
 	}
-	for _, v := range words {
-		if v == str {
+	for word := range dictionary {
+		if word == str {
 			return 0
 		}
 	}
@@ -27,7 +27,7 @@ func (h *IdiotmouthHub) reset() {
 		client.highestWord = ""
 		client.highestScore = 0
 	}
-	h.wordsLeft = len(words)
+	h.wordsLeft = len(dictionary)
 	for k, v := range letters {
 		h.letters[k] = v
 	}

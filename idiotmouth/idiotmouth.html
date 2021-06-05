@@ -6,7 +6,7 @@
 <script type="text/javascript">
 // MESSAGE TYPES (CLIENT TO SERVER)
 // when using conn.send(), the first character in the string represents the message type
-// 0 means regular chat message, 1 means setting player name, 2 means skip, 3 means game end, 4 means restart
+// 0 means regular chat message, 1 means setting player name, 2 means skip, 3 means game end / restart, 4 means what
 window.onload = function () {
     
     //collapsible start
@@ -162,6 +162,29 @@ window.onload = function () {
                     while (log.firstChild) {
                         log.removeChild(log.firstChild);
                     }
+                    break
+                case '5':
+                    var item = document.createElement("div");
+                    item.classList.add("score-message");
+                    message = message.replaceAll("<br/>", "\n");
+                    var data = message.split("|");
+                    var message = document.createElement("a");
+                    message.innerText = data[0];
+                    item.appendChild(message);
+                    var word = document.createElement("a");
+                    word.innerText = data[1];
+                    item.appendChild(word);
+                    var what = document.createElement("button");
+                    what.classList.add("what-button");
+                    what.innerText = "What?";
+                    what.onclick = function (e) {
+                        if (!conn) {
+                            return false;
+                        }
+                        conn.send("4"+what.previousElementSibling.innerText);
+                    }
+                    item.appendChild(what);
+                    appendLog(item);
                     break
                 }
             }
@@ -342,6 +365,15 @@ button {
     display: flex;
     flex-direction: row;
     gap: 5px;
+}
+
+.score-message {
+    display: inline;
+}
+
+.what-button {
+    padding: 2px;
+    margin-left: 8px;
 }
 
 #msg {
