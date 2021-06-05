@@ -23,6 +23,8 @@ type IdiotmouthHub struct {
 	letters map[string]int
 
 	wordsLeft int
+
+	phase int
 }
 
 func (h *IdiotmouthHub) getAssertedClients() map[*IdiotmouthClient]bool {
@@ -41,11 +43,27 @@ func (h *IdiotmouthHub) getAssertedClients() map[*IdiotmouthClient]bool {
 
 func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*IdiotmouthClient)
-	switch m.MessageType {
-	case byte('0'):
+	if m.MessageType == byte('0') {
 		for client := range h.Clients {
 			h.SendData(client, byte('0'), []byte(c.Name+": "+string(m.Data)))
 		}
+	}
+	if h.phase == 1 {
+		if m.MessageType == byte('3') {
+			h.reset()
+			for client := range h.Clients {
+				h.SendData(client, byte('4'), []byte(""))
+				h.SendData(client, byte('0'), []byte(c.Name+" restarted the game"))
+				h.SendData(client, byte('1'), []byte(h.getPlayers()))
+				h.SendData(client, byte('2'), []byte(h.getPrompt()))
+				h.SendData(client, byte('0'), []byte("."))
+			}
+			h.phase = 0
+		}
+		return
+	}
+	switch m.MessageType {
+	case byte('0'):
 		word := strings.TrimSpace(strings.ToLower(string(m.Data)))
 		if len(word) >= 3 && word[0] == byte(h.start) && word[len(word)-1] == byte(h.end) {
 			switch h.validWord(word) {
@@ -111,14 +129,11 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 			}
 		}
 	case byte('3'):
-		h.reset()
 		for client := range h.Clients {
-			h.SendData(client, byte('3'), []byte(""))
-			h.SendData(client, byte('0'), []byte(c.Name+" restarted the game"))
-			h.SendData(client, byte('1'), []byte(h.getPlayers()))
-			h.SendData(client, byte('2'), []byte(h.getPrompt()))
-			h.SendData(client, byte('0'), []byte("."))
+			h.SendData(client, byte('0'), []byte("Game ended by "+c.Name))
+			h.SendData(client, byte('3'), []byte(h.getWinners()))
 		}
+		h.phase = 1
 	}
 }
 

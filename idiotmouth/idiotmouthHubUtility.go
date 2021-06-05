@@ -110,3 +110,23 @@ func (h *IdiotmouthHub) getPlayers() string {
 	}
 	return players
 }
+
+func (h *IdiotmouthHub) getWinners() string {
+	keys := make([]*IdiotmouthClient, 0, len(h.Clients))
+	for k := range h.getAssertedClients() {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i].score > keys[j].score
+	})
+	winner := keys[0]
+	ret := fmt.Sprint(winner.Name, "\t", winner.score, "\t")
+
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i].highestScore > keys[j].highestScore
+	})
+	winner = keys[0]
+	ret += fmt.Sprint(winner.Name, "\t", winner.highestWord, "\t", winner.highestScore)
+
+	return ret
+}

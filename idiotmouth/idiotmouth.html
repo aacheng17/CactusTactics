@@ -6,7 +6,7 @@
 <script type="text/javascript">
 // MESSAGE TYPES (CLIENT TO SERVER)
 // when using conn.send(), the first character in the string represents the message type
-// 0 means regular chat message, 1 means setting player name, 2 means skip, 3 means restart
+// 0 means regular chat message, 1 means setting player name, 2 means skip, 3 means game end, 4 means restart
 window.onload = function () {
     
     //collapsible start
@@ -24,6 +24,11 @@ window.onload = function () {
     }
     //collapsible end
 
+    col1 = document.getElementsByClassName("howtoplay-text");
+    for (i = 0; i < col1.length; i++) {
+        col1[i].innerText = "Rules\nTry to think of a word that starts with the first letter and ends with the second letter before your opponents.\nWords must be at least 3 letters long.\n\nScoring\nThe more rare the letter combination, the more points it's worth (up to 100).\nEach word gets a length bonus multiplier as well."
+    }
+
     var conn, name;
     var landing = document.getElementById("landing");
     var nameForm = document.getElementById("name-form");
@@ -31,7 +36,7 @@ window.onload = function () {
     var ingame = document.getElementById("ingame");
     var ingameHowtoplayButton = document.getElementById("ingame-howtoplay-button");
     var ingameHowtoplay = document.getElementById("ingame-howtoplay");
-    var restart = document.getElementById("restart");
+    var endgame = document.getElementById("endgame");
     var players = document.getElementById("players");
     var startLetter = document.getElementById("start-letter");
     var endLetter = document.getElementById("end-letter");
@@ -72,11 +77,12 @@ window.onload = function () {
         } 
     });
 
-    restart.onclick = function (e) {
+    endgame.onclick = function (e) {
         if (!conn) {
             return false;
         }
         conn.send("3");
+        endgame.innerText = endgame.innerText === "end game" ? "new game" : "end game";
     }
 
     skip.onclick = function (e) {
@@ -91,13 +97,6 @@ window.onload = function () {
             return false;
         }
         if (!msg.value.trim()) {
-            return false;
-        }
-        if (msg.value.trim()=="/rules") {
-            var item = document.createElement("div");
-            item.innerHTML = "<br/><b>Rules</b><br/>At the bottom are two letters. Try to think of a word that starts with the first letter and ends with the second.<br/>You get points for harder letters and longer words. Words must be >2 letters.<br/>You can also enter '/pass' if the letters are too hard to vote to skip the current letters.<br/>You can enter '/restart' at any time to restart the game.<br/>";
-            appendLog(item);
-            msg.value = "";
             return false;
         }
         conn.send("0" + msg.value);
@@ -125,8 +124,7 @@ window.onload = function () {
                 switch (messageType) {
                 case '0':
                     var item = document.createElement("div");
-                    message = message.replaceAll("<br/>", "\n")
-                    item.innerText = message;
+                    item.innerText = message.replaceAll("<br/>", "\n");
                     appendLog(item);
                     break;
                 case '1':
@@ -155,6 +153,12 @@ window.onload = function () {
                     promptExtraText.innerText = "Worth " + String(data[2]) + " points. There are " + String(data[3]) + " possible words.";
                     break
                 case '3':
+                    var data = message.split("\t");
+                    var item = document.createElement("div");
+                    item.innerText = "Winner: " + data[0] + " " + data[1] + " points\nBest word: " + data[2] + " " + data[3] + " " + data[4] + " points";
+                    appendLog(item);
+                    break;
+                case '4':
                     while (log.firstChild) {
                         log.removeChild(log.firstChild);
                     }
@@ -364,7 +368,7 @@ button {
         <div>
             <button class="collapsible-button">How to play</button>
             <div class="collapsible-content">
-                <p>This isn't finished yet go click on something else</p>
+                <p class="howtoplay-text"></p>
             </div>
         </div>
     </div>
@@ -376,11 +380,11 @@ button {
                     <h1>Idiotmouth</h1>
                     <div>
                         <button id="ingame-howtoplay-button">how to play</button>
-                        <button id="restart">reset game</button>
+                        <button id="endgame">end game</button>
                     </div>
                 </div>
                 <div id="ingame-howtoplay" class="collapsible-content">
-                    <p>This isn't finished yet go click on something else</p>
+                    <p class="howtoplay-text"></p>
                 </div>
             </div>
             <div id="players">status</div>
