@@ -64,6 +64,11 @@ func (h *Hub) HandleHubMessage(m *Message) {
 	return
 }
 
+func formatEscapes(s string) string {
+
+	return s
+}
+
 func (h *Hub) Run() {
 	for {
 		select {
@@ -74,7 +79,7 @@ func (h *Hub) Run() {
 				h.RemoveClient(client, "Removed client that disconnected.")
 			}
 		case message := <-h.Messages:
-			log.Println("Received message\n\tType: " + fmt.Sprint(message.MessageType) + "\n\tData: " + string(message.Data))
+			log.Println(fmt.Sprint("Received message\n\tType: ", message.MessageType, "\n\tData: ", message.Data))
 			h.Child.HandleHubMessage(message)
 		}
 	}

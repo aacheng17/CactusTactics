@@ -169,6 +169,7 @@ func NewFakeoutHub() core.Hublike {
 	h := &FakeoutHub{
 		Hub: *core.NewHub(),
 	}
+	h.Child = h
 	h.reset()
 	return h
 }

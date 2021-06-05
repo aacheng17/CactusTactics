@@ -1,8 +1,6 @@
 package fakeout
 
 import (
-	"log"
-
 	"example.com/hello/core"
 	"github.com/gorilla/websocket"
 )
@@ -18,11 +16,6 @@ type FakeoutClient struct {
 	answer string
 
 	choice int
-}
-
-func (c *FakeoutClient) HandleClientMessage(d []byte) {
-	log.Println(string(d))
-	c.GetHub().GetMessages() <- core.NewMessage(c, byte(d[0]), d[1:])
 }
 
 func NewFakeoutClient(hub core.Hublike, conn *websocket.Conn) core.Clientlike {

@@ -1,8 +1,6 @@
 package idiotmouth
 
 import (
-	"log"
-
 	"example.com/hello/core"
 	"github.com/gorilla/websocket"
 )
@@ -20,11 +18,6 @@ type IdiotmouthClient struct {
 	highestWord string
 
 	highestScore int
-}
-
-func (c *IdiotmouthClient) HandleClientMessage(d []byte) {
-	log.Println(string(d))
-	c.GetHub().GetMessages() <- core.NewMessage(c, byte(d[0]), d[1:])
 }
 
 func NewIdiotmouthClient(hub core.Hublike, conn *websocket.Conn) core.Clientlike {

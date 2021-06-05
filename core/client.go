@@ -41,7 +41,6 @@ type Clientlike interface {
 	GetHub() Hublike
 	GetName() string
 	GetSend() chan []byte
-	HandleClientMessage(d []byte)
 	readPump()
 	writePump()
 }
@@ -100,7 +99,7 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.Child.HandleClientMessage(message)
+		c.Hub.GetMessages() <- NewMessage(c.Child, byte(message[0]), message[1:])
 	}
 }
 
