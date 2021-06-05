@@ -53,10 +53,9 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 			h.reset()
 			for client := range h.Clients {
 				h.SendData(client, byte('4'), []byte(""))
-				h.SendData(client, byte('0'), []byte(c.Name+" restarted the game"))
+				h.SendData(client, byte('0'), []byte(c.Name+" restarted the game\n"))
 				h.SendData(client, byte('1'), []byte(h.getPlayers()))
 				h.SendData(client, byte('2'), []byte(h.getPrompt()))
-				h.SendData(client, byte('0'), []byte("."))
 			}
 			h.phase = 0
 		}
@@ -84,8 +83,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 					break
 				}
 				for client := range h.Clients {
-					h.SendData(client, byte('0'), []byte(fmt.Sprint(c.Name, " earned ", worth, "x", bonus, "=", finalWorth, " points")))
-					h.SendData(client, byte('0'), []byte("."))
+					h.SendData(client, byte('0'), []byte(fmt.Sprint(c.Name, " earned ", worth, "x", bonus, "=", finalWorth, " points\n")))
 					h.SendData(client, byte('2'), []byte(h.getPrompt()))
 					h.SendData(client, byte('1'), []byte(h.getPlayers()))
 				}
@@ -122,8 +120,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 					break
 				}
 				for client := range h.Clients {
-					h.SendData(client, byte('0'), []byte("Majority has voted to skip. New letters generated"))
-					h.SendData(client, byte('0'), []byte("."))
+					h.SendData(client, byte('0'), []byte("Majority has voted to skip. New letters generated\n"))
 					h.SendData(client, byte('2'), []byte(h.getPrompt()))
 				}
 			}
