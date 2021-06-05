@@ -2,7 +2,6 @@ package idiotmouth
 
 import (
 	"fmt"
-	"log"
 	"strings"
 
 	"example.com/hello/core"
@@ -144,27 +143,12 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	}
 }
 
-func (h *IdiotmouthHub) Run() {
-	for {
-		select {
-		case client := <-h.Register:
-			h.Clients[client] = true
-		case client := <-h.Unregister:
-			if _, ok := h.Clients[client]; ok {
-				h.RemoveClient(client, "Removed client that disconnected.")
-			}
-		case message := <-h.Messages:
-			log.Println(fmt.Sprint("Received message\n\tType: ", message.MessageType), "\n\tData: ", string(message.Data))
-			h.HandleHubMessage(message)
-		}
-	}
-}
-
 func NewIdiotmouthHub() core.Hublike {
 	h := &IdiotmouthHub{
 		Hub:     *core.NewHub(),
 		letters: make(map[string]int),
 	}
+	h.Child = h
 	h.reset()
 	return h
 }

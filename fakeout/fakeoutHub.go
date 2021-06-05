@@ -2,7 +2,6 @@ package fakeout
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -163,22 +162,6 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 		}
 		h.SendData(c, byte('2'), []byte(h.getPrompt()))
 		h.SendData(c, byte('0'), []byte("New Prompt: "+h.getPrompt()))
-	}
-}
-
-func (h *FakeoutHub) Run() {
-	for {
-		select {
-		case client := <-h.Register:
-			h.Clients[client] = true
-		case client := <-h.Unregister:
-			if _, ok := h.Clients[client]; ok {
-				h.RemoveClient(client, "Removed client that disconnected.")
-			}
-		case message := <-h.Messages:
-			log.Println("Received message\n\tType: " + fmt.Sprint(message.MessageType) + "\n\tData: " + string(message.Data))
-			h.HandleHubMessage(message)
-		}
 	}
 }
 

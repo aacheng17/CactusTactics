@@ -20,6 +20,7 @@ type Hublike interface {
 // Hub maintains the set of active clients and broadcasts messages to the
 // clients.
 type Hub struct {
+	Child Hublike
 	// Registered clients.
 	Clients map[Clientlike]bool
 
@@ -74,7 +75,7 @@ func (h *Hub) Run() {
 			}
 		case message := <-h.Messages:
 			log.Println("Received message\n\tType: " + fmt.Sprint(message.MessageType) + "\n\tData: " + string(message.Data))
-			h.HandleHubMessage(message)
+			h.Child.HandleHubMessage(message)
 		}
 	}
 }
