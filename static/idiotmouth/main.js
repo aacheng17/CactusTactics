@@ -1,22 +1,11 @@
+import { initCollapsible } from './../collapsible.js';
+
 // MESSAGE TYPES (CLIENT TO SERVER)
 // when using conn.send(), the first character in the string represents the message type
 // 0 means regular chat message, 1 means setting player name, 2 means skip, 3 means game end / restart, 4 means what
-window.onload = function () {
-    //collapsible start
-    var coll = document.getElementsByClassName("collapsible-button");
-    for (var i = 0; i < coll.length; i++) {
-        coll[i].addEventListener("click", function() {
-            this.classList.toggle("collapsible-button-active");
-            var content = this.nextElementSibling;
-            if (content.style.maxHeight){
-            content.style.maxHeight = null;
-            } else {
-            content.style.maxHeight = content.scrollHeight + "px";
-            }
-        });
-    }
-    //collapsible end
 
+window.onload = function () {
+    initCollapsible();
     var col1 = document.getElementsByClassName("howtoplay-text");
     for (var i = 0; i < col1.length; i++) {
         col1[i].innerText = "Rules\nTry to think of a word that starts with the first letter and ends with the second letter before your opponents.\nWords must be at least 3 letters long.\n\nScoring\nThe more rare the letter combination, the more points it's worth (up to 100).\nEach word gets a length bonus multiplier as well."
@@ -70,7 +59,6 @@ window.onload = function () {
                 }
             } else {
                 if (s[i] === "\v") {
-                    state = 0;
                     switch (tag) {
                     case "br/":
                         ret.appendChild(document.createElement("br"));
@@ -80,7 +68,6 @@ window.onload = function () {
                         var result = decodeToHTMLHelper(s, i+1);
                         item.appendChild(result[0]);
                         ret.appendChild(item);
-                        console.log(result[1]);
                         i = result[1];
                         break;
                     case "/":
@@ -88,6 +75,8 @@ window.onload = function () {
                     default:
                         break;
                     }
+                    tag = "";
+                    state = 0;
                 } else {
                     tag += s[i];
                 }
