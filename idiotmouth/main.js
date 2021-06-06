@@ -1,12 +1,3 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>IdiotMouth</title>
-<script type="text/javascript">
-// MESSAGE TYPES (CLIENT TO SERVER)
-// when using conn.send(), the first character in the string represents the message type
-// 0 means regular chat message, 1 means setting player name, 2 means skip, 3 means game end / restart, 4 means what
 window.onload = function () {
     
     //collapsible start
@@ -120,7 +111,7 @@ window.onload = function () {
                 return false;
             }
             name = nameField.value;
-            send("1" + name);
+            conn.send("1" + name);
             e.preventDefault();
             landing.parentNode.removeChild(landing);
             ingame.style.visibility = "visible";
@@ -139,7 +130,7 @@ window.onload = function () {
         if (!conn) {
             return false;
         }
-        send("3");
+        conn.send("3");
         endgame.innerText = endgame.innerText === "end game" ? "new game" : "end game";
     }
 
@@ -147,7 +138,7 @@ window.onload = function () {
         if (!conn) {
             return false;
         }
-        send("2");
+        conn.send("2");
     }
     
     document.getElementById("chat-form").onsubmit = function () {
@@ -157,7 +148,7 @@ window.onload = function () {
         if (!msg.value.trim()) {
             return false;
         }
-        send("0" + msg.value);
+        conn.send("0" + msg.value);
         msg.value = "";
         return false;
     };
@@ -232,7 +223,7 @@ window.onload = function () {
                         if (!conn) {
                             return false;
                         }
-                        send("4"+what.previousElementSibling.innerText);
+                        conn.send("4"+what.previousElementSibling.innerText);
                     }
                     item.appendChild(what);
                     appendLog(item);
@@ -248,248 +239,3 @@ window.onload = function () {
 
     ingame.style.visibility = "hidden";
 };
-</script>
-<style type="text/css">
-.collapsible-button {
-  background-color: #777;
-  color: white;
-  cursor: pointer;
-  padding: 15px;
-  width: 100%;
-  border: none;
-  text-align: left;
-  outline: none;
-}
-
-.collapsible-button:after {
-  content: '\23F7';
-  color: white;
-  font-weight: bold;
-  float: right;
-  margin-left: 5px;
-}
-
-.collapsible-button-active:after {
-  content: "\23F6";
-}
-
-.collapsible-content {
-  padding: 0 15px;
-  max-height: 0;
-  overflow: hidden;
-  transition: max-height 0.2s ease-out;
-  background-color: #f1f1f1;
-}
-
-@media only screen and (max-width: 620px) {
-  /* For mobile phones: */
-  .menu, .main, .right {
-    width: 100%;
-  }
-}
-
-* {
-    font-family: Arial, Helvetica, sans-serif;
-}
-
-html {
-    overflow: hidden;
-}
-
-body {
-    overflow: hidden;
-    padding: 0;
-    margin: 0;
-    width: 100%;
-    height: 100%;
-}
-
-h1, h2 {
-    margin: 0px;
-}
-
-button {
-    padding: 5px;
-}
-
-#landing {
-    padding: 15px 0px;
-    position: absolute;
-    width: 500px;
-    left: 50%;
-    margin-left: -250px;
-    display: grid;
-    flex-direction: column;
-    gap: 30px;
-}
-
-#landing-title {
-    background-color: #e5e5e5;
-    text-align: center;
-    padding: 15px;
-}
-
-#name-form {
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-}
-
-#name-form-submit {
-    padding: 5px;
-}
-
-#ingame {
-    padding: 15px 0px;
-    position: absolute;
-    width: 800px;
-    left: 50%;
-    margin-left: -400px;
-    display: flex;
-    flex-direction: row;
-    gap: 15px;
-}
-
-#ingame-left {
-    width: 30%;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-#ingame-right {
-    width: 70%;
-    display: flex;
-    flex-direction: column;
-    gap: 15px;
-}
-
-#ingame-title {
-    background-color: #e5e5e5;
-    text-align: center;
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    gap: 10px;
-    padding: 15px;
-}
-
-#players {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
-#player {
-    background-color: #f5f5f5;
-    padding: 15px;
-    overflow: hidden;
-}
-
-#prompt {
-    background-color: #e5e5e5;
-    padding: 15px;
-}
-
-#prompt-text {
-    display: flex;
-    flex-direction: row;
-    gap: 10px;
-}
-
-#chatbox {
-    background-color: #e5e5e5;
-    display: flex;
-    flex-direction: column;
-}
-
-#log {
-    padding: 15px;
-    overflow: auto;
-    height: 400px;
-}
-
-#chat-form {
-    padding: 5px;
-    display: flex;
-    flex-direction: row;
-    gap: 5px;
-}
-
-.score-message {
-    display: inline;
-}
-
-.what-button {
-    padding: 2px;
-    margin-left: 8px;
-}
-
-#msg {
-    flex-grow: 100;
-}
-
-#msg-send {
-    padding: 5px 5px;
-}
-
-</style>
-</head>
-<body>
-    <div id="landing">
-        <div id="landing-title">
-            <h1>Idiotmouth</h1>
-        </div>
-        <div>
-            <form id="name-form">
-                <input type="text" id="name-field" size="64" maxlength="20" placeholder="Name" autofocus />
-                <input id="name-form-submit" type="submit" value="Set Name" />
-            </form>
-        </div>
-        <div>
-            <button class="collapsible-button">How to play</button>
-            <div class="collapsible-content">
-                <p class="howtoplay-text"></p>
-            </div>
-        </div>
-    </div>
-
-    <div id="ingame">
-        <div id="ingame-left">
-            <div id="ingame-title-holder">
-                <div id="ingame-title">
-                    <h1>Idiotmouth</h1>
-                    <div>
-                        <button id="ingame-howtoplay-button">how to play</button>
-                        <button id="endgame">end game</button>
-                    </div>
-                </div>
-                <div id="ingame-howtoplay" class="collapsible-content">
-                    <p class="howtoplay-text"></p>
-                </div>
-            </div>
-            <div id="players">status</div>
-        </div>
-        <div id="ingame-right">
-            <div id="prompt">
-                <div id="prompt-text">
-                    <h2>Current Letters:</h2>
-                    <h2 id="start-letter"></h2>
-                    <h2 id="end-letter"></h2>
-                    <button id="skip">Vote to skip</button>
-                </div>
-                <a id="prompt-extra-text"></a>
-            </div>
-            <div id="chatbox">
-                <div id="log"></div>
-                <form id="chat-form">
-                    <input type="text" id="msg" size="64" maxlength="100"/>
-                    <input type="submit" id="msg-send" value="Send" />
-                </form>
-            </div>
-        </div>
-    </div>
-</body>
-</html>
