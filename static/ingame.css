@@ -1,0 +1,93 @@
+#ingame {
+    padding: 15px 0px;
+    position: absolute;
+    width: 800px;
+    left: 50%;
+    margin-left: -400px;
+    display: flex;
+    flex-direction: row;
+    gap: 15px;
+}
+
+#ingame-left {
+    width: 30%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#ingame-right {
+    width: 70%;
+    display: flex;
+    flex-direction: column;
+    gap: 15px;
+}
+
+#ingame-title {
+    background-color: #e5e5e5;
+    text-align: center;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 10px;
+    padding: 15px;
+}
+
+#players {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#player {
+    background-color: #f5f5f5;
+    padding: 15px;
+    overflow: hidden;
+}
+
+#prompt {
+    background-color: #e5e5e5;
+    padding: 15px;
+}
+
+#prompt-text {
+    display: flex;
+    flex-direction: row;
+    gap: 10px;
+}
+
+#chatbox {
+    background-color: #e5e5e5;
+    display: flex;
+    flex-direction: column;
+}
+
+#log {
+    padding: 15px;
+    overflow: auto;
+    height: 400px;
+}
+
+#chat-form {
+    padding: 5px;
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
+
+.score-message {
+    display: inline;
+}
+
+.what-button {
+    padding: 2px;
+    margin-left: 8px;
+}
+
+#msg {
+    flex-grow: 100;
+}
+
+#msg-send {
+    padding: 5px 5px;
+}

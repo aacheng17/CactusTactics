@@ -82,6 +82,8 @@ func main() {
 	if port == "" {
 		port = "8080"
 	}
+	fs := http.FileServer(http.Dir("static/"))
+	http.Handle("/static/", http.StripPrefix("/static/", fs))
 	http.HandleFunc("/", handler)
 	rand.Seed(time.Now().Unix())
 	Init()
