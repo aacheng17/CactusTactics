@@ -86,8 +86,8 @@ func (h *IdiotmouthHub) getWorth() int {
 	return int(50-50*(float32(letters[string(h.start)+string(h.end)]-minFreq)/float32(maxFreq-minFreq))) + 50
 }
 
-func (h *IdiotmouthHub) getPrompt() string {
-	return fmt.Sprint(string(h.start), "\t", string(h.end), "\t", h.getWorth(), "\t", h.letters[string(h.start)+string(h.end)])
+func (h *IdiotmouthHub) getPrompt() []string {
+	return []string{string(h.start), string(h.end), fmt.Sprint(h.getWorth()), fmt.Sprint(h.letters[string(h.start)+string(h.end)])}
 }
 
 func (h *IdiotmouthHub) getPlayers() []string {

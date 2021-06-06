@@ -5,6 +5,7 @@ import (
 	"strings"
 
 	"example.com/hello/core"
+	"example.com/hello/utility"
 )
 
 // declaring a struct
@@ -47,7 +48,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	switch m.MessageType {
 	case byte('0'):
 		for client := range h.Clients {
-			h.SendData(client, byte('0'), []string{"\vb\v" + c.Name + "\v/\v" + ": " + m.Data[0]})
+			h.SendData(client, byte('0'), []string{fmt.Sprint(utility.BTAG+c.Name+utility.ENDTAG, ": ", m.Data[0])})
 		}
 	case byte('1'):
 		name := string(m.Data[0])
@@ -55,17 +56,17 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 			c.Name = name
 		}
 		for client := range h.Clients {
-			h.SendData(client, byte('0'), []string{"\vb\v" + name + "\v/\v" + " joined"})
+			h.SendData(client, byte('0'), []string{fmt.Sprint(utility.BTAG+name+utility.ENDTAG, " joined")})
 		}
 		for client := range h.Clients {
 			h.SendData(client, byte('1'), h.getPlayers())
 		}
-		h.SendData(c, byte('2'), []string{h.getPrompt()})
+		h.SendData(c, byte('2'), h.getPrompt())
 	case byte('4'):
 		word := string(m.Data[0])
 		if definition, ok := dictionary[word]; ok {
 			for client := range h.Clients {
-				h.SendData(client, byte('0'), []string{fmt.Sprint("\vb\v"+c.Name+"\v/\v"+" asked, \"What?\" for the word ", word, ".\vbr/\v", word, " - ", definition)})
+				h.SendData(client, byte('0'), []string{fmt.Sprint(utility.BTAG+c.Name+utility.ENDTAG+" asked, \"What?\" for the word ", word, utility.BRTAG, word, " - ", definition)})
 			}
 		}
 	}
@@ -74,9 +75,9 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 			h.reset()
 			for client := range h.Clients {
 				h.SendData(client, byte('4'), []string{""})
-				h.SendData(client, byte('0'), []string{"\vb\v" + c.Name + "\v/\v" + " restarted the game\vbr/\v"})
+				h.SendData(client, byte('0'), []string{fmt.Sprint(utility.BTAG+c.Name+utility.ENDTAG, " restarted the game", utility.BRTAG)})
 				h.SendData(client, byte('1'), h.getPlayers())
-				h.SendData(client, byte('2'), []string{h.getPrompt()})
+				h.SendData(client, byte('2'), h.getPrompt())
 			}
 			h.phase = 0
 		}
@@ -104,8 +105,8 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 					break
 				}
 				for client := range h.Clients {
-					h.SendData(client, byte('5'), []string{fmt.Sprint("\vb\v"+c.Name+"\v/\v", " earned ", worth, "x", bonus, "=", finalWorth, " points for "), word})
-					h.SendData(client, byte('2'), []string{h.getPrompt()})
+					h.SendData(client, byte('5'), []string{fmt.Sprint(utility.BTAG+c.Name+utility.ENDTAG, " earned ", worth, "x", bonus, "=", finalWorth, " points for "), word})
+					h.SendData(client, byte('2'), h.getPrompt())
 					h.SendData(client, byte('1'), h.getPlayers())
 				}
 			case 2:
@@ -118,7 +119,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 		if !c.pass {
 			c.pass = true
 			for client := range h.Clients {
-				h.SendData(client, byte('0'), []string{"\vb\v" + c.Name + "\v/\v" + " voted to skip."})
+				h.SendData(client, byte('0'), []string{fmt.Sprint(utility.BTAG+c.Name+utility.ENDTAG, " voted to skip.")})
 			}
 			if h.getMajorityPass() {
 				err := h.pass()
@@ -129,14 +130,14 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 					break
 				}
 				for client := range h.Clients {
-					h.SendData(client, byte('0'), []string{"Majority has voted to skip. New letters generated\vbr/\va"})
-					h.SendData(client, byte('2'), []string{h.getPrompt()})
+					h.SendData(client, byte('0'), []string{fmt.Sprint("Majority has voted to skip. New letters generated", utility.BRTAG, "a")})
+					h.SendData(client, byte('2'), h.getPrompt())
 				}
 			}
 		}
 	case byte('3'):
 		for client := range h.Clients {
-			h.SendData(client, byte('0'), []string{"Game ended by " + "\vb\v" + c.Name + "\v/\v"})
+			h.SendData(client, byte('0'), []string{fmt.Sprint("Game ended by ", utility.BTAG+c.Name+utility.ENDTAG)})
 			h.SendData(client, byte('3'), h.getWinners())
 		}
 		h.phase = 1

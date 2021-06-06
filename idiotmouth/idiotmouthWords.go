@@ -5,10 +5,12 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+
+	"example.com/hello/utility"
 )
 
 var (
-	dictionary map[string]interface{}
+	dictionary map[string]string
 	letters    map[string]int
 	minFreq    int
 	maxFreq    int
@@ -23,7 +25,13 @@ func buildWords() {
 	byteValue, _ := ioutil.ReadAll(jsonFile)
 	var dictionaryRaw interface{}
 	json.Unmarshal(byteValue, &dictionaryRaw)
-	dictionary = dictionaryRaw.(map[string]interface{})
+	var dictionaryAsserted = dictionaryRaw.(map[string]interface{})
+	dictionary = make(map[string]string)
+	for k, v := range dictionaryAsserted {
+		s := v.(string)
+		s = utility.RemoveEscapes(s)
+		dictionary[k] = s
+	}
 }
 
 func buildLetters() {

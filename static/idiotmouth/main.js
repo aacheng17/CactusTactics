@@ -1,3 +1,4 @@
+import * as global from './../global.js';
 import { initCollapsible } from './../collapsible.js';
 
 // MESSAGE TYPES (CLIENT TO SERVER)
@@ -30,14 +31,14 @@ window.onload = function () {
     function send(s) {
         var toSend = "";
         for (var i = 0; i < s.length; i++) {
-            toSend += s.replaceAll("\v", "");
-            toSend += "\t" + s.replaceAll("\t", "");
+            toSend += s.replaceAll(global.TAG, "");
+            toSend += global.DELIM + s.replaceAll(global.DELIM, "");
         }
         conn.send(s);
     }
 
     function decode(s) {
-        var ret = s.split("\t");
+        var ret = s.split(global.DELIM);
         ret.shift();
         return ret;
     }
@@ -52,13 +53,13 @@ window.onload = function () {
         var state = 0; //0 normal, 1 in a tag
         for (; i < s.length; i++) {
             if (state == 0) {
-                if (s[i] !== "\v") {
+                if (s[i] !== global.TAG) {
                     ret.innerHTML += s[i];
                 } else {
                     state = 1;
                 }
             } else {
-                if (s[i] === "\v") {
+                if (s[i] === global.TAG) {
                     switch (tag) {
                     case "br/":
                         ret.appendChild(document.createElement("br"));

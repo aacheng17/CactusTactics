@@ -2,6 +2,15 @@ package utility
 
 import "strings"
 
+const (
+	MESSAGESEP = "\n"
+	DELIM      = "\t"
+	TAG        = "\v"
+	BRTAG      = TAG + "br/" + TAG
+	BTAG       = TAG + "b" + TAG
+	ENDTAG     = TAG + "/" + TAG
+)
+
 func Find(slice []string, val string) (int, bool) {
 	for i, item := range slice {
 		if item == val {
@@ -36,24 +45,9 @@ func MakeRange(min, max int) []int {
 	return a
 }
 
-func EscapeString(s string) string {
-	htmlEscaper := strings.NewReplacer(
-		`&`, "&amp;",
-		`'`, "&#39;",
-		`<`, "&lt;",
-		`>`, "&gt;",
-		`"`, "&#34;",
-	)
-	return htmlEscaper.Replace(s)
-}
-
-func UnEscapeString(s string) string {
-	htmlUnEscaper := strings.NewReplacer(
-		`&amp;`, "&",
-		`&#39;`, "'",
-		`&lt;`, "<",
-		`&gt;`, ">",
-		`&#34;`, "\"",
-	)
-	return htmlUnEscaper.Replace(s)
+func RemoveEscapes(s string) string {
+	s = strings.ReplaceAll(s, DELIM, "")
+	s = strings.ReplaceAll(s, TAG, "")
+	s = strings.ReplaceAll(s, MESSAGESEP, BRTAG)
+	return s
 }

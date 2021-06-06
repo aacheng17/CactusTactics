@@ -7,6 +7,8 @@ package core
 import (
 	"fmt"
 	"log"
+
+	"example.com/hello/utility"
 )
 
 type Hublike interface {
@@ -43,7 +45,7 @@ func (h *Hub) SendData(client Clientlike, messageType byte, data []string) {
 	if len(client.GetSend()) <= cap(client.GetSend()) {
 		message := ""
 		for _, s := range data {
-			message += "\t" + s
+			message += utility.DELIM + s
 		}
 		toSend := append([]byte{messageType}, []byte(message)...)
 		client.GetSend() <- toSend
