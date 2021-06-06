@@ -130,7 +130,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 					break
 				}
 				for client := range h.Clients {
-					h.SendData(client, byte('0'), []string{fmt.Sprint("Majority has voted to skip. New letters generated", utility.BRTAG, "a")})
+					h.SendData(client, byte('0'), []string{fmt.Sprint("Majority has voted to skip. New letters generated", utility.BRTAG)})
 					h.SendData(client, byte('2'), h.getPrompt())
 				}
 			}
