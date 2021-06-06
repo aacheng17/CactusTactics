@@ -39,9 +39,13 @@ func (h *Hub) RemoveClient(client Clientlike, debugMessage string) {
 	log.Println(debugMessage)
 }
 
-func (h *Hub) SendData(client Clientlike, messageType byte, data []byte) {
+func (h *Hub) SendData(client Clientlike, messageType byte, data []string) {
 	if len(client.GetSend()) <= cap(client.GetSend()) {
-		toSend := append([]byte{messageType}, data...)
+		message := ""
+		for _, s := range data {
+			message += "\t" + s
+		}
+		toSend := append([]byte{messageType}, []byte(message)...)
 		client.GetSend() <- toSend
 	} else {
 		h.RemoveClient(client, "Detected and removed client with full send buffer.")
@@ -62,11 +66,6 @@ func (h *Hub) GetMessages() chan *Message {
 
 func (h *Hub) HandleHubMessage(m *Message) {
 	return
-}
-
-func formatEscapes(s string) string {
-
-	return s
 }
 
 func (h *Hub) Run() {

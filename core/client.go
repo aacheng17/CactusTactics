@@ -8,6 +8,7 @@ import (
 	"bytes"
 	"log"
 	"net/http"
+	"strings"
 	"time"
 
 	"github.com/gorilla/websocket"
@@ -72,11 +73,6 @@ func (c *Client) GetSend() chan []byte {
 	return c.Send
 }
 
-func (c *Client) HandleClientMessage(d []byte) {
-	log.Println(string(d))
-	c.Hub.GetMessages() <- NewMessage(c, byte(d[0]), d[1:])
-}
-
 // readPump pumps messages from the websocket connection to the hub.
 //
 // The application runs readPump in a per-connection goroutine. The application
@@ -99,7 +95,7 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.Hub.GetMessages() <- NewMessage(c.Child, byte(message[0]), message[1:])
+		c.Hub.GetMessages() <- NewMessage(c.Child, byte(message[0]), strings.Split(string(message[1:]), "&"))
 	}
 }
 

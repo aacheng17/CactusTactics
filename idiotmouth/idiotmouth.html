@@ -45,6 +45,64 @@ window.onload = function () {
     var msg = document.getElementById("msg");
     var log = document.getElementById("log");
 
+    function send(s) {
+        var toSend = "";
+        for (var i = 0; i < s.length; i++) {
+            toSend += s.replaceAll("\v", "");
+            toSend += "\t" + s.replaceAll("\t", "");
+        }
+        conn.send(s);
+    }
+
+    function decode(s) {
+        var ret = s.split("\t");
+        ret.shift();
+        return ret;
+    }
+
+    function decodeToHTML(s) {
+        return decodeToHTMLHelper(s, 0)[0];
+    }
+
+    function decodeToHTMLHelper(s, i) {
+        var ret = document.createElement("a");
+        var tag = "";
+        var state = 0; //0 normal, 1 in a start tag
+        for (; i < s.length; i++) {
+            if (state == 0) {
+                if (s[i] !== "\v") {
+                    ret.innerHTML += s[i];
+                } else {
+                    state = 1;
+                }
+            } else {
+                if (s[i] === "\v") {
+                    state = 0;
+                    switch (tag) {
+                    case "br/":
+                        ret.appendChild(document.createElement("br"));
+                        break;
+                    case "b":
+                        var item = document.createElement("b");
+                        var result = decodeToHTMLHelper(s, i+1);
+                        item.appendChild(result[0]);
+                        ret.appendChild(item);
+                        console.log(result[1]);
+                        i = result[1];
+                        break;
+                    case "/":
+                        return [ret, i];
+                    default:
+                        break;
+                    }
+                } else {
+                    tag += s[i];
+                }
+            }
+        }
+        return [ret, i];
+    }
+
     function appendLog(item) {
         var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
         log.appendChild(item);
@@ -118,20 +176,19 @@ window.onload = function () {
         conn.onmessage = function (evt) {
             var messages = evt.data.split('\n');
             for (var i = 0; i < messages.length; i++) {
-                var m = messages[i]
+                var m = messages[i];
                 var messageType = m.charAt(0);
-                var message = m.substring(1,m.length)
+                var data = decode(m.substring(1,m.length));
                 switch (messageType) {
                 case '0':
                     var item = document.createElement("div");
-                    item.innerText = message.replaceAll("<br/>", "\n");
+                    item.appendChild(decodeToHTML(data[0]));
                     appendLog(item);
                     break;
                 case '1':
                     while (players.firstChild) {
                         players.removeChild(players.firstChild);
                     }
-                    var data = message.split("\t");
                     for (var j = 0; j < data.length; j+=4) {
                         var player = document.createElement("div");
                         player.id = "player";
@@ -144,7 +201,6 @@ window.onload = function () {
                     }
                     break
                 case '2':
-                    var data = message.split("\t");
                     var sl = data[0].toUpperCase();
                     var el = data[1].toUpperCase();
                     startLetter.innerText = sl;
@@ -153,7 +209,6 @@ window.onload = function () {
                     promptExtraText.innerText = "Worth " + String(data[2]) + " points. There are " + String(data[3]) + " possible words.";
                     break
                 case '3':
-                    var data = message.split("\t");
                     var item = document.createElement("div");
                     item.innerText = "Winner: " + data[0] + " " + data[1] + " points\nBest word: " + data[2] + " " + data[3] + " " + data[4] + " points";
                     appendLog(item);
@@ -166,13 +221,9 @@ window.onload = function () {
                 case '5':
                     var item = document.createElement("div");
                     item.classList.add("score-message");
-                    message = message.replaceAll("<br/>", "\n");
-                    var data = message.split("|");
-                    var message = document.createElement("a");
-                    message.innerText = data[0];
+                    var message = decodeToHTML(data[0]);
                     item.appendChild(message);
-                    var word = document.createElement("a");
-                    word.innerText = data[1];
+                    var word = decodeToHTML(data[1]);
                     item.appendChild(word);
                     var what = document.createElement("button");
                     what.classList.add("what-button");

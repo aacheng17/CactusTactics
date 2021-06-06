@@ -47,13 +47,25 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	switch m.MessageType {
 	case byte('0'):
 		for client := range h.Clients {
-			h.SendData(client, byte('0'), []byte(c.Name+": "+string(m.Data)))
+			h.SendData(client, byte('0'), []string{"\vb\v" + c.Name + "\v/\v" + ": " + m.Data[0]})
 		}
+	case byte('1'):
+		name := string(m.Data[0])
+		if c.Name == "" {
+			c.Name = name
+		}
+		for client := range h.Clients {
+			h.SendData(client, byte('0'), []string{"\vb\v" + name + "\v/\v" + " joined"})
+		}
+		for client := range h.Clients {
+			h.SendData(client, byte('1'), h.getPlayers())
+		}
+		h.SendData(c, byte('2'), []string{h.getPrompt()})
 	case byte('4'):
-		word := string(m.Data)
+		word := string(m.Data[0])
 		if definition, ok := dictionary[word]; ok {
 			for client := range h.Clients {
-				h.SendData(client, byte('0'), []byte(fmt.Sprint(c.Name+" asked, \"What?\" for the word ", word, ".<br/>", word, " - ", definition)))
+				h.SendData(client, byte('0'), []string{fmt.Sprint("\vb\v"+c.Name+"\v/\v"+" asked, \"What?\" for the word ", word, ".\vbr/\v", word, " - ", definition)})
 			}
 		}
 	}
@@ -61,10 +73,10 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 		if m.MessageType == byte('3') {
 			h.reset()
 			for client := range h.Clients {
-				h.SendData(client, byte('4'), []byte(""))
-				h.SendData(client, byte('0'), []byte(c.Name+" restarted the game<br/>"))
-				h.SendData(client, byte('1'), []byte(h.getPlayers()))
-				h.SendData(client, byte('2'), []byte(h.getPrompt()))
+				h.SendData(client, byte('4'), []string{""})
+				h.SendData(client, byte('0'), []string{"\vb\v" + c.Name + "\v/\v" + " restarted the game\vbr/\v"})
+				h.SendData(client, byte('1'), h.getPlayers())
+				h.SendData(client, byte('2'), []string{h.getPrompt()})
 			}
 			h.phase = 0
 		}
@@ -72,7 +84,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	}
 	switch m.MessageType {
 	case byte('0'):
-		word := strings.TrimSpace(strings.ToLower(string(m.Data)))
+		word := strings.TrimSpace(strings.ToLower(string(m.Data[0])))
 		if len(word) >= 3 && word[0] == byte(h.start) && word[len(word)-1] == byte(h.end) {
 			switch h.validWord(word) {
 			case 0:
@@ -87,57 +99,45 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 				err := h.gotIt(word)
 				if err == 1 {
 					for client := range h.Clients {
-						h.SendData(client, byte('0'), []byte("All possible words have been used or passed. Type restart to restart the game."))
+						h.SendData(client, byte('0'), []string{"All possible words have been used or passed. Type restart to restart the game."})
 					}
 					break
 				}
 				for client := range h.Clients {
-					h.SendData(client, byte('5'), []byte(fmt.Sprint(c.Name, " earned ", worth, "x", bonus, "=", finalWorth, " points for |", word)))
-					h.SendData(client, byte('2'), []byte(h.getPrompt()))
-					h.SendData(client, byte('1'), []byte(h.getPlayers()))
+					h.SendData(client, byte('5'), []string{fmt.Sprint("\vb\v"+c.Name+"\v/\v", " earned ", worth, "x", bonus, "=", finalWorth, " points for "), word})
+					h.SendData(client, byte('2'), []string{h.getPrompt()})
+					h.SendData(client, byte('1'), h.getPlayers())
 				}
 			case 2:
 				for client := range h.Clients {
-					h.SendData(client, byte('0'), []byte("This word has already been used this game."))
+					h.SendData(client, byte('0'), []string{"This word has already been used this game."})
 				}
 			}
 		}
-	case byte('1'):
-		name := string(m.Data)
-		if c.Name == "" {
-			c.Name = name
-		}
-		for client := range h.Clients {
-			h.SendData(client, byte('0'), []byte(name+" joined"))
-		}
-		for client := range h.Clients {
-			h.SendData(client, byte('1'), []byte(h.getPlayers()))
-		}
-		h.SendData(c, byte('2'), []byte(h.getPrompt()))
 	case byte('2'):
 		if !c.pass {
 			c.pass = true
 			for client := range h.Clients {
-				h.SendData(client, byte('0'), []byte(c.Name+" voted to skip."))
+				h.SendData(client, byte('0'), []string{"\vb\v" + c.Name + "\v/\v" + " voted to skip."})
 			}
 			if h.getMajorityPass() {
 				err := h.pass()
 				if err == 1 {
 					for client := range h.Clients {
-						h.SendData(client, byte('0'), []byte("You have passed or gotten all possible words. Type restart to restart the game."))
+						h.SendData(client, byte('0'), []string{"All possible words have been used or passed. Type restart to restart the game."})
 					}
 					break
 				}
 				for client := range h.Clients {
-					h.SendData(client, byte('0'), []byte("Majority has voted to skip. New letters generated<br/>a"))
-					h.SendData(client, byte('2'), []byte(h.getPrompt()))
+					h.SendData(client, byte('0'), []string{"Majority has voted to skip. New letters generated\vbr/\va"})
+					h.SendData(client, byte('2'), []string{h.getPrompt()})
 				}
 			}
 		}
 	case byte('3'):
 		for client := range h.Clients {
-			h.SendData(client, byte('0'), []byte("Game ended by "+c.Name))
-			h.SendData(client, byte('3'), []byte(h.getWinners()))
+			h.SendData(client, byte('0'), []string{"Game ended by " + "\vb\v" + c.Name + "\v/\v"})
+			h.SendData(client, byte('3'), h.getWinners())
 		}
 		h.phase = 1
 	}

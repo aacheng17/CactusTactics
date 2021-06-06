@@ -43,18 +43,18 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 	question := questions.getQuestion(h.question)
 	switch m.MessageType {
 	case byte('0'):
-		if string(m.Data) == "/restart" {
+		if string(m.Data[0]) == "/restart" {
 			h.reset()
 			for client := range h.Clients {
-				h.SendData(client, byte('3'), []byte(""))
-				h.SendData(client, byte('0'), []byte(c.Name+" restarted the game"))
-				h.SendData(client, byte('1'), []byte(h.getScores()))
-				h.SendData(client, byte('2'), []byte(h.getPrompt()))
-				h.SendData(client, byte('0'), []byte("."))
-				h.SendData(client, byte('0'), []byte("New Prompt: "+h.getPrompt()))
+				h.SendData(client, byte('3'), []string{""})
+				h.SendData(client, byte('0'), []string{c.Name + " restarted the game"})
+				h.SendData(client, byte('1'), []string{h.getScores()})
+				h.SendData(client, byte('2'), []string{h.getPrompt()})
+				h.SendData(client, byte('0'), []string{"."})
+				h.SendData(client, byte('0'), []string{"New Prompt: " + h.getPrompt()})
 			}
 		} else if h.phase == 0 {
-			playerAnswer := strings.TrimSpace(strings.ToLower(string(m.Data)))
+			playerAnswer := strings.TrimSpace(strings.ToLower(string(m.Data[0])))
 			alternateSpelling := false
 			for _, x := range question.AlternateSpellings {
 				if playerAnswer == x {
@@ -64,9 +64,9 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 			}
 			if c.answer != "" {
 			} else if playerAnswer == question.Answer || alternateSpelling {
-				h.SendData(c, byte('0'), []byte("Your answer is too close to the actual answer. Please choose another answer."))
+				h.SendData(c, byte('0'), []string{"Your answer is too close to the actual answer. Please choose another answer."})
 			} else {
-				h.SendData(c, byte('0'), []byte("Your answer has been recorded. Waiting for other players' answers."))
+				h.SendData(c, byte('0'), []string{"Your answer has been recorded. Waiting for other players' answers."})
 				c.answer = playerAnswer
 				if h.isAllAnswered() {
 					h.answers = []*FakeoutClient{nil}
@@ -85,18 +85,18 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 						stringToSend += "(" + fmt.Sprint(i) + ") " + s + "<br/>"
 					}
 					for client := range h.Clients {
-						h.SendData(client, byte('0'), []byte(stringToSend))
+						h.SendData(client, byte('0'), []string{stringToSend})
 					}
 					h.phase = 1
 				}
 			}
 		} else if h.phase == 1 {
-			playerChoice := strings.TrimSpace(string(m.Data))
+			playerChoice := strings.TrimSpace(string(m.Data[0]))
 			choiceIndex, err := strconv.Atoi(playerChoice)
 			if err != nil || choiceIndex < 0 || choiceIndex >= len(h.answers) {
-				h.SendData(c, byte('0'), []byte("Invalid choice. Please enter a valid number choice."))
+				h.SendData(c, byte('0'), []string{"Invalid choice. Please enter a valid number choice."})
 			} else if h.answers[choiceIndex] == c {
-				h.SendData(c, byte('0'), []byte("Invalid choice. You can't pick your own answer."))
+				h.SendData(c, byte('0'), []string{"Invalid choice. You can't pick your own answer."})
 			} else {
 				c.choice = choiceIndex
 				wordChoice := ""
@@ -105,7 +105,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 				} else {
 					wordChoice = h.answers[c.choice].answer
 				}
-				h.SendData(c, byte('0'), []byte("You chose ("+fmt.Sprint(c.choice)+") "+wordChoice+". Waiting for other players' choices."))
+				h.SendData(c, byte('0'), []string{"You chose (" + fmt.Sprint(c.choice) + ") " + wordChoice + ". Waiting for other players' choices."})
 				if h.isAllChosen() {
 					choices := make([][]*FakeoutClient, len(h.answers))
 					for i := range choices {
@@ -140,28 +140,28 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 					h.resetAnswers()
 					h.genNextQuestion()
 					for client := range h.Clients {
-						h.SendData(client, byte('0'), []byte(stringToSend))
-						h.SendData(client, byte('1'), []byte(h.getScores()))
-						h.SendData(client, byte('2'), []byte(h.getPrompt()))
-						h.SendData(client, byte('0'), []byte("."))
-						h.SendData(client, byte('0'), []byte("New Prompt: "+h.getPrompt()))
+						h.SendData(client, byte('0'), []string{stringToSend})
+						h.SendData(client, byte('1'), []string{h.getScores()})
+						h.SendData(client, byte('2'), []string{h.getPrompt()})
+						h.SendData(client, byte('0'), []string{"."})
+						h.SendData(client, byte('0'), []string{"New Prompt: " + h.getPrompt()})
 					}
 				}
 			}
 		}
 	case byte('1'):
-		name := string(m.Data)
+		name := string(m.Data[0])
 		if c.Name == "" {
 			c.Name = name
 		}
 		for client := range h.Clients {
-			h.SendData(client, byte('0'), []byte(name+" joined"))
+			h.SendData(client, byte('0'), []string{name + " joined"})
 		}
 		for client := range h.Clients {
-			h.SendData(client, byte('1'), []byte(h.getScores()))
+			h.SendData(client, byte('1'), []string{h.getScores()})
 		}
-		h.SendData(c, byte('2'), []byte(h.getPrompt()))
-		h.SendData(c, byte('0'), []byte("New Prompt: "+h.getPrompt()))
+		h.SendData(c, byte('2'), []string{h.getPrompt()})
+		h.SendData(c, byte('0'), []string{"New Prompt: " + h.getPrompt()})
 	}
 }
 

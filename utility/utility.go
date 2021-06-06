@@ -35,3 +35,25 @@ func MakeRange(min, max int) []int {
 	}
 	return a
 }
+
+func EscapeString(s string) string {
+	htmlEscaper := strings.NewReplacer(
+		`&`, "&amp;",
+		`'`, "&#39;",
+		`<`, "&lt;",
+		`>`, "&gt;",
+		`"`, "&#34;",
+	)
+	return htmlEscaper.Replace(s)
+}
+
+func UnEscapeString(s string) string {
+	htmlUnEscaper := strings.NewReplacer(
+		`&amp;`, "&",
+		`&#39;`, "'",
+		`&lt;`, "<",
+		`&gt;`, ">",
+		`&#34;`, "\"",
+	)
+	return htmlUnEscaper.Replace(s)
+}

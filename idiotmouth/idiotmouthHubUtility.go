@@ -90,7 +90,7 @@ func (h *IdiotmouthHub) getPrompt() string {
 	return fmt.Sprint(string(h.start), "\t", string(h.end), "\t", h.getWorth(), "\t", h.letters[string(h.start)+string(h.end)])
 }
 
-func (h *IdiotmouthHub) getPlayers() string {
+func (h *IdiotmouthHub) getPlayers() []string {
 	keys := make([]*IdiotmouthClient, 0, len(h.Clients))
 	for k := range h.getAssertedClients() {
 		keys = append(keys, k)
@@ -98,20 +98,21 @@ func (h *IdiotmouthHub) getPlayers() string {
 	sort.Slice(keys, func(i, j int) bool {
 		return keys[i].score > keys[j].score
 	})
-	players := ""
+	players := []string{}
 	for _, client := range keys {
 		if client.Name == "" {
 			continue
 		}
-		players += fmt.Sprint(client.Name, "\t", client.score, "\t", client.highestWord, "\t", client.highestScore, "\t")
-	}
-	if len(players) > 0 {
-		players = players[:len(players)-1]
+		players = append(players, client.Name)
+		players = append(players, fmt.Sprint(client.score))
+		players = append(players, client.highestWord)
+		players = append(players, fmt.Sprint(client.highestScore))
 	}
 	return players
 }
 
-func (h *IdiotmouthHub) getWinners() string {
+func (h *IdiotmouthHub) getWinners() []string {
+	ret := []string{}
 	keys := make([]*IdiotmouthClient, 0, len(h.Clients))
 	for k := range h.getAssertedClients() {
 		keys = append(keys, k)
@@ -120,13 +121,16 @@ func (h *IdiotmouthHub) getWinners() string {
 		return keys[i].score > keys[j].score
 	})
 	winner := keys[0]
-	ret := fmt.Sprint(winner.Name, "\t", winner.score, "\t")
+	ret = append(ret, winner.Name)
+	ret = append(ret, fmt.Sprint(winner.score))
 
 	sort.Slice(keys, func(i, j int) bool {
 		return keys[i].highestScore > keys[j].highestScore
 	})
 	winner = keys[0]
-	ret += fmt.Sprint(winner.Name, "\t", winner.highestWord, "\t", winner.highestScore)
+	ret = append(ret, winner.Name)
+	ret = append(ret, winner.highestWord)
+	ret = append(ret, fmt.Sprint(winner.highestScore))
 
 	return ret
 }
