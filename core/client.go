@@ -80,7 +80,7 @@ func (c *Client) GetSend() chan []byte {
 // reads from this goroutine.
 func (c *Client) readPump() {
 	defer func() {
-		c.Hub.GetUnregister() <- c
+		c.Hub.GetUnregister() <- c.Child
 		c.Conn.Close()
 	}()
 	c.Conn.SetReadLimit(maxMessageSize)
