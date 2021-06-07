@@ -48,12 +48,7 @@ func (h *IdiotmouthHub) getAssertedClients() map[*IdiotmouthClient]bool {
 
 func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*IdiotmouthClient)
-	switch m.MessageType {
-	case byte('0'):
-		for client := range h.Clients {
-			h.SendData(client, byte('0'), []string{fmt.Sprint(utility.BTAG+c.Name+utility.ENDTAG, ": ", m.Data[0])})
-		}
-	case byte('1'):
+	if c.Name == "" && m.MessageType == byte('1') {
 		name := string(m.Data[0])
 		if c.Name == "" {
 			c.Name = name
@@ -65,13 +60,20 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 			h.SendData(client, byte('1'), h.getPlayers())
 		}
 		h.SendData(c, byte('2'), h.getPrompt())
+		return
+	}
+	switch m.MessageType {
+	case byte('0'):
+		for client := range h.Clients {
+			h.SendData(client, byte('0'), []string{fmt.Sprint(utility.BTAG+c.Name+utility.ENDTAG, ": ", m.Data[0])})
+		}
 	case byte('4'):
 		word := string(m.Data[0])
 		if _, ok := h.whattedWords[word]; !ok {
 			h.whattedWords[word] = true
 			if definition, ok := dictionary[word]; ok {
 				for client := range h.Clients {
-					h.SendData(client, byte('6'), []string{fmt.Sprint(utility.BTAG+c.Name+utility.ENDTAG+" said \"What?\" for the word ", word, utility.BRTAG, word, " - ", definition), word})
+					h.SendData(client, byte('6'), []string{fmt.Sprint(utility.BTAG+c.Name+utility.ENDTAG+" said \"What?\" for the word ", word, utility.BRTAG, utility.BRTAG, word, " - ", definition), word})
 				}
 			}
 		}
@@ -143,7 +145,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 		}
 	case byte('3'):
 		for client := range h.Clients {
-			h.SendData(client, byte('0'), []string{fmt.Sprint("Game ended by ", utility.BTAG+c.Name+utility.ENDTAG)})
+			h.SendData(client, byte('0'), []string{fmt.Sprint(utility.BRTAG, "Game ended by ", utility.BTAG+c.Name+utility.ENDTAG)})
 			h.SendData(client, byte('3'), h.getWinners())
 		}
 		h.phase = 1
