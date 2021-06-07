@@ -56,22 +56,14 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 		if c.Name == "" {
 			c.Name = name
 		}
-		mNum := h.useMessageNum()
-		for client := range h.Clients {
-			h.SendData(client, byte('0'), []string{fmt.Sprint(u.TagId("p", mNum), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
-		}
-		for client := range h.Clients {
-			h.SendData(client, byte('1'), h.getPlayers())
-		}
+		h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
+		h.Broadcast(byte('1'), h.getPlayers())
 		h.SendData(c, byte('2'), h.getPrompt())
 		return
 	}
 	switch m.MessageType {
 	case byte('0'):
-		mNum := h.useMessageNum()
-		for client := range h.Clients {
-			h.SendData(client, byte('0'), []string{fmt.Sprint(u.TagId("p", mNum), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
-		}
+		h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
 	case byte('4'):
 		clientMessageNum, err := strconv.Atoi(m.Data[0])
 		if err != nil {
@@ -80,23 +72,17 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 		if word := h.whattedWords[clientMessageNum]; word != "" {
 			h.whattedWords[clientMessageNum] = ""
 			if definition, ok := dictionary[word]; ok {
-				mNum := h.useMessageNum()
-				for client := range h.Clients {
-					h.SendData(client, byte('6'), []string{fmt.Sprint(u.TagId("p", mNum), u.Tag("b")+c.Name+u.ENDTAG+" said \"What?\" for the word ", word, u.ENDTAG, u.Tag("br"), u.Tag("p"), word, " - ", definition, u.ENDTAG), fmt.Sprint(clientMessageNum)})
-				}
+				h.Broadcast(byte('6'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG+" said \"What?\" for the word ", word, u.ENDTAG, u.Tag("br"), u.Tag("p"), word, " - ", definition, u.ENDTAG), fmt.Sprint(clientMessageNum)})
 			}
 		}
 	}
 	if h.phase == 1 {
 		if m.MessageType == byte('3') {
 			h.reset()
-			mNum := h.useMessageNum()
-			for client := range h.Clients {
-				h.SendData(client, byte('4'), []string{""})
-				h.SendData(client, byte('0'), []string{fmt.Sprint(u.TagId("p postbr", mNum), u.Tag("b")+c.Name+u.ENDTAG, " restarted the game", u.ENDTAG, u.ENDTAG)})
-				h.SendData(client, byte('1'), h.getPlayers())
-				h.SendData(client, byte('2'), h.getPrompt())
-			}
+			h.Broadcast(byte('4'), []string{""})
+			h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " restarted the game", u.ENDTAG, u.ENDTAG)})
+			h.Broadcast(byte('1'), h.getPlayers())
+			h.Broadcast(byte('2'), h.getPrompt())
 			h.phase = 0
 		}
 		return
@@ -117,55 +103,35 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 				}
 				err := h.gotIt(word)
 				if err == 1 {
-					mNum := h.useMessageNum()
-					for client := range h.Clients {
-						h.SendData(client, byte('0'), []string{fmt.Sprint(u.TagId("p", mNum), "All possible words have been used or passed. Type restart to restart the game.", u.ENDTAG)})
-					}
+					h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "All possible words have been used or passed. Type restart to restart the game.", u.ENDTAG)})
 					break
 				}
 				mNum := h.useMessageNum()
 				h.whattedWords[mNum] = word
-				for client := range h.Clients {
-					h.SendData(client, byte('5'), []string{fmt.Sprint(u.TagId("p", mNum), u.Tag("b")+c.Name+u.ENDTAG, " earned ", worth, "x", bonus, "=", finalWorth, " points for ", word, u.ENDTAG), word})
-					h.SendData(client, byte('2'), h.getPrompt())
-					h.SendData(client, byte('1'), h.getPlayers())
-				}
+				h.Broadcast(byte('5'), []string{fmt.Sprint(u.TagId("p", mNum), u.Tag("b")+c.Name+u.ENDTAG, " earned ", worth, "x", bonus, "=", finalWorth, " points for ", word, u.ENDTAG), word})
+				h.Broadcast(byte('2'), h.getPrompt())
+				h.Broadcast(byte('1'), h.getPlayers())
 			case 2:
-				mNum := h.useMessageNum()
-				for client := range h.Clients {
-					h.SendData(client, byte('0'), []string{fmt.Sprint(u.TagId("p", mNum), "This word has already been used this game.", u.ENDTAG)})
-				}
+				h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "This word has already been used this game.", u.ENDTAG)})
 			}
 		}
 	case byte('2'):
 		if !c.pass {
 			c.pass = true
-			mNum := h.useMessageNum()
-			for client := range h.Clients {
-				h.SendData(client, byte('0'), []string{fmt.Sprint(u.TagId("p", mNum), u.Tag("b")+c.Name+u.ENDTAG, " voted to skip.", u.ENDTAG)})
-			}
+			h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " voted to skip.", u.ENDTAG)})
 			if h.getMajorityPass() {
 				err := h.pass()
 				if err == 1 {
-					mNum := h.useMessageNum()
-					for client := range h.Clients {
-						h.SendData(client, byte('0'), []string{fmt.Sprint(u.TagId("p", mNum), "All possible words have been used or passed. Type restart to restart the game.", u.ENDTAG)})
-					}
+					h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "All possible words have been used or passed. Type restart to restart the game.", u.ENDTAG)})
 					break
 				}
-				mNum := h.useMessageNum()
-				for client := range h.Clients {
-					h.SendData(client, byte('0'), []string{fmt.Sprint(u.TagId("p postbr", mNum), "Majority has voted to skip. New letters generated", u.ENDTAG)})
-					h.SendData(client, byte('2'), h.getPrompt())
-				}
+				h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), "Majority has voted to skip. New letters generated", u.ENDTAG)})
+				h.Broadcast(byte('2'), h.getPrompt())
 			}
 		}
 	case byte('3'):
-		mNum := h.useMessageNum()
-		for client := range h.Clients {
-			h.SendData(client, byte('0'), []string{fmt.Sprint(u.TagId("p prebr postbr", mNum), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
-			h.SendData(client, byte('3'), h.getWinners())
-		}
+		h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
+		h.Broadcast(byte('3'), h.getWinners())
 		h.phase = 1
 	}
 }

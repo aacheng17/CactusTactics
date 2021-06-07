@@ -41,6 +41,21 @@ func (h *Hub) RemoveClient(client Clientlike, debugMessage string) {
 	log.Println(debugMessage)
 }
 
+func (h *Hub) Broadcast(messageType byte, data []string, exceptions ...Clientlike) {
+	for client := range h.Clients {
+		isException := false
+		for _, c := range exceptions {
+			if client == c {
+				isException = true
+				break
+			}
+		}
+		if !isException {
+			h.SendData(client, messageType, data)
+		}
+	}
+}
+
 func (h *Hub) SendData(client Clientlike, messageType byte, data []string) {
 	if len(client.GetSend()) <= cap(client.GetSend()) {
 		message := ""
