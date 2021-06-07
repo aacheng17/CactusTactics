@@ -175,17 +175,26 @@ window.onload = function () {
                         var childsChildren = child.children;
                         var potentialWhatButton = childsChildren[childsChildren.length - 1];
                         if (potentialWhatButton.classList.contains("what-button")) {
-                            found = true;
-                            potentialWhatButton.parentNode.removeChild(potentialWhatButton);
-                            break;
+                            console.log(childsChildren[1]);
+                            if (childsChildren[1] !== undefined) {
+                                if (childsChildren[1].innerText === data[1]) {
+                                    found = true;
+                                    potentialWhatButton.parentNode.removeChild(potentialWhatButton);
+                                    break;
+                                }
+                            }
                         }
                     }
+                    var doScroll = chatLog.scrollTop > chatLog.scrollHeight - chatLog.clientHeight - 1;
                     var item = document.createElement("div");
                     item.appendChild(networking.decodeToHTML(data[0]));
                     if (found) {
                         child.insertAdjacentElement('afterend', item);
                     } else {
                         chatLog.prepend(item);
+                    }
+                    if (doScroll) {
+                        chatLog.scrollTop = chatLog.scrollHeight - chatLog.clientHeight;
                     }
                     break
                 }

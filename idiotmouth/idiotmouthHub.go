@@ -71,7 +71,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 			h.whattedWords[word] = true
 			if definition, ok := dictionary[word]; ok {
 				for client := range h.Clients {
-					h.SendData(client, byte('6'), []string{fmt.Sprint(utility.BTAG+c.Name+utility.ENDTAG+" said \"What?\" for the word ", word, utility.BRTAG, word, " - ", definition)})
+					h.SendData(client, byte('6'), []string{fmt.Sprint(utility.BTAG+c.Name+utility.ENDTAG+" said \"What?\" for the word ", word, utility.BRTAG, word, " - ", definition), word})
 				}
 			}
 		}
