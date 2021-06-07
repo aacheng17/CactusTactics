@@ -25,8 +25,9 @@ window.onload = function () {
     var endLetter = document.getElementById("end-letter");
     var skip = document.getElementById("skip")
     var promptExtraText = document.getElementById("prompt-extra-text");
-    var msg = document.getElementById("msg");
     var chatLog = document.getElementById("chat-log");
+    var chatForm = document.getElementById("chat-form");
+    var chatField = document.getElementById("chat-field");
 
     function appendChatLog(item) {
         var doScroll = chatLog.scrollTop > chatLog.scrollHeight - chatLog.clientHeight - 1;
@@ -75,15 +76,15 @@ window.onload = function () {
         networking.send(conn, "2");
     }
     
-    document.getElementById("chat-form").onsubmit = function () {
+    chatForm.onsubmit = function () {
         if (!conn) {
             return false;
         }
-        if (!msg.value.trim()) {
+        if (!chatField.value.trim()) {
             return false;
         }
-        networking.send(conn, "0" + msg.value);
-        msg.value = "";
+        networking.send(conn, "0" + chatField.value);
+        chatField.value = "";
         return false;
     };
 
@@ -130,7 +131,7 @@ window.onload = function () {
                     var el = data[1].toUpperCase();
                     startLetter.innerText = sl;
                     endLetter.innerText = el;
-                    msg.placeholder = "a word that starts with " + sl + " and ends with " + el;
+                    chatField.placeholder = "a word that starts with " + sl + " and ends with " + el;
                     promptExtraText.innerText = "Worth " + String(data[2]) + " points. There are " + String(data[3]) + " possible words.";
                     break
                 case '3':
