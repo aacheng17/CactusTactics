@@ -1,4 +1,4 @@
-import * as global from './../global.js';
+import * as networking from './../networking.js';
 import { initCollapsible } from './../collapsible.js';
 
 // MESSAGE TYPES (CLIENT TO SERVER)
@@ -28,64 +28,6 @@ window.onload = function () {
     var msg = document.getElementById("msg");
     var log = document.getElementById("log");
 
-    function send(s) {
-        var toSend = "";
-        for (var i = 0; i < s.length; i++) {
-            toSend += s.replaceAll(global.TAG, "");
-            toSend += global.DELIM + s.replaceAll(global.DELIM, "");
-        }
-        conn.send(s);
-    }
-
-    function decode(s) {
-        var ret = s.split(global.DELIM);
-        ret.shift();
-        return ret;
-    }
-
-    function decodeToHTML(s) {
-        return decodeToHTMLHelper(s, 0)[0];
-    }
-
-    function decodeToHTMLHelper(s, i) {
-        var ret = document.createElement("a");
-        var tag = "";
-        var state = 0; //0 normal, 1 in a tag
-        for (; i < s.length; i++) {
-            if (state == 0) {
-                if (s[i] !== global.TAG) {
-                    ret.innerHTML += s[i];
-                } else {
-                    state = 1;
-                }
-            } else {
-                if (s[i] === global.TAG) {
-                    switch (tag) {
-                    case "br/":
-                        ret.appendChild(document.createElement("br"));
-                        break;
-                    case "b":
-                        var item = document.createElement("b");
-                        var result = decodeToHTMLHelper(s, i+1);
-                        item.appendChild(result[0]);
-                        ret.appendChild(item);
-                        i = result[1];
-                        break;
-                    case "/":
-                        return [ret, i];
-                    default:
-                        break;
-                    }
-                    tag = "";
-                    state = 0;
-                } else {
-                    tag += s[i];
-                }
-            }
-        }
-        return [ret, i];
-    }
-
     function appendLog(item) {
         var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
         log.appendChild(item);
@@ -103,7 +45,7 @@ window.onload = function () {
                 return false;
             }
             name = nameField.value;
-            send("1" + name);
+            networking.send(conn, "1" + name);
             e.preventDefault();
             landing.parentNode.removeChild(landing);
             ingame.style.visibility = "visible";
@@ -122,7 +64,7 @@ window.onload = function () {
         if (!conn) {
             return false;
         }
-        send("3");
+        networking.send(conn, "3");
         endgame.innerText = endgame.innerText === "end game" ? "new game" : "end game";
     }
 
@@ -130,7 +72,7 @@ window.onload = function () {
         if (!conn) {
             return false;
         }
-        send("2");
+        networking.send(conn, "2");
     }
     
     document.getElementById("chat-form").onsubmit = function () {
@@ -140,7 +82,7 @@ window.onload = function () {
         if (!msg.value.trim()) {
             return false;
         }
-        send("0" + msg.value);
+        networking.send(conn, "0" + msg.value);
         msg.value = "";
         return false;
     };
@@ -161,11 +103,11 @@ window.onload = function () {
             for (var i = 0; i < messages.length; i++) {
                 var m = messages[i];
                 var messageType = m.charAt(0);
-                var data = decode(m.substring(1,m.length));
+                var data = networking.decode(m.substring(1,m.length));
                 switch (messageType) {
                 case '0':
                     var item = document.createElement("div");
-                    item.appendChild(decodeToHTML(data[0]));
+                    item.appendChild(networking.decodeToHTML(data[0]));
                     appendLog(item);
                     break;
                 case '1':
@@ -204,9 +146,9 @@ window.onload = function () {
                 case '5':
                     var item = document.createElement("div");
                     item.classList.add("score-message");
-                    var message = decodeToHTML(data[0]);
+                    var message = networking.decodeToHTML(data[0]);
                     item.appendChild(message);
-                    var word = decodeToHTML(data[1]);
+                    var word = networking.decodeToHTML(data[1]);
                     item.appendChild(word);
                     var what = document.createElement("button");
                     what.classList.add("what-button");
@@ -215,7 +157,7 @@ window.onload = function () {
                         if (!conn) {
                             return false;
                         }
-                        send("4"+what.previousElementSibling.innerText);
+                        networking.send(conn, "4" + what.previousElementSibling.innerText);
                     }
                     item.appendChild(what);
                     appendLog(item);
