@@ -175,7 +175,6 @@ window.onload = function () {
                         var childsChildren = child.children;
                         var potentialWhatButton = childsChildren[childsChildren.length - 1];
                         if (potentialWhatButton.classList.contains("what-button")) {
-                            console.log(childsChildren[1]);
                             if (childsChildren[1] !== undefined) {
                                 if (childsChildren[1].innerText === data[1]) {
                                     found = true;
