@@ -100,6 +100,9 @@ window.onload = function () {
             appendChatLog(item);
         };
         conn.onmessage = function (evt) {
+            if (name === undefined) {
+                return false;
+            }
             var messages = evt.data.split('\n');
             for (var i = 0; i < messages.length; i++) {
                 var m = messages[i];
