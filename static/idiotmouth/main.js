@@ -110,8 +110,7 @@ window.onload = function () {
                 var data = networking.decode(m.substring(1,m.length));
                 switch (messageType) {
                 case '0':
-                    var item = document.createElement("div");
-                    item.appendChild(networking.decodeToHTML(data[0]));
+                    var item = networking.decodeToDiv(data[0]);
                     appendChatLog(item);
                     break;
                 case '1':
@@ -150,10 +149,8 @@ window.onload = function () {
                 case '5':
                     var item = document.createElement("div");
                     item.classList.add("score-message");
-                    var message = networking.decodeToHTML(data[0]);
+                    var message = networking.decodeToDiv(data[0]);
                     item.appendChild(message);
-                    var word = networking.decodeToHTML(data[1]);
-                    item.appendChild(word);
                     var what = document.createElement("button");
                     what.classList.add("what-button");
                     what.innerText = "What?";
@@ -161,7 +158,13 @@ window.onload = function () {
                         if (!conn) {
                             return false;
                         }
-                        networking.send(conn, "4" + what.previousElementSibling.innerText);
+                        if (what.previousElementSibling === undefined) {
+                            return false;
+                        }
+                        if (what.previousElementSibling.children.length < 1) {
+                            return false;
+                        }
+                        networking.send(conn, "4" + what.previousElementSibling.children[0].id);
                     }
                     item.appendChild(what);
                     appendChatLog(item);
@@ -173,20 +176,18 @@ window.onload = function () {
                     for (var i = 0; i < children.length; i++) {
                         child = children[i];
                         var childsChildren = child.children;
+                        if (childsChildren.length !== 2) continue;
                         var potentialWhatButton = childsChildren[childsChildren.length - 1];
                         if (potentialWhatButton.classList.contains("what-button")) {
-                            if (childsChildren[1] !== undefined) {
-                                if (childsChildren[1].innerText === data[1]) {
-                                    found = true;
-                                    potentialWhatButton.parentNode.removeChild(potentialWhatButton);
-                                    break;
-                                }
+                            if (potentialWhatButton.previousElementSibling.children[0].id === data[1]) {
+                                found = true;
+                                potentialWhatButton.parentNode.removeChild(potentialWhatButton);
+                                break;
                             }
                         }
                     }
                     var doScroll = chatLog.scrollTop > chatLog.scrollHeight - chatLog.clientHeight - 1;
-                    var item = document.createElement("div");
-                    item.appendChild(networking.decodeToHTML(data[0]));
+                    var item = networking.decodeToDiv(data[0]);
                     if (found) {
                         child.insertAdjacentElement('afterend', item);
                     } else {

@@ -1,15 +1,41 @@
 package utility
 
-import "strings"
+import (
+	"fmt"
+	"strings"
+)
 
 const (
 	MESSAGESEP = "\n"
 	DELIM      = "\t"
 	TAG        = "\v"
-	BRTAG      = TAG + "br/" + TAG
-	BTAG       = TAG + "b" + TAG
 	ENDTAG     = TAG + "/" + TAG
 )
+
+func Tag(tagString string) string {
+	return TAG + tagString + TAG
+}
+
+func TagId(tagString string, tagId int) string {
+	tagName := ""
+	tagClasses := ""
+	seenSpace := false
+	for _, c := range tagString {
+		if !seenSpace {
+			if c == ' ' {
+				seenSpace = true
+			} else {
+				tagName += string(c)
+			}
+		} else {
+			tagClasses += string(c)
+		}
+	}
+	if tagClasses != "" {
+		tagClasses = " " + tagClasses
+	}
+	return fmt.Sprint(TAG, tagName, " ", tagId, tagClasses, TAG)
+}
 
 func Find(slice []string, val string) (int, bool) {
 	for i, item := range slice {
@@ -48,6 +74,6 @@ func MakeRange(min, max int) []int {
 func RemoveEscapes(s string) string {
 	s = strings.ReplaceAll(s, DELIM, "")
 	s = strings.ReplaceAll(s, TAG, "")
-	s = strings.ReplaceAll(s, MESSAGESEP, BRTAG)
+	s = strings.ReplaceAll(s, MESSAGESEP, Tag("br"))
 	return s
 }

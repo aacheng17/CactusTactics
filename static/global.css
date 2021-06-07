@@ -25,6 +25,19 @@ h1, h2 {
     margin: 0px;
 }
 
+p {
+    margin: 0px;
+    padding: 0px;
+}
+
 button {
     padding: 5px;
+}
+
+.prebr {
+    margin-top: 10px;
+}
+
+.postbr {
+    margin-bottom: 10px;
 }

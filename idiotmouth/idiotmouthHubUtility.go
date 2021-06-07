@@ -6,6 +6,12 @@ import (
 	"sort"
 )
 
+func (h *IdiotmouthHub) useMessageNum() int {
+	ret := h.messageNum
+	h.messageNum++
+	return ret
+}
+
 func (h *IdiotmouthHub) validWord(str string) int {
 	if _, ok := h.usedWords[str]; ok {
 		return 2
@@ -23,8 +29,9 @@ func (h *IdiotmouthHub) reset() {
 		client.highestWord = ""
 		client.highestScore = 0
 	}
+	h.messageNum = 0
 	h.usedWords = make(map[string]bool)
-	h.whattedWords = make(map[string]bool)
+	h.whattedWords = make(map[int]string)
 	h.wordsLeft = len(dictionary)
 	for k, v := range letters {
 		h.letters[k] = v

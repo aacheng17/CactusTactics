@@ -17,12 +17,12 @@ export function decode(s) {
     return ret;
 }
 
-export function decodeToHTML(s) {
-    return decodeToHTMLHelper(s, 0)[0];
+export function decodeToDiv(s) {
+    return decodeToDivHelper(s, 0, "div")[0];
 }
 
-export function decodeToHTMLHelper(s, i) {
-    var ret = document.createElement("a");
+export function decodeToDivHelper(s, i, tagName) {
+    var ret = document.createElement(tagName);
     var tag = "";
     var state = 0; //0 normal, 1 in a tag
     for (; i < s.length; i++) {
@@ -34,20 +34,25 @@ export function decodeToHTMLHelper(s, i) {
             }
         } else {
             if (s[i] === TAG) {
-                switch (tag) {
-                case "br/":
+                var tagData = tag.split(" ", -1);
+                var tagName = tagData[0];
+                var tagId = tagData[1];
+                switch (tagName) {
+                case "br":
                     ret.appendChild(document.createElement("br"));
-                    break;
-                case "b":
-                    var item = document.createElement("b");
-                    var result = decodeToHTMLHelper(s, i+1);
-                    item.appendChild(result[0]);
-                    ret.appendChild(item);
-                    i = result[1];
                     break;
                 case "/":
                     return [ret, i];
                 default:
+                    if (["p", "b"].includes(tagName)) {
+                        var result = decodeToDivHelper(s, i+1, tagName);
+                        var item = result[0];
+                        if (tagId !== "") item.id = tagId;
+                        tagData.slice(2).forEach(className => item.classList.add(className))
+                        ret.appendChild(item);
+                        i = result[1];
+                        break;
+                    }
                     break;
                 }
                 tag = "";
