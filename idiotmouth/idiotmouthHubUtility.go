@@ -47,12 +47,16 @@ func (h *IdiotmouthHub) pass() int {
 
 func (h *IdiotmouthHub) getMajorityPass() bool {
 	count := 0
+	clientsWithNames := 0
 	for client := range h.getAssertedClients() {
-		if client.pass {
-			count++
+		if client.Name != "" {
+			clientsWithNames++
+			if client.pass {
+				count++
+			}
 		}
 	}
-	return count*2 > len(h.Clients)
+	return count*2 > clientsWithNames
 }
 
 func (h *IdiotmouthHub) gotIt(word string) int {
