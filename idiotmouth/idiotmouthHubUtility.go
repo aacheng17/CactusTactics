@@ -7,15 +7,11 @@ import (
 )
 
 func (h *IdiotmouthHub) validWord(str string) int {
-	for _, v := range h.usedWords {
-		if v == str {
-			return 2
-		}
+	if _, ok := h.usedWords[str]; ok {
+		return 2
 	}
-	for word := range dictionary {
-		if word == str {
-			return 0
-		}
+	if _, ok := dictionary[str]; ok {
+		return 0
 	}
 	return 1
 }
@@ -27,6 +23,8 @@ func (h *IdiotmouthHub) reset() {
 		client.highestWord = ""
 		client.highestScore = 0
 	}
+	h.usedWords = make(map[string]bool)
+	h.whattedWords = make(map[string]bool)
 	h.wordsLeft = len(dictionary)
 	for k, v := range letters {
 		h.letters[k] = v
@@ -59,7 +57,7 @@ func (h *IdiotmouthHub) getMajorityPass() bool {
 
 func (h *IdiotmouthHub) gotIt(word string) int {
 	h.resetPass()
-	h.usedWords = append(h.usedWords, word)
+	h.usedWords[word] = true
 	h.wordsLeft--
 	h.letters[string(h.start)+string(h.end)]--
 	return h.genNextLetters()

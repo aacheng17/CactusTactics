@@ -18,7 +18,9 @@ type IdiotmouthHub struct {
 
 	end rune
 
-	usedWords []string
+	usedWords map[string]bool
+
+	whattedWords map[string]bool
 
 	letters map[string]int
 
@@ -42,6 +44,7 @@ func (h *IdiotmouthHub) getAssertedClients() map[*IdiotmouthClient]bool {
 // 3: winners
 // 4: restart (data is inconsequential, probably empty string)
 // 5: message that needs a "what?""
+// 6: "what?" message
 
 func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*IdiotmouthClient)
@@ -64,9 +67,12 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 		h.SendData(c, byte('2'), h.getPrompt())
 	case byte('4'):
 		word := string(m.Data[0])
-		if definition, ok := dictionary[word]; ok {
-			for client := range h.Clients {
-				h.SendData(client, byte('0'), []string{fmt.Sprint(utility.BTAG+c.Name+utility.ENDTAG+" said \"What?\" for the word ", word, utility.BRTAG, word, " - ", definition)})
+		if _, ok := h.whattedWords[word]; !ok {
+			h.whattedWords[word] = true
+			if definition, ok := dictionary[word]; ok {
+				for client := range h.Clients {
+					h.SendData(client, byte('6'), []string{fmt.Sprint(utility.BTAG+c.Name+utility.ENDTAG+" said \"What?\" for the word ", word, utility.BRTAG, word, " - ", definition)})
+				}
 			}
 		}
 	}

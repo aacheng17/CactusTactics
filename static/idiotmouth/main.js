@@ -163,6 +163,28 @@ window.onload = function () {
                     item.appendChild(what);
                     appendChatLog(item);
                     break
+                case '6':
+                    var children = chatLog.children;
+                    var found = false;
+                    var child = null;
+                    for (var i = 0; i < children.length; i++) {
+                        child = children[i];
+                        var childsChildren = child.children;
+                        var potentialWhatButton = childsChildren[childsChildren.length - 1];
+                        if (potentialWhatButton.classList.contains("what-button")) {
+                            found = true;
+                            potentialWhatButton.parentNode.removeChild(potentialWhatButton);
+                            break;
+                        }
+                    }
+                    var item = document.createElement("div");
+                    item.appendChild(networking.decodeToHTML(data[0]));
+                    if (found) {
+                        child.insertAdjacentElement('afterend', item);
+                    } else {
+                        chatLog.prepend(item);
+                    }
+                    break
                 }
             }
         };
