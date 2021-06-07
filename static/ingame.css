@@ -62,7 +62,7 @@
     flex-direction: column;
 }
 
-#log {
+#chat-log {
     padding: 15px;
     overflow: auto;
     height: 400px;

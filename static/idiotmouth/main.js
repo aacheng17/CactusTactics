@@ -26,13 +26,13 @@ window.onload = function () {
     var skip = document.getElementById("skip")
     var promptExtraText = document.getElementById("prompt-extra-text");
     var msg = document.getElementById("msg");
-    var log = document.getElementById("log");
+    var chatLog = document.getElementById("chat-log");
 
-    function appendLog(item) {
-        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-        log.appendChild(item);
+    function appendChatLog(item) {
+        var doScroll = chatLog.scrollTop > chatLog.scrollHeight - chatLog.clientHeight - 1;
+        chatLog.appendChild(item);
         if (doScroll) {
-            log.scrollTop = log.scrollHeight - log.clientHeight;
+            chatLog.scrollTop = chatLog.scrollHeight - chatLog.clientHeight;
         }
     }
 
@@ -96,7 +96,7 @@ window.onload = function () {
         conn.onclose = function (evt) {
             var item = document.createElement("div");
             item.innerHTML = "<b>Connection closed.</b>";
-            appendLog(item);
+            appendChatLog(item);
         };
         conn.onmessage = function (evt) {
             var messages = evt.data.split('\n');
@@ -108,7 +108,7 @@ window.onload = function () {
                 case '0':
                     var item = document.createElement("div");
                     item.appendChild(networking.decodeToHTML(data[0]));
-                    appendLog(item);
+                    appendChatLog(item);
                     break;
                 case '1':
                     while (players.firstChild) {
@@ -136,11 +136,11 @@ window.onload = function () {
                 case '3':
                     var item = document.createElement("div");
                     item.innerText = "Winner: " + data[0] + " " + data[1] + " points\nBest word: " + data[2] + " " + data[3] + " " + data[4] + " points";
-                    appendLog(item);
+                    appendChatLog(item);
                     break;
                 case '4':
-                    while (log.firstChild) {
-                        log.removeChild(log.firstChild);
+                    while (chatLog.firstChild) {
+                        chatLog.removeChild(chatLog.firstChild);
                     }
                     break
                 case '5':
@@ -160,7 +160,7 @@ window.onload = function () {
                         networking.send(conn, "4" + what.previousElementSibling.innerText);
                     }
                     item.appendChild(what);
-                    appendLog(item);
+                    appendChatLog(item);
                     break
                 }
             }
@@ -168,7 +168,7 @@ window.onload = function () {
     } else {
         var item = document.createElement("div");
         item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-        appendLog(item);
+        appendChatLog(item);
     }
 
     ingame.style.visibility = "hidden";
