@@ -66,7 +66,6 @@ window.onload = function () {
             return false;
         }
         networking.send(conn, "3");
-        endgame.innerText = endgame.innerText === "end game" ? "new game" : "end game";
     }
 
     skip.onclick = function (e) {
@@ -142,6 +141,7 @@ window.onload = function () {
                     appendChatLog(item);
                     break;
                 case '4':
+                    endgame.innerText = "end game";
                     while (chatLog.firstChild) {
                         chatLog.removeChild(chatLog.firstChild);
                     }
@@ -197,6 +197,11 @@ window.onload = function () {
                         chatLog.scrollTop = chatLog.scrollHeight - chatLog.clientHeight;
                     }
                     break
+                case '7':
+                    endgame.innerText = "new game";
+                    var item = networking.decodeToDiv(data[0]);
+                    appendChatLog(item);
+                    break;
                 }
             }
         };

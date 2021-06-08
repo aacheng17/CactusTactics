@@ -55,6 +55,7 @@ func (h *IdiotmouthHub) getAssertedClients() map[*IdiotmouthClient]bool {
 // 4: restart (data is inconsequential, probably empty string)
 // 5: message that needs a "what?""
 // 6: "what?" message
+// 7: end game message
 
 func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*IdiotmouthClient)
@@ -137,7 +138,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 			}
 		}
 	case byte('3'):
-		h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
+		h.Broadcast(byte('7'), []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
 		h.Broadcast(byte('3'), h.getWinners())
 		h.phase = 1
 	}
