@@ -32,6 +32,11 @@ type IdiotmouthHub struct {
 	phase int
 }
 
+func (h *IdiotmouthHub) DisconnectClientMessage(c core.Clientlike) {
+	h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
+	h.Broadcast(byte('1'), h.getPlayers())
+}
+
 func (h *IdiotmouthHub) getAssertedClients() map[*IdiotmouthClient]bool {
 	ret := make(map[*IdiotmouthClient]bool)
 	for k, v := range h.Clients {

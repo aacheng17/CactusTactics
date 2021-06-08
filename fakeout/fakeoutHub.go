@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"example.com/hello/core"
+	u "example.com/hello/utility"
 )
 
 // declaring a struct
@@ -22,6 +23,10 @@ type FakeoutHub struct {
 	phase int
 
 	answers []*FakeoutClient
+}
+
+func (h *FakeoutHub) DisconnectClientMessage(c core.Clientlike) {
+	h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p", -1), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
 }
 
 func (h *FakeoutHub) getAssertedClients() map[*FakeoutClient]bool {

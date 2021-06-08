@@ -17,6 +17,7 @@ type Hublike interface {
 	GetMessages() chan *Message
 	HandleHubMessage(m *Message)
 	Run()
+	DisconnectClientMessage(Clientlike)
 }
 
 // Hub maintains the set of active clients and broadcasts messages to the
@@ -38,6 +39,7 @@ type Hub struct {
 func (h *Hub) RemoveClient(client Clientlike, debugMessage string) {
 	delete(h.Clients, client)
 	close(client.GetSend())
+	h.Child.DisconnectClientMessage(client)
 	log.Println(debugMessage)
 }
 
