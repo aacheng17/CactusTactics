@@ -5,6 +5,7 @@ import (
 	"io/ioutil"
 	"log"
 	"os"
+	"strings"
 
 	"example.com/hello/utility"
 )
@@ -17,7 +18,7 @@ var (
 )
 
 func buildWords() {
-	jsonFile, err := os.Open("idiotmouth/dictionary_compact.json")
+	jsonFile, err := os.Open("idiotmouth/dictionary.json")
 	if err != nil {
 		log.Println(err)
 	}
@@ -30,7 +31,7 @@ func buildWords() {
 	for k, v := range dictionaryAsserted {
 		s := v.(string)
 		s = utility.RemoveEscapes(s)
-		dictionary[k] = s
+		dictionary[strings.ToLower(k)] = s
 	}
 }
 
