@@ -18,6 +18,7 @@ var (
 )
 
 func buildWords() {
+	//dictionary source: https://github.com/adambom/dictionary
 	jsonFile, err := os.Open("idiotmouth/dictionary.json")
 	if err != nil {
 		log.Println(err)
