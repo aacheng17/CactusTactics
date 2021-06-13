@@ -27,6 +27,29 @@
     padding: 5px;
 }
 
+#avatar {
+    display: flex;
+    flex-direction: row;
+}
+
+.avatar-buttons-div {
+    display: flex;
+    flex-direction: column;
+}
+
+#avatar-img-div > * {
+    position: relative;
+    top: 0;
+    left: 0
+}
+
+#avatar-img-background {
+    width: 200px;
+    height: 200px;
+    top: -200px;
+    left: 0;
+}
+
 .howtoplay-text {
     padding: 15px 0;
 }

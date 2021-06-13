@@ -1,4 +1,5 @@
 import * as networking from './../networking.js';
+import { avatars } from './../avatars/avatars.js';
 import { initCollapsible } from './../collapsible.js';
 
 // MESSAGE TYPES (CLIENT TO SERVER)
@@ -13,9 +14,19 @@ window.onload = function () {
     }
 
     var conn, name;
+    var avatarIndex = 0;
+    var colorIndex = 0;
+    var colors = ["blue", "red"];
     var landing = document.getElementById("landing");
     var nameForm = document.getElementById("name-form");
     var nameField = document.getElementById("name-field");
+    var avatarRandomize = document.getElementById("avatar-randomize");
+    var avatarButtonLeft = document.getElementById("avatar-button-left");
+    var avatarButtonRight = document.getElementById("avatar-button-right");
+    var avatarButtonColorLeft = document.getElementById("avatar-button-color-left");
+    var avatarButtonColorRight = document.getElementById("avatar-button-color-right");
+    var avatarSvg = document.getElementById("avatar-svg");
+    var avatarPath = document.getElementById("avatar-path");
     var ingame = document.getElementById("ingame");
     var ingameHowtoplayButton = document.getElementById("ingame-howtoplay-button");
     var ingameHowtoplay = document.getElementById("ingame-howtoplay");
@@ -28,6 +39,21 @@ window.onload = function () {
     var chatLog = document.getElementById("chat-log");
     var chatForm = document.getElementById("chat-form");
     var chatField = document.getElementById("chat-field");
+
+    function getRandomInt(max) {
+        return Math.floor(Math.random() * max);
+    }
+
+    function randomizeAvatar() {
+        avatarIndex = getRandomInt(avatars.length);
+        setAvatarSvg();
+        colorIndex = getRandomInt(colors.length);
+        avatarSvg.style.fill = colors[colorIndex];
+    }
+
+    function setAvatarSvg() {
+        avatarPath.setAttribute("d", avatars[avatarIndex]);
+    }
 
     function appendChatLog(item) {
         var doScroll = chatLog.scrollTop > chatLog.scrollHeight - chatLog.clientHeight - 1;
@@ -51,6 +77,34 @@ window.onload = function () {
             landing.parentNode.removeChild(landing);
             ingame.style.visibility = "visible";
         }
+    }
+
+    avatarRandomize.onclick = function(e) {
+        randomizeAvatar();
+    }
+
+    avatarButtonLeft.onclick = function(e) {
+        avatarIndex--;
+        if (avatarIndex < 0) avatarIndex = avatars.length - 1;
+        setAvatarSvg();
+    }
+
+    avatarButtonRight.onclick = function(e) {
+        avatarIndex++;
+        if (avatarIndex >= avatars.length) avatarIndex = 0;
+        setAvatarSvg();
+    }
+    
+    avatarButtonColorLeft.onclick = function(e) {
+        colorIndex--;
+        if (colorIndex < 0) colorIndex = colors.length - 1;
+        avatarSvg.style.fill = colors[colorIndex];
+    }
+    
+    avatarButtonColorRight.onclick = function(e) {
+        colorIndex++;
+        if (colorIndex >= colors.length) colorIndex = 0;
+        avatarSvg.style.fill = colors[colorIndex];
     }
 
     ingameHowtoplayButton.addEventListener("click", function() {
@@ -212,4 +266,7 @@ window.onload = function () {
     }
 
     ingame.style.visibility = "hidden";
+    randomizeAvatar();
+    console.log(avatarIndex);
+    console.log(colorIndex);
 };

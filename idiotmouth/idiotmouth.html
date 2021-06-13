@@ -18,7 +18,23 @@
         <div>
             <form id="name-form">
                 <input type="text" id="name-field" size="64" maxlength="20" placeholder="Name" autofocus />
-                <input id="name-form-submit" type="submit" value="Set Name" />
+                <button id="avatar-randomize">Randomize Avatar</button>
+                <div id="avatar">
+                    <div class="avatar-buttons-div">
+                        <button id="avatar-button-left">&larr;</button>
+                        <button id="avatar-button-color-left">&larr;</button>
+                    </div>
+                    <div id="avatar-svg-div">
+                        <svg id="avatar-svg" width="200px" height="200px" viewBox="0 0 1000 1000">
+                            <path id="avatar-path"></path>
+                        </svg>
+                    </div>
+                    <div class="avatar-buttons-div">
+                        <button id="avatar-button-right">&rarr;</button>
+                        <button id="avatar-button-color-right">&rarr;</button>
+                    </div>
+                </div>
+                <input id="name-form-submit" type="submit" value="Enter Game" />
             </form>
         </div>
         <div>
@@ -45,7 +61,7 @@
             </div>
             <div id="players">status</div>
         </div>
-        <div id="ingame-right">
+        <div id="ingame-center">
             <div id="prompt">
                 <div id="prompt-text">
                     <h2>Current Letters:</h2>
