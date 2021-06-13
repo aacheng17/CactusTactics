@@ -16,7 +16,7 @@ window.onload = function () {
     var conn, name;
     var avatarIndex = 0;
     var colorIndex = 0;
-    var colors = ["blue", "red"];
+    var colors = ["chocolate", "crimson", "coral", "gold", "darkgreen", "springgreen", "turquoise", "cornflowerblue", "indigo", "orchid", "slategrey", "black"];
     var landing = document.getElementById("landing");
     var nameForm = document.getElementById("name-form");
     var nameField = document.getElementById("name-field");
