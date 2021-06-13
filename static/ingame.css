@@ -39,10 +39,16 @@
     gap: 5px;
 }
 
-#player {
+.player {
     background-color: #f5f5f5;
     padding: 15px;
-    overflow: hidden;
+    overflow: auto;
+}
+
+.player-avatar {
+    display: block;
+    width: 100px;
+    height: 100px;
 }
 
 #prompt {

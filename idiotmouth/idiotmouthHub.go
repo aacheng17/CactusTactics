@@ -60,10 +60,15 @@ func (h *IdiotmouthHub) getAssertedClients() map[*IdiotmouthClient]bool {
 func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*IdiotmouthClient)
 	if c.Name == "" && m.MessageType == byte('1') {
-		name := string(m.Data[0])
-		if c.Name == "" {
-			c.Name = name
+		name := m.Data[0]
+		avatar, err1 := strconv.Atoi(m.Data[1])
+		color, err2 := strconv.Atoi(m.Data[2])
+		if err1 != nil || err2 != nil {
+			return
 		}
+		c.Name = name
+		c.Avatar = avatar
+		c.Color = color
 		h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
 		h.Broadcast(byte('1'), h.getPlayers())
 		h.SendData(c, byte('2'), h.getPrompt())

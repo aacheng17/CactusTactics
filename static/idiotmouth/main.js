@@ -72,7 +72,7 @@ window.onload = function () {
                 return false;
             }
             name = nameField.value;
-            networking.send(conn, "1" + name);
+            networking.send(conn, "1" + name + "\t" + avatarIndex.toString() + "\t" + colorIndex);
             e.preventDefault();
             landing.parentNode.removeChild(landing);
             ingame.style.visibility = "visible";
@@ -170,14 +170,24 @@ window.onload = function () {
                     while (players.firstChild) {
                         players.removeChild(players.firstChild);
                     }
-                    for (var j = 0; j < data.length; j+=4) {
+                    for (var j = 0; j < data.length; j+=6) {
                         var player = document.createElement("div");
-                        player.id = "player";
-                        var text = data[j] + " - " + data[j+1].toString() + " points";
-                        if (data[j+2] != "") {
-                            text += "\nBest word: " + data[j+2] + " " + data[j+3].toString() + " points";
+                        player.className = "player";
+                        var text = data[j] + " - " + data[j+3].toString() + " points";
+                        if (data[j+4] != "") {
+                            text += "\nBest word: " + data[j+4] + " " + data[j+3].toString() + " points";
                         }
                         player.innerText = text;
+                        var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+                        svg.classList.add("player-avatar");
+                        svg.setAttribute("width", "200px");
+                        svg.setAttribute("height", "200px");
+                        svg.setAttribute("viewBox", "0 0 1000 1000");
+                        svg.setAttribute("fill", colors[data[j+2]]);
+                        var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+                        svg.appendChild(path);
+                        path.setAttribute("d", avatars[data[j+1]]);
+                        player.appendChild(svg);
                         players.appendChild(player);
                     }
                     break
@@ -267,6 +277,4 @@ window.onload = function () {
 
     ingame.style.visibility = "hidden";
     randomizeAvatar();
-    console.log(avatarIndex);
-    console.log(colorIndex);
 };

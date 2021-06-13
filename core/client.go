@@ -57,6 +57,10 @@ type Client struct {
 
 	Name string
 
+	Avatar int
+
+	Color int
+
 	// Buffered channel of outbound messages.
 	Send chan []byte
 }
@@ -95,7 +99,7 @@ func (c *Client) readPump() {
 			break
 		}
 		message = bytes.TrimSpace(bytes.Replace(message, newline, space, -1))
-		c.Hub.GetMessages() <- NewMessage(c.Child, byte(message[0]), strings.Split(string(message[1:]), "&"))
+		c.Hub.GetMessages() <- NewMessage(c.Child, byte(message[0]), strings.Split(string(message[1:]), "\t"))
 	}
 }
 

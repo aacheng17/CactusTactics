@@ -113,6 +113,8 @@ func (h *IdiotmouthHub) getPlayers() []string {
 			continue
 		}
 		players = append(players, client.Name)
+		players = append(players, fmt.Sprint(client.Avatar))
+		players = append(players, fmt.Sprint((client.Color)))
 		players = append(players, fmt.Sprint(client.score))
 		players = append(players, client.highestWord)
 		players = append(players, fmt.Sprint(client.highestScore))
