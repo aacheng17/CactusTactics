@@ -177,7 +177,7 @@ window.onload = function () {
                         playerInfo.classList.add("player-info");
                         var text = "<b>" + data[j] + "</b>" + ": " + data[j+3].toString() + " points";
                         if (data[j+4] != "") {
-                            text += "<br/>Best: " + data[j+4] + " (" + data[j+3].toString() + ")";
+                            text += "<br/>Best: " + data[j+4] + " (" + data[j+5].toString() + ")";
                         }
                         playerInfo.innerHTML = text;
                         player.appendChild(playerInfo);
