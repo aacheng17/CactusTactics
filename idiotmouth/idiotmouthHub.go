@@ -85,7 +85,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 		if word := h.whattedWords[clientMessageNum]; word != "" {
 			h.whattedWords[clientMessageNum] = ""
 			if definition, ok := dictionary[word]; ok {
-				h.Broadcast(byte('6'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG+" said \"What?\" for the word ", word, u.ENDTAG, u.Tag("br"), u.Tag("p"), word, " - ", definition, u.ENDTAG), fmt.Sprint(clientMessageNum)})
+				h.Broadcast(byte('6'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG+" said \"What?\" for the word ", word, u.ENDTAG, u.Tag("p"), word, " - ", definition, u.ENDTAG), fmt.Sprint(clientMessageNum)})
 			}
 		}
 	}
