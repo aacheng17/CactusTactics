@@ -75,7 +75,7 @@ window.onload = function () {
             networking.send(conn, "1" + name + "\t" + avatarIndex.toString() + "\t" + colorIndex);
             e.preventDefault();
             landing.parentNode.removeChild(landing);
-            ingame.classList.remove("hidden");
+            document.body.appendChild(ingame);
         }
     }
 
@@ -278,6 +278,6 @@ window.onload = function () {
         appendChatLog(item);
     }
 
-    ingame.classList.add("hidden");
+    ingame.parentNode.removeChild(ingame);
     randomizeAvatar();
 };

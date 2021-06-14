@@ -2,12 +2,6 @@
     font-family: Arial, Helvetica, sans-serif;
 }
 
-.hidden {
-    visibility: hidden;
-    width: 0;
-    height: 0;
-}
-
 body {
     overflow: auto;
     padding: 0;
