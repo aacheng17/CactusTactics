@@ -1,13 +1,10 @@
 package idiotmouth
 
 import (
-	"encoding/json"
-	"io/ioutil"
+	"bufio"
 	"log"
 	"os"
 	"strings"
-
-	"example.com/hello/utility"
 )
 
 var (
@@ -18,21 +15,27 @@ var (
 )
 
 func buildWords() {
-	//dictionary source: https://github.com/adambom/dictionary
-	jsonFile, err := os.Open("idiotmouth/dictionary.json")
-	if err != nil {
-		log.Println(err)
-	}
-	defer jsonFile.Close()
-	byteValue, _ := ioutil.ReadAll(jsonFile)
-	var dictionaryRaw interface{}
-	json.Unmarshal(byteValue, &dictionaryRaw)
-	var dictionaryAsserted = dictionaryRaw.(map[string]interface{})
+	//dictionary source: https://boardgames.stackexchange.com/questions/38366/latest-collins-scrabble-words-list-in-text-file https://drive.google.com/file/d/1XIFdZukAcDRiDIOgR_rHpICrrgJbLBxV/view
+
 	dictionary = make(map[string]string)
-	for k, v := range dictionaryAsserted {
-		s := v.(string)
-		s = utility.RemoveEscapes(s)
-		dictionary[strings.ToLower(k)] = s
+	file, err := os.Open("idiotmouth/dictionary.txt")
+	if err != nil {
+		log.Fatal(err)
+	}
+	defer file.Close()
+
+	scanner := bufio.NewScanner(file)
+	for scanner.Scan() {
+		s := scanner.Text()
+		if s == "" || s == "Collins Scrabble Words (2019). 279,496 words with definitions." {
+			continue
+		}
+		data := strings.Split(s, "\t")
+		dictionary[strings.ToLower(data[0])] = data[1]
+	}
+
+	if err := scanner.Err(); err != nil {
+		log.Fatal(err)
 	}
 }
 

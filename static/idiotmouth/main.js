@@ -180,8 +180,8 @@ window.onload = function () {
                         player.innerText = text;
                         var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                         svg.classList.add("player-avatar");
-                        svg.setAttribute("width", "200px");
-                        svg.setAttribute("height", "200px");
+                        svg.setAttribute("width", "700");
+                        svg.setAttribute("height", "700");
                         svg.setAttribute("viewBox", "0 0 1000 1000");
                         svg.setAttribute("fill", colors[data[j+2]]);
                         var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
