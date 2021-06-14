@@ -173,15 +173,18 @@ window.onload = function () {
                     for (var j = 0; j < data.length; j+=6) {
                         var player = document.createElement("div");
                         player.className = "player";
-                        var text = data[j] + " - " + data[j+3].toString() + " points";
+                        var playerInfo = document.createElement("div");
+                        playerInfo.classList.add("player-info");
+                        var text = "<b>" + data[j] + "</b>" + ": " + data[j+3].toString() + " points";
                         if (data[j+4] != "") {
-                            text += "\nBest word: " + data[j+4] + " " + data[j+3].toString() + " points";
+                            text += "<br/>Best: " + data[j+4] + " (" + data[j+3].toString() + ")";
                         }
-                        player.innerText = text;
+                        playerInfo.innerHTML = text;
+                        player.appendChild(playerInfo);
                         var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                         svg.classList.add("player-avatar");
-                        svg.setAttribute("width", "700");
-                        svg.setAttribute("height", "700");
+                        svg.setAttribute("width", "50px");
+                        svg.setAttribute("height", "50px");
                         svg.setAttribute("viewBox", "0 0 1000 1000");
                         svg.setAttribute("fill", colors[data[j+2]]);
                         var path = document.createElementNS("http://www.w3.org/2000/svg", "path");

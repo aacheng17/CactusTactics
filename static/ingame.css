@@ -41,14 +41,14 @@
 
 .player {
     background-color: #f5f5f5;
-    padding: 15px;
-    overflow: auto;
+    padding: 5px 15px;
+    display: flex;
+    flex-direction: row;
+    justify-content: space-between;
 }
 
-.player-avatar {
-    display: block;
-    width: 100px;
-    height: 100px;
+.player-info {
+    padding: 5px 0px;
 }
 
 #prompt {
