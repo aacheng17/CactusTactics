@@ -1,12 +1,22 @@
 #landing {
     padding: 15px 0px;
     position: absolute;
-    width: 500px;
+    width: 800px;
     left: 50%;
-    margin-left: -250px;
+    margin-left: -400px;
     display: grid;
     flex-direction: column;
     gap: 30px;
+}
+
+@media only screen and (max-width: 800px) {
+    /* For mobile phones: */
+    #landing {
+        position: default;
+        width: 100%;
+        left: 0;
+        margin-left: 0px;
+    }
 }
 
 #landing-title {
