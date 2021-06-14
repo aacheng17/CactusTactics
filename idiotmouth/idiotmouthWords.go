@@ -31,7 +31,9 @@ func buildWords() {
 			continue
 		}
 		data := strings.Split(s, "\t")
-		dictionary[strings.ToLower(data[0])] = data[1]
+		word := strings.ToLower(data[0])
+		definition := data[1]
+		dictionary[word] = definition
 	}
 
 	if err := scanner.Err(); err != nil {
