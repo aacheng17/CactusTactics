@@ -17,7 +17,7 @@
         </div>
         <div>
             <form id="name-form">
-                <input type="text" id="name-field" size="64" maxlength="20" placeholder="Name" autofocus />
+                <input type="text" id="name-field" size="64" maxlength="20" placeholder="Name" autofocus autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
                 <button type="button" id="avatar-randomize">Randomize Avatar</button>
                 <div id="avatar">
                     <div class="avatar-buttons-div">
@@ -48,12 +48,15 @@
     <div id="ingame">
         <div id="ingame-left">
             <div id="ingame-title-holder">
-                <div id="ingame-title">
-                    <h1>Idiotmouth</h1>
-                    <div>
-                        <button id="ingame-howtoplay-button">how to play</button>
-                        <button id="endgame">end game</button>
+                <div id="ingame-title-expandable">
+                    <div id="ingame-title">
+                        <h1>Idiotmouth</h1>
+                        <div>
+                            <button id="ingame-howtoplay-button">how to play</button>
+                            <button id="endgame">end game</button>
+                        </div>
                     </div>
+                    <button id="ingame-title-expand-button">a</button>
                 </div>
                 <div id="ingame-howtoplay" class="collapsible-content">
                     <p class="howtoplay-text"></p>
@@ -74,7 +77,7 @@
             <div id="chatbox">
                 <div id="chat-log"></div>
                 <form id="chat-form">
-                    <input type="text" id="chat-field" size="64" maxlength="100"/>
+                    <input type="text" id="chat-field" size="64" maxlength="100" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
                     <input type="submit" id="chat-send" value="Send" />
                 </form>
             </div>
