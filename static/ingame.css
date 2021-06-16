@@ -24,6 +24,7 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
+    height: 600px;
 }
 
 @media only screen and (max-width: 800px) {
@@ -109,12 +110,13 @@
     background-color: #e5e5e5;
     display: flex;
     flex-direction: column;
+    flex-grow: 1000;
 }
 
 #chat-log {
     overflow: auto;
     padding: 10px;
-    height: 400px;
+    flex-grow: 1000;
 }
 
 .what-button {
@@ -123,7 +125,7 @@
 }
 
 #chat-form {
-    padding: 5px;
+    padding: 10px;
     display: flex;
     flex-direction: row;
     gap: 5px;
