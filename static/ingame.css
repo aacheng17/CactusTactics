@@ -81,6 +81,7 @@
     display: none;
     position: absolute;
     padding: 0px;
+    border: none;
 }
 
 .vertical-text {

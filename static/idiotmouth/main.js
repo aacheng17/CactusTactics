@@ -144,14 +144,14 @@ window.onload = function () {
     });
 
     function expandLeft() {
-        leftExpandButton.firstChild.innerText = "Less";
+        leftExpandButton.firstChild.innerText = "Collapse";
         ingameLeft.classList.add("ingame-left-expanded");
         newMessages = 0;
         renderChatboxNotification();
     }
 
     function collapseLeft() {
-        leftExpandButton.firstChild.innerText = "More";
+        leftExpandButton.firstChild.innerText = "Expand";
         ingameLeft.classList.remove("ingame-left-expanded");
         ingameLeft.style.boxShadow = null;
     }
