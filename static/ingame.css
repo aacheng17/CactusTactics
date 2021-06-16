@@ -112,6 +112,7 @@
 }
 
 #chat-log {
+    overflow: auto;
     padding: 10px;
     height: 400px;
 }
