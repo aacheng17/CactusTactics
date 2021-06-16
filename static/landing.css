@@ -2,18 +2,15 @@
     padding: 15px 0px;
     max-width: 800px;
     margin: auto;
-    display: grid;
+    display: flex;
     flex-direction: column;
-    gap: 30px;
+    gap: 20px;
 }
 
 @media only screen and (max-width: 800px) {
     /* For mobile phones: */
     #landing {
-        position: default;
         width: 100%;
-        left: 0;
-        margin-left: 0px;
     }
 }
 
