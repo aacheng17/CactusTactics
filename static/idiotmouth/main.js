@@ -28,6 +28,8 @@ window.onload = function () {
     var avatarSvg = document.getElementById("avatar-svg");
     var avatarPath = document.getElementById("avatar-path");
     var ingame = document.getElementById("ingame");
+    var ingameLeft = document.getElementById("ingame-left");
+    var leftExpandButton = document.getElementById("ingame-left-expand-button");
     var ingameHowtoplayButton = document.getElementById("ingame-howtoplay-button");
     var ingameHowtoplay = document.getElementById("ingame-howtoplay");
     var endgame = document.getElementById("endgame");
@@ -108,10 +110,21 @@ window.onload = function () {
     }
 
     ingameHowtoplayButton.addEventListener("click", function() {
-        if (ingameHowtoplay.style.maxHeight){
-            ingameHowtoplay.style.maxHeight = null;
+        var effected = ingameHowtoplay;
+        if (effected.style.maxHeight){
+            effected.style.maxHeight = null;
         } else {
-            ingameHowtoplay.style.maxHeight = ingameHowtoplay.scrollHeight + "px";
+            effected.style.maxHeight = effected.scrollHeight + "px";
+        } 
+    });
+
+    leftExpandButton.addEventListener("click", function() {
+        var effected = ingameLeft;
+        console.log(effected.style.left);
+        if (effected.style.left === "-450px" || effected.style.left === ""){
+            effected.style.left = "0px";
+        } else {
+            effected.style.left = "-450px";
         } 
     });
 

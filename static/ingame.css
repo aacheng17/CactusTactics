@@ -1,23 +1,26 @@
 #ingame {
     padding: 15px 0px;
-    position: absolute;
-    width: 800px;
-    left: 50%;
-    margin-left: -400px;
+    max-width: 800px;
+    margin: auto;
     display: flex;
     flex-direction: row;
     gap: 15px;
 }
 
+.expandable-panel {
+    transition: left 0.2s ease-out, right 0.2s ease-out;
+}
+
 #ingame-left {
-    width: 30%;
+    background-color: white;
+    width: 200px;
     display: flex;
     flex-direction: column;
     gap: 15px;
 }
 
 #ingame-center {
-    width: 70%;
+    width: 555px;
     display: flex;
     flex-direction: column;
     gap: 15px;
@@ -26,10 +29,17 @@
 @media only screen and (max-width: 800px) {
     #ingame-center {
         width: 100%;
+        margin: 0px 65px;
+    }
+    #ingame-left {
+        position: absolute;
+        left: -450px;
+        width: 500px;
     }
 }
 
 #ingame-title {
+    margin: auto;
     text-align: center;
     display: flex;
     flex-direction: column;
@@ -43,12 +53,26 @@
     width: 100%;
     display: flex;
     flex-direction: row;
+    gap: 0;
     justify-content: space-between;
 }
 
+#ingame-left-expand-button {
+    display: none;
+    position: absolute;
+    padding: 0px;
+}
+
+.vertical-text {
+    writing-mode: vertical-rl;
+    text-orientation: mixed;
+}
+
 @media only screen and (max-width: 800px) {
-    #ingame-title-expand-button {
-        display: none;
+    #ingame-left-expand-button {
+        display: block;
+        position: static;
+        width: 50px;
     }
 }
 
@@ -89,7 +113,6 @@
 
 #chat-log {
     padding: 15px;
-    overflow: auto;
     height: 400px;
 }
 
@@ -106,7 +129,7 @@
 }
 
 #chat-field {
-    flex-grow: 100;
+    width: 100%;
 }
 
 #chat-send {
