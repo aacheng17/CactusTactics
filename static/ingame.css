@@ -12,6 +12,7 @@
 }
 
 #ingame-left {
+    border: none;
     background-color: white;
     width: 300px;
     display: flex;
@@ -38,6 +39,10 @@
         position: absolute;
         left: -250px;
         max-width: 300px;
+    }
+    div#ingame-left.ingame-left-expanded {
+        left: 0;
+        box-shadow: 1px 1px black;
     }
 }
 

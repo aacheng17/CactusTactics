@@ -133,15 +133,14 @@ window.onload = function () {
 
     leftExpandButton.addEventListener("click", function() {
         var effected = ingameLeft;
-        if (effected.style.left === "-250px" || effected.style.left === "") {
+        if (!effected.classList.contains("ingame-left-expanded")) {
             leftExpandButton.firstChild.innerText = "Less";
-            effected.style.left = "0px";
-            effected.style.boxShadow = "1px 1px black"
+            effected.classList.add("ingame-left-expanded");
             newMessages = 0;
             renderChatboxNotification();
         } else {
             leftExpandButton.firstChild.innerText = "More";
-            effected.style.left = "-250px";
+            effected.classList.remove("ingame-left-expanded");
             effected.style.boxShadow = null;
         } 
     });
