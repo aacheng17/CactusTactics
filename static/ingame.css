@@ -34,7 +34,7 @@
         margin: 0px 60px;
     }
     #ingame-left {
-        position: absolute;
+        position: fixed;
         left: -250px;
         max-width: 300px;
     }
@@ -83,6 +83,12 @@
     flex-direction: column;
     gap: 5px;
     overflow-y: auto;
+}
+
+@media only screen and (max-width: 800px) {
+    #players {
+        overflow-y: auto;
+    }
 }
 
 .player {
