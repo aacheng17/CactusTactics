@@ -5,6 +5,7 @@
     display: flex;
     flex-direction: row;
     gap: 10px;
+    height: 600px;
 }
 
 .expandable-panel {
@@ -18,7 +19,6 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    height: 600px;
 }
 
 #ingame-left-clickable-region {
@@ -30,7 +30,6 @@
     display: flex;
     flex-direction: column;
     gap: 10px;
-    height: 600px;
 }
 
 @media only screen and (max-width: 800px) {
@@ -103,7 +102,6 @@
     gap: 5px;
     overflow-y: auto;
     flex-grow: 1000;
-    overflow-y: auto;
 }
 
 .player {
@@ -191,6 +189,10 @@
     display: flex;
     flex-direction: row;
     gap: 10px;
+}
+
+#gamebox {
+    overflow: hidden;
 }
 
 .what-button {
