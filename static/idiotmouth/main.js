@@ -121,10 +121,10 @@ window.onload = function () {
     leftExpandButton.addEventListener("click", function() {
         var effected = ingameLeft;
         console.log(effected.style.left);
-        if (effected.style.left === "-450px" || effected.style.left === ""){
+        if (effected.style.left === "-250px" || effected.style.left === ""){
             effected.style.left = "0px";
         } else {
-            effected.style.left = "-450px";
+            effected.style.left = "-250px";
         } 
     });
 
