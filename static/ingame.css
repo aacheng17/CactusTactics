@@ -116,6 +116,7 @@
     overflow: auto;
     padding: 10px;
     flex-grow: 1000;
+    word-break: break-word;
 }
 
 .data-form {
