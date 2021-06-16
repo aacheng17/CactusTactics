@@ -37,6 +37,8 @@ window.onload = function () {
     var chatLog = document.getElementById("chat-log");
     var chatForm = document.getElementById("chat-form");
     var chatField = document.getElementById("chat-field");
+    var chatboxNotification = document.getElementById("chatbox-notification");
+    var newMessages = 0;
     var startLetter = document.getElementById("start-letter");
     var endLetter = document.getElementById("end-letter");
     var skip = document.getElementById("skip")
@@ -58,6 +60,14 @@ window.onload = function () {
 
     function setAvatarSvg() {
         avatarPath.setAttribute("d", avatars[avatarIndex]);
+    }
+
+    function renderChatboxNotification() {
+        var s = "lobby chat";
+        if (newMessages > 0) {
+            s += " (" + newMessages.toString() + ")";
+        }
+        chatboxNotification.innerText = s;
     }
 
     function appendDataLog(log, item) {
@@ -127,7 +137,8 @@ window.onload = function () {
             leftExpandButton.firstChild.innerText = "Less";
             effected.style.left = "0px";
             effected.style.boxShadow = "1px 1px black"
-            effected.boxShadow
+            newMessages = 0;
+            renderChatboxNotification();
         } else {
             leftExpandButton.firstChild.innerText = "More";
             effected.style.left = "-250px";
@@ -304,6 +315,10 @@ window.onload = function () {
                 case '8':
                     var item = networking.decodeToDiv(data[0]);
                     appendDataLog(chatLog, item);
+                    if (ingameLeft.style.left !== "0px") {
+                        newMessages++;
+                        renderChatboxNotification();
+                    }
                     break;      
                 }
             }
