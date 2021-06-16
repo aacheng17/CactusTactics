@@ -34,6 +34,9 @@ window.onload = function () {
     var ingameHowtoplay = document.getElementById("ingame-howtoplay");
     var endgame = document.getElementById("endgame");
     var players = document.getElementById("players");
+    var chatLog = document.getElementById("chat-log");
+    var chatForm = document.getElementById("chat-form");
+    var chatField = document.getElementById("chat-field");
     var startLetter = document.getElementById("start-letter");
     var endLetter = document.getElementById("end-letter");
     var skip = document.getElementById("skip")
@@ -57,11 +60,11 @@ window.onload = function () {
         avatarPath.setAttribute("d", avatars[avatarIndex]);
     }
 
-    function appendGameLog(item) {
-        var doScroll = gameLog.scrollTop > gameLog.scrollHeight - gameLog.clientHeight - 1;
-        gameLog.appendChild(item);
+    function appendDataLog(log, item) {
+        var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
+        log.appendChild(item);
         if (doScroll) {
-            gameLog.scrollTop = gameLog.scrollHeight - gameLog.clientHeight;
+            log.scrollTop = log.scrollHeight - log.clientHeight;
         }
     }
 
@@ -139,6 +142,18 @@ window.onload = function () {
         networking.send(conn, "3");
     }
 
+    chatForm.onsubmit = function () {
+        if (!conn) {
+            return false;
+        }
+        if (!chatField.value.trim()) {
+            return false;
+        }
+        networking.send(conn, "8" + chatField.value);
+        chatField.value = "";
+        return false;
+    };
+
     skip.onclick = function (e) {
         if (!conn) {
             return false;
@@ -167,7 +182,7 @@ window.onload = function () {
         conn.onclose = function (evt) {
             var item = document.createElement("div");
             item.innerHTML = "<b>Connection closed.</b>";
-            appendGameLog(item);
+            appendDataLog(gameLog, item);
         };
         conn.onmessage = function (evt) {
             if (name === undefined) {
@@ -181,7 +196,7 @@ window.onload = function () {
                 switch (messageType) {
                 case '0':
                     var item = networking.decodeToDiv(data[0]);
-                    appendGameLog(item);
+                    appendDataLog(gameLog, item);
                     break;
                 case '1':
                     while (players.firstChild) {
@@ -222,7 +237,7 @@ window.onload = function () {
                 case '3':
                     var item = document.createElement("div");
                     item.innerText = "Winner: " + data[0] + " " + data[1] + " points\nBest word: " + data[2] + " " + data[3] + " " + data[4] + " points";
-                    appendGameLog(item);
+                    appendDataLog(gameLog, item);
                     break;
                 case '4':
                     endgame.innerText = "end game";
@@ -251,7 +266,7 @@ window.onload = function () {
                         networking.send(conn, "4" + what.previousElementSibling.children[0].id);
                     }
                     item.appendChild(what);
-                    appendGameLog(item);
+                    appendDataLog(gameLog, item);
                     break
                 case '6':
                     var children = gameLog.children;
@@ -284,15 +299,19 @@ window.onload = function () {
                 case '7':
                     endgame.innerText = "new game";
                     var item = networking.decodeToDiv(data[0]);
-                    appendGameLog(item);
+                    appendDataLog(gameLog, item);
                     break;
+                case '8':
+                    var item = networking.decodeToDiv(data[0]);
+                    appendDataLog(chatLog, item);
+                    break;      
                 }
             }
         };
     } else {
         var item = document.createElement("div");
         item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-        appendGameLog(item);
+        appendDataLog(gameLog, item);
     }
 
     ingame.parentNode.removeChild(ingame);

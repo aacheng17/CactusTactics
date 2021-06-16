@@ -82,6 +82,7 @@
     display: flex;
     flex-direction: column;
     gap: 5px;
+    flex-grow: 1000;
 }
 
 .player {
@@ -96,6 +97,39 @@
     padding: 5px 0px;
 }
 
+.databox {
+    background-color: #e5e5e5;
+    display: flex;
+    flex-direction: column;
+    flex-grow: 1000;
+}
+
+.data-log {
+    overflow: auto;
+    padding: 10px;
+    flex-grow: 1000;
+}
+
+.data-form {
+    padding: 10px;
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+
+}
+
+.data-field {
+    width: 100%;
+}
+
+#chatbox {
+    height: 100px;
+}
+
+#chatbox-title {
+    padding: 10px 0px 5px 10px;
+}
+
 #prompt {
     background-color: #e5e5e5;
     padding: 10px;
@@ -107,33 +141,9 @@
     gap: 10px;
 }
 
-#gamebox {
-    background-color: #e5e5e5;
-    display: flex;
-    flex-direction: column;
-    flex-grow: 1000;
-}
-
-#game-log {
-    overflow: auto;
-    padding: 10px;
-    flex-grow: 1000;
-}
-
 .what-button {
     padding: 2px;
     margin-left: 8px;
-}
-
-#game-form {
-    padding: 10px;
-    display: flex;
-    flex-direction: row;
-    gap: 5px;
-}
-
-#game-field {
-    width: 100%;
 }
 
 #game-send {

@@ -88,6 +88,8 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 				h.Broadcast(byte('6'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG+" said \"What?\" for the word ", word, u.ENDTAG, u.Tag("p"), word, " - ", definition, u.ENDTAG), fmt.Sprint(clientMessageNum)})
 			}
 		}
+	case byte('8'):
+		h.Broadcast(byte('8'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
 	}
 	if h.phase == 1 {
 		if m.MessageType == byte('3') {
