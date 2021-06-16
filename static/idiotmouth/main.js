@@ -123,7 +123,7 @@ window.onload = function () {
 
     leftExpandButton.addEventListener("click", function() {
         var effected = ingameLeft;
-        if (effected.style.left === "-250px" || effected.style.left === ""){
+        if (effected.style.left === "-250px" || effected.style.left === "") {
             leftExpandButton.firstChild.innerText = "Less";
             effected.style.left = "0px";
             effected.style.boxShadow = "1px 1px black"
