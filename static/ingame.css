@@ -107,14 +107,14 @@
     gap: 10px;
 }
 
-#chatbox {
+#gamebox {
     background-color: #e5e5e5;
     display: flex;
     flex-direction: column;
     flex-grow: 1000;
 }
 
-#chat-log {
+#game-log {
     overflow: auto;
     padding: 10px;
     flex-grow: 1000;
@@ -125,17 +125,17 @@
     margin-left: 8px;
 }
 
-#chat-form {
+#game-form {
     padding: 10px;
     display: flex;
     flex-direction: row;
     gap: 5px;
 }
 
-#chat-field {
+#game-field {
     width: 100%;
 }
 
-#chat-send {
+#game-send {
     padding: 5px 5px;
 }

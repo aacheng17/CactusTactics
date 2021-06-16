@@ -4,7 +4,7 @@ import { initCollapsible } from './../collapsible.js';
 
 // MESSAGE TYPES (CLIENT TO SERVER)
 // when using conn.send(), the first character in the string represents the message type
-// 0 means regular chat message, 1 means setting player name, 2 means skip, 3 means game end / restart, 4 means what
+// 0 means regular game message, 1 means setting player name, 2 means skip, 3 means game end / restart, 4 means what
 
 window.onload = function () {
     initCollapsible();
@@ -38,9 +38,9 @@ window.onload = function () {
     var endLetter = document.getElementById("end-letter");
     var skip = document.getElementById("skip")
     var promptExtraText = document.getElementById("prompt-extra-text");
-    var chatLog = document.getElementById("chat-log");
-    var chatForm = document.getElementById("chat-form");
-    var chatField = document.getElementById("chat-field");
+    var gameLog = document.getElementById("game-log");
+    var gameForm = document.getElementById("game-form");
+    var gameField = document.getElementById("game-field");
 
     function getRandomInt(max) {
         return Math.floor(Math.random() * max);
@@ -57,11 +57,11 @@ window.onload = function () {
         avatarPath.setAttribute("d", avatars[avatarIndex]);
     }
 
-    function appendChatLog(item) {
-        var doScroll = chatLog.scrollTop > chatLog.scrollHeight - chatLog.clientHeight - 1;
-        chatLog.appendChild(item);
+    function appendGameLog(item) {
+        var doScroll = gameLog.scrollTop > gameLog.scrollHeight - gameLog.clientHeight - 1;
+        gameLog.appendChild(item);
         if (doScroll) {
-            chatLog.scrollTop = chatLog.scrollHeight - chatLog.clientHeight;
+            gameLog.scrollTop = gameLog.scrollHeight - gameLog.clientHeight;
         }
     }
 
@@ -146,15 +146,15 @@ window.onload = function () {
         networking.send(conn, "2");
     }
     
-    chatForm.onsubmit = function () {
+    gameForm.onsubmit = function () {
         if (!conn) {
             return false;
         }
-        if (!chatField.value.trim()) {
+        if (!gameField.value.trim()) {
             return false;
         }
-        networking.send(conn, "0" + chatField.value);
-        chatField.value = "";
+        networking.send(conn, "0" + gameField.value);
+        gameField.value = "";
         return false;
     };
 
@@ -167,7 +167,7 @@ window.onload = function () {
         conn.onclose = function (evt) {
             var item = document.createElement("div");
             item.innerHTML = "<b>Connection closed.</b>";
-            appendChatLog(item);
+            appendGameLog(item);
         };
         conn.onmessage = function (evt) {
             if (name === undefined) {
@@ -181,7 +181,7 @@ window.onload = function () {
                 switch (messageType) {
                 case '0':
                     var item = networking.decodeToDiv(data[0]);
-                    appendChatLog(item);
+                    appendGameLog(item);
                     break;
                 case '1':
                     while (players.firstChild) {
@@ -216,18 +216,18 @@ window.onload = function () {
                     var el = data[1].toUpperCase();
                     startLetter.innerText = sl;
                     endLetter.innerText = el;
-                    chatField.placeholder = sl + "___" + el;
+                    gameField.placeholder = sl + "___" + el;
                     promptExtraText.innerText = "Worth " + String(data[2]) + " points. There are " + String(data[3]) + " possible words.";
                     break
                 case '3':
                     var item = document.createElement("div");
                     item.innerText = "Winner: " + data[0] + " " + data[1] + " points\nBest word: " + data[2] + " " + data[3] + " " + data[4] + " points";
-                    appendChatLog(item);
+                    appendGameLog(item);
                     break;
                 case '4':
                     endgame.innerText = "end game";
-                    while (chatLog.firstChild) {
-                        chatLog.removeChild(chatLog.firstChild);
+                    while (gameLog.firstChild) {
+                        gameLog.removeChild(gameLog.firstChild);
                     }
                     break
                 case '5':
@@ -251,10 +251,10 @@ window.onload = function () {
                         networking.send(conn, "4" + what.previousElementSibling.children[0].id);
                     }
                     item.appendChild(what);
-                    appendChatLog(item);
+                    appendGameLog(item);
                     break
                 case '6':
-                    var children = chatLog.children;
+                    var children = gameLog.children;
                     var found = false;
                     var child = null;
                     for (var i = 0; i < children.length; i++) {
@@ -270,21 +270,21 @@ window.onload = function () {
                             }
                         }
                     }
-                    var doScroll = chatLog.scrollTop > chatLog.scrollHeight - chatLog.clientHeight - 1;
+                    var doScroll = gameLog.scrollTop > gameLog.scrollHeight - gameLog.clientHeight - 1;
                     var item = networking.decodeToDiv(data[0]);
                     if (found) {
                         child.insertAdjacentElement('afterend', item);
                     } else {
-                        chatLog.prepend(item);
+                        gameLog.prepend(item);
                     }
                     if (doScroll) {
-                        chatLog.scrollTop = chatLog.scrollHeight - chatLog.clientHeight;
+                        gameLog.scrollTop = gameLog.scrollHeight - gameLog.clientHeight;
                     }
                     break
                 case '7':
                     endgame.innerText = "new game";
                     var item = networking.decodeToDiv(data[0]);
-                    appendChatLog(item);
+                    appendGameLog(item);
                     break;
                 }
             }
@@ -292,7 +292,7 @@ window.onload = function () {
     } else {
         var item = document.createElement("div");
         item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
-        appendChatLog(item);
+        appendGameLog(item);
     }
 
     ingame.parentNode.removeChild(ingame);
