@@ -212,7 +212,7 @@ window.onload = function () {
                     var el = data[1].toUpperCase();
                     startLetter.innerText = sl;
                     endLetter.innerText = el;
-                    chatField.placeholder = "a word that starts with " + sl + " and ends with " + el;
+                    chatField.placeholder = sl + "_____" + el;
                     promptExtraText.innerText = "Worth " + String(data[2]) + " points. There are " + String(data[3]) + " possible words.";
                     break
                 case '3':
