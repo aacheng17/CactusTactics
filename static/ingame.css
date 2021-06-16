@@ -102,12 +102,7 @@
     gap: 5px;
     overflow-y: auto;
     flex-grow: 1000;
-}
-
-@media only screen and (max-width: 800px) {
-    #players {
-        overflow-y: auto;
-    }
+    overflow-y: auto;
 }
 
 .player {
@@ -116,6 +111,12 @@
     display: flex;
     flex-direction: row;
     justify-content: space-between;
+}
+
+@media only screen and (max-width: 800px) {
+    .player {
+        padding-right: 0;
+    }
 }
 
 .player-info {
