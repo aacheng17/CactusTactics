@@ -83,6 +83,7 @@
     flex-direction: column;
     gap: 5px;
     overflow-y: auto;
+    flex-grow: 1000;
 }
 
 @media only screen and (max-width: 800px) {
@@ -129,7 +130,8 @@
 }
 
 #chatbox {
-    height: 250px;
+    max-height: 250px;
+    min-height: 250px;
 }
 
 #chatbox-title {
