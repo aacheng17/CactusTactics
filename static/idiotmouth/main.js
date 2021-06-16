@@ -314,7 +314,8 @@ window.onload = function () {
                 case '8':
                     var item = networking.decodeToDiv(data[0]);
                     appendDataLog(chatLog, item);
-                    if (ingameLeft.style.left !== "0px") {
+                    var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+                    if (!ingameLeft.classList.contains("ingame-left-expanded") && width <= 800) {
                         newMessages++;
                         renderChatboxNotification();
                     }
