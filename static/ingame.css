@@ -21,7 +21,7 @@
 }
 
 #ingame-center {
-    width: 580px;
+    width: 490px;
     display: flex;
     flex-direction: column;
     gap: 10px;
