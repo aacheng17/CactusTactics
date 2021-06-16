@@ -29,6 +29,7 @@ window.onload = function () {
     var avatarPath = document.getElementById("avatar-path");
     var ingame = document.getElementById("ingame");
     var ingameLeft = document.getElementById("ingame-left");
+    var ingameLeftClickableRegion = document.getElementById("ingame-left-clickable-region");
     var leftExpandButton = document.getElementById("ingame-left-expand-button");
     var ingameHowtoplayButton = document.getElementById("ingame-howtoplay-button");
     var ingameHowtoplay = document.getElementById("ingame-howtoplay");
@@ -46,6 +47,17 @@ window.onload = function () {
     var gameLog = document.getElementById("game-log");
     var gameForm = document.getElementById("game-form");
     var gameField = document.getElementById("game-field");
+
+    window.addEventListener('click', function(e){
+        var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+        if (width <= 800) {
+            if (ingameLeft.classList.contains("ingame-left-expanded")) {
+                if (!ingameLeft.contains(e.target)) {
+                    collapseLeft();
+                }
+            }
+        }
+      });
 
     function getRandomInt(max) {
         return Math.floor(Math.random() * max);
@@ -131,18 +143,25 @@ window.onload = function () {
         } 
     });
 
-    leftExpandButton.addEventListener("click", function() {
-        var effected = ingameLeft;
-        if (!effected.classList.contains("ingame-left-expanded")) {
-            leftExpandButton.firstChild.innerText = "Less";
-            effected.classList.add("ingame-left-expanded");
-            newMessages = 0;
-            renderChatboxNotification();
+    function expandLeft() {
+        leftExpandButton.firstChild.innerText = "Less";
+        ingameLeft.classList.add("ingame-left-expanded");
+        newMessages = 0;
+        renderChatboxNotification();
+    }
+
+    function collapseLeft() {
+        leftExpandButton.firstChild.innerText = "More";
+        ingameLeft.classList.remove("ingame-left-expanded");
+        ingameLeft.style.boxShadow = null;
+    }
+
+    ingameLeftClickableRegion.addEventListener("click", function() {
+        if (!ingameLeft.classList.contains("ingame-left-expanded")) {
+            expandLeft();
         } else {
-            leftExpandButton.firstChild.innerText = "More";
-            effected.classList.remove("ingame-left-expanded");
-            effected.style.boxShadow = null;
-        } 
+            collapseLeft();
+        }
     });
 
     endgame.onclick = function (e) {
