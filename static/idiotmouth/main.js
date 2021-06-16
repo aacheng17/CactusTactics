@@ -123,9 +123,12 @@ window.onload = function () {
         if (effected.style.left === "-250px" || effected.style.left === ""){
             leftExpandButton.firstChild.innerText = "Hide";
             effected.style.left = "0px";
+            effected.style.boxShadow = "1px 1px black"
+            effected.boxShadow
         } else {
             leftExpandButton.firstChild.innerText = "Info";
             effected.style.left = "-250px";
+            effected.style.boxShadow = null;
         } 
     });
 
