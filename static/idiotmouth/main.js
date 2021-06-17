@@ -83,6 +83,11 @@ window.onload = function () {
     }
 
     function appendDataLog(log, item) {
+        if (log.firstChild != null) {
+            if (log.firstChild.classList.contains("emptyLog")) {
+                log.removeChild(log.firstChild);
+            }
+        }
         var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
         log.appendChild(item);
         if (doScroll) {
@@ -136,7 +141,7 @@ window.onload = function () {
 
     ingameHowtoplayButton.addEventListener("click", function() {
         var effected = ingameHowtoplay;
-        if (effected.style.maxHeight){
+        if (effected.style.maxHeight) {
             effected.style.maxHeight = null;
         } else {
             effected.style.maxHeight = effected.scrollHeight + "px";
@@ -350,4 +355,10 @@ window.onload = function () {
 
     ingame.parentNode.removeChild(ingame);
     randomizeAvatar();
+
+    var emptyLog = document.createElement("div");
+    emptyLog.classList.add("emptyLog");
+    emptyLog.innerText = "Nobody's said anything yet.";
+    appendDataLog(chatLog, emptyLog);
+
 };
