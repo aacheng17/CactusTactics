@@ -98,6 +98,11 @@
     }
 }
 
+#ingame-howtoplay {
+    position: absolute;
+    width: 280px;
+}
+
 #players {
     display: flex;
     flex-direction: column;
