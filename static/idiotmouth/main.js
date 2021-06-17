@@ -104,7 +104,7 @@ window.onload = function () {
                 return false;
             }
             name = nameField.value;
-            networking.send(conn, "1" + name + "\t" + avatarIndex.toString() + "\t" + colorIndex);
+            networking.send(conn, "0" + name + "\t" + avatarIndex.toString() + "\t" + colorIndex);
             e.preventDefault();
             landing.parentNode.removeChild(landing);
             document.body.appendChild(ingame);
@@ -173,7 +173,7 @@ window.onload = function () {
         if (!conn) {
             return false;
         }
-        networking.send(conn, "3");
+        networking.send(conn, "2");
     }
 
     chatForm.onsubmit = function () {
@@ -183,7 +183,7 @@ window.onload = function () {
         if (!chatField.value.trim()) {
             return false;
         }
-        networking.send(conn, "8" + chatField.value);
+        networking.send(conn, "1" + chatField.value);
         chatField.value = "";
         return false;
     };
@@ -192,7 +192,7 @@ window.onload = function () {
         if (!conn) {
             return false;
         }
-        networking.send(conn, "2");
+        networking.send(conn, "b");
     }
     
     gameForm.onsubmit = function () {
@@ -202,7 +202,7 @@ window.onload = function () {
         if (!gameField.value.trim()) {
             return false;
         }
-        networking.send(conn, "0" + gameField.value);
+        networking.send(conn, "a" + gameField.value);
         gameField.value = "";
         return false;
     };
@@ -228,11 +228,11 @@ window.onload = function () {
                 var messageType = m.charAt(0);
                 var data = networking.decode(m.substring(1,m.length));
                 switch (messageType) {
-                case '0':
+                case 'a':
                     var item = networking.decodeToDiv(data[0]);
                     appendDataLog(gameLog, item);
                     break;
-                case '1':
+                case '3':
                     while (players.firstChild) {
                         players.removeChild(players.firstChild);
                     }
@@ -260,7 +260,7 @@ window.onload = function () {
                         players.appendChild(player);
                     }
                     break
-                case '2':
+                case 'd':
                     var sl = data[0].toUpperCase();
                     var el = data[1].toUpperCase();
                     startLetter.innerText = sl;
@@ -268,18 +268,18 @@ window.onload = function () {
                     gameField.placeholder = sl + "___" + el;
                     promptExtraText.innerText = "Worth " + String(data[2]) + " points. There are " + String(data[3]) + " possible words.";
                     break
-                case '3':
+                case 'e':
                     var item = document.createElement("div");
                     item.innerText = "Winner: " + data[0] + " " + data[1] + " points\nBest word: " + data[2] + " " + data[3] + " " + data[4] + " points";
                     appendDataLog(gameLog, item);
                     break;
-                case '4':
+                case '0':
                     endgame.innerText = "end game";
                     while (gameLog.firstChild) {
                         gameLog.removeChild(gameLog.firstChild);
                     }
                     break
-                case '5':
+                case 'c':
                     var item = document.createElement("div");
                     item.classList.add("score-message");
                     var message = networking.decodeToDiv(data[0]);
@@ -297,12 +297,12 @@ window.onload = function () {
                         if (what.previousElementSibling.children.length < 1) {
                             return false;
                         }
-                        networking.send(conn, "4" + what.previousElementSibling.children[0].id);
+                        networking.send(conn, "c" + what.previousElementSibling.children[0].id);
                     }
                     item.appendChild(what);
                     appendDataLog(gameLog, item);
                     break
-                case '6':
+                case 'b':
                     var children = gameLog.children;
                     var found = false;
                     var child = null;
@@ -330,12 +330,12 @@ window.onload = function () {
                         gameLog.scrollTop = gameLog.scrollHeight - gameLog.clientHeight;
                     }
                     break
-                case '7':
+                case '2':
                     endgame.innerText = "new game";
                     var item = networking.decodeToDiv(data[0]);
                     appendDataLog(gameLog, item);
                     break;
-                case '8':
+                case '1':
                     var item = networking.decodeToDiv(data[0]);
                     appendDataLog(chatLog, item);
                     var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
