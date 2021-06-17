@@ -47,16 +47,6 @@ func (h *IdiotmouthHub) getAssertedClients() map[*IdiotmouthClient]bool {
 	return ret
 }
 
-// MESSAGE TYPES (SERVER TO CLIENT)
-// 0: regular chat messages
-// 1: scores
-// 2: prompt
-// 3: winners
-// 4: restart (data is inconsequential, probably empty string)
-// 5: message that needs a "what?""
-// 6: "what?" message
-// 7: end game message
-
 // RECEIVING:
 // 0: name
 // 1: lobby chat message
