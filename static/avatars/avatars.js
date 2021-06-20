@@ -1,4 +1,4 @@
-export var avatars = [
+export var AVATARS = [
 //bee
 `M 800.80,465.25
 C 789.92,471.75 790.42,490.01 801.55,495.89
