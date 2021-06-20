@@ -112,6 +112,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	switch m.MessageType {
 	case byte('a'):
 		word := strings.TrimSpace(strings.ToLower(string(m.Data[0])))
+		h.Broadcast(byte('a'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", word)})
 		if len(word) >= 3 && word[0] == byte(h.start) && word[len(word)-1] == byte(h.end) {
 			switch h.validWord(word) {
 			case 0:
