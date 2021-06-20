@@ -1,7 +1,7 @@
 import * as networking from './../networking.js';
 import { AVATARS } from './../avatars/avatars.js';
 import { COLORS, name } from './../landing.js';
-import { appendDataLog } from './../ingame-utility.js';
+import { appendDataLog, setChatboxNotification } from './../ingame-utility.js';
 
 var ingameLeft = document.getElementById("ingame-left");
 var endgame = document.getElementById("endgame");
@@ -157,10 +157,9 @@ export function initIdiotMouth(conn) {
                 appendDataLog(chatLog, item);
                 var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
                 if (!ingameLeft.classList.contains("ingame-left-expanded") && width <= 800) {
-                    newMessages++;
-                    renderChatboxNotification();
+                    setChatboxNotification(1);
                 }
-                break;      
+                break;
             }
         }
     };

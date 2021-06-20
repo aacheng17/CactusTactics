@@ -1,5 +1,5 @@
 import * as networking from './networking.js';
-import { appendDataLog } from './ingame-utility.js';
+import { appendDataLog, setChatboxNotification } from './ingame-utility.js';
 
 var ingameLeft = document.getElementById("ingame-left");
 var ingameLeftClickableRegion = document.getElementById("ingame-left-clickable-region");
@@ -10,8 +10,6 @@ var endgame = document.getElementById("endgame");
 var chatLog = document.getElementById("chat-log");
 var chatForm = document.getElementById("chat-form");
 var chatField = document.getElementById("chat-field");
-var chatboxNotification = document.getElementById("chatbox-notification");
-var newMessages = 0;
 
 export function initIngameLeft(conn) {
     window.addEventListener('click', function(e){
@@ -70,20 +68,11 @@ export function initIngameLeft(conn) {
 function expandLeft() {
     leftExpandButton.firstChild.innerText = "Collapse";
     ingameLeft.classList.add("ingame-left-expanded");
-    newMessages = 0;
-    renderChatboxNotification();
+    setChatboxNotification(0);
 }
 
 function collapseLeft() {
     leftExpandButton.firstChild.innerText = "Expand";
     ingameLeft.classList.remove("ingame-left-expanded");
     ingameLeft.style.boxShadow = null;
-}
-
-function renderChatboxNotification() {
-    var s = "lobby chat";
-    if (newMessages > 0) {
-        s += " (" + newMessages.toString() + ")";
-    }
-    chatboxNotification.innerText = s;
 }
