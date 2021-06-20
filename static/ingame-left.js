@@ -1,4 +1,5 @@
-import { appendDataLog } from "./ingame-utility.js";
+import * as networking from './networking.js';
+import { appendDataLog } from './ingame-utility.js';
 
 var ingameLeft = document.getElementById("ingame-left");
 var ingameLeftClickableRegion = document.getElementById("ingame-left-clickable-region");
@@ -48,7 +49,7 @@ export function initIngameLeft(conn) {
         networking.send(conn, "2");
     }
     
-    chatForm.onsubmit = function () {
+    chatForm.onsubmit = function (e) {
         if (!conn) {
             return false;
         }
@@ -56,8 +57,8 @@ export function initIngameLeft(conn) {
             return false;
         }
         networking.send(conn, "1" + chatField.value);
+        e.preventDefault();
         chatField.value = "";
-        return false;
     };
     
     var emptyLog = document.createElement("div");

@@ -1,7 +1,7 @@
 import * as networking from './../networking.js';
 import { AVATARS } from './../avatars/avatars.js';
 import { COLORS, name } from './../landing.js';
-import { appendDataLog } from '../ingame-utility.js';
+import { appendDataLog } from './../ingame-utility.js';
 
 var ingameLeft = document.getElementById("ingame-left");
 var endgame = document.getElementById("endgame");
