@@ -39,7 +39,7 @@ func servePage(w http.ResponseWriter, r *http.Request) {
 	}
 	_, ok := games[game]
 	if !ok {
-		http.Error(w, "404 Page Not Found", http.StatusNotFound)
+		http.Error(w, "404 Page Not Found. This is the custom 404 page.", http.StatusNotFound)
 		return
 	}
 	html := games[game].Html()
