@@ -10,7 +10,7 @@ window.onload = async function () {
     
     var head = document.getElementsByTagName('head')[0];
     var style = document.createElement('link');
-    style.href = './static/' + gameName + '/idiotmouth.css';
+    style.href = './static/' + gameName + '/game.css';
     style.type = 'text/css';
     style.rel = 'stylesheet';
     head.append(style);
