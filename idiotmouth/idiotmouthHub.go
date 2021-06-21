@@ -34,8 +34,8 @@ type IdiotmouthHub struct {
 
 func (h *IdiotmouthHub) DisconnectClientMessage(c core.Clientlike) {
 	if c.GetName() != "" {
-		h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
-		h.Broadcast(byte('1'), h.getPlayers())
+		h.Broadcast(byte('a'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
+		h.Broadcast(byte('3'), h.getPlayers())
 	}
 }
 
@@ -48,6 +48,7 @@ func (h *IdiotmouthHub) getAssertedClients() map[*IdiotmouthClient]bool {
 }
 
 // RECEIVING:
+// -: disconnect
 // 0: name
 // 1: lobby chat message
 // 2: end game message
