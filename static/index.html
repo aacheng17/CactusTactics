@@ -1,0 +1,52 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title class="title"></title>
+<script type="module" src="./static/main.js"></script>
+<link rel="stylesheet" href="./static/global.css" type="text/css">
+<link rel="stylesheet" href="./static/collapsible.css" type="text/css">
+<link rel="stylesheet" href="./static/landing.css" type="text/css">
+<link rel="stylesheet" href="./static/ingame.css" type="text/css">
+{{ template "stylesheets.html" }}
+</head>
+<body>
+    <div id="landing">
+        <div id="landing-title">
+            <h1 class="title"></h1>
+        </div>
+        <div>
+            <form id="name-form">
+                <input type="text" id="name-field" maxlength="20" placeholder="Name" autofocus autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+                <button type="button" id="avatar-randomize">Randomize Avatar</button>
+                <div id="avatar">
+                    <div class="avatar-buttons-div">
+                        <button type="button" id="avatar-button-left">&larr;</button>
+                        <button type="button" id="avatar-button-color-left">&larr;</button>
+                    </div>
+                    <div id="avatar-svg-div">
+                        <svg id="avatar-svg" width="150px" height="150px" viewBox="0 0 1000 1000">
+                            <path id="avatar-path"></path>
+                        </svg>
+                    </div>
+                    <div class="avatar-buttons-div">
+                        <button type="button" id="avatar-button-right">&rarr;</button>
+                        <button type="button" id="avatar-button-color-right">&rarr;</button>
+                    </div>
+                </div>
+                <input id="name-form-submit" type="submit" value="Enter Game" />
+            </form>
+        </div>
+        <div>
+            <button class="collapsible-button">How to play</button>
+            <div class="collapsible-content">
+                <p class="howtoplay-text"></p>
+            </div>
+        </div>
+    </div>
+
+    <div id="ingame">
+      {{ template "ingame.html" }}
+    </div>
+</body>
+</html>

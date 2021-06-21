@@ -1,0 +1,51 @@
+<div id="ingame-left" class="expandable-panel">
+  <div id="ingame-left-clickable-region"></div>
+  <div id="ingame-title-holder">
+      <div id="ingame-title-expandable">
+          <div id="ingame-title">
+              <div>
+                  <h1 class="title"></h1>
+                  <a href="https://idiotmouth.herokuapp.com/" target="_blank" rel="noopener noreferrer">more games</a>
+              </div>
+              <div>
+                  <button id="ingame-howtoplay-button">how to play</button>
+                  <button id="endgame">end game</button>
+              </div>
+          </div>
+          <button id="ingame-left-expand-button"><a class="vertical-text">Expand</a></button>
+      </div>
+      <div id="ingame-howtoplay" class="collapsible-content">
+          <p class="howtoplay-text"></p>
+      </div>
+  </div>
+  <div id="players">status</div>
+  <div id="chatbox-wrapper">
+      <div id="chatbox" class="databox">
+          <h3 id="chatbox-title">lobby chat</h3>
+          <div id="chat-log" class="data-log"></div>
+          <form id="chat-form" class="data-form">
+              <input type="text" id="chat-field" class="data-field" maxlength="200" autocomplete="off"/>
+              <input type="submit" id="chat-send" value="Send" />
+          </form>
+      </div>
+      <h3 id="chatbox-notification" class="vertical-text">lobby chat</h3>
+  </div>
+</div>
+<div id="ingame-center">
+  <div id="prompt">
+      <div id="prompt-text">
+          <h2>Current Letters:</h2>
+          <h2 id="start-letter"></h2>
+          <h2 id="end-letter"></h2>
+          <button id="skip">Vote to skip</button>
+      </div>
+      <a id="prompt-extra-text"></a>
+  </div>
+  <div id="gamebox" class="databox">
+      <div id="game-log" class="data-log"></div>
+      <form id="game-form" class="data-form">
+          <input type="text" id="game-field" class="data-field" maxlength="100" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
+          <input type="submit" id="game-send" value="Send" />
+      </form>
+  </div>
+</div>

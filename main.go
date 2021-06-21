@@ -42,8 +42,7 @@ func servePage(w http.ResponseWriter, r *http.Request) {
 		http.Error(w, "404 Page Not Found. This is the custom 404 page.", http.StatusNotFound)
 		return
 	}
-	html := games[game].Html()
-	http.ServeFile(w, r, html)
+	games[game].ExecuteTemplate(w)
 }
 
 func handleWs(w http.ResponseWriter, r *http.Request) {

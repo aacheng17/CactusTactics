@@ -2,7 +2,7 @@ import { initCollapsible } from './collapsible.js';
 import { initLanding } from './landing.js';
 import { initIngameLeft } from './ingame-left.js';
 import { appendDataLog } from './ingame-utility.js';
-import { initHowToPlays } from './howtoplay.js';
+import { initTitles, initHowToPlays } from './importantStrings.js';
 
 window.onload = async function () {
     var pn = window.location.pathname;
@@ -29,6 +29,7 @@ window.onload = async function () {
         appendDataLog(gameLog, item);
     }
 
+    initTitles("Idiotmouth");
     initHowToPlays("Rules\nTry to think of a word that starts with the first letter and ends with the second letter before your opponents.\nWords must be at least 3 letters long.\n\nScoring\nThe more rare the letter combination, the more points it's worth (up to 100).\nEach word gets a length bonus multiplier as well.");
     initCollapsible();
     initLanding(conn);
