@@ -1,7 +1,7 @@
-import * as networking from './../networking.js';
-import { AVATARS } from './../avatars/avatars.js';
-import { COLORS, name } from './../landing.js';
-import { appendDataLog, setChatboxNotification } from './../ingame-utility.js';
+import * as networking from '../networking.js';
+import { AVATARS } from '../avatars/avatars.js';
+import { COLORS, name } from '../landing.js';
+import { appendDataLog, setChatboxNotification } from '../ingame-utility.js';
 
 var ingameLeft = document.getElementById("ingame-left");
 var endgame = document.getElementById("endgame");
@@ -15,7 +15,7 @@ var gameLog = document.getElementById("game-log");
 var gameForm = document.getElementById("game-form");
 var gameField = document.getElementById("game-field");
 
-export function initIdiotMouth(conn) {
+export function initMain(conn) {
     skip.onclick = function (e) {
         if (!conn) {
             return false;

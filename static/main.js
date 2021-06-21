@@ -5,8 +5,15 @@ import { appendDataLog } from './ingame-utility.js';
 import { initTitles, initHowToPlays } from './importantStrings.js';
 
 window.onload = async function () {
-    var pn = window.location.pathname;
-    let { initIdiotMouth } = await import('.' + pn + pn + '.js');
+    var gameName = window.location.pathname.slice(1);
+    let { initMain } = await import('./' + gameName + '/game.js');
+    
+    var head = document.getElementsByTagName('head')[0];
+    var style = document.createElement('link');
+    style.href = './static/' + gameName + '/idiotmouth.css';
+    style.type = 'text/css';
+    style.rel = 'stylesheet';
+    head.append(style);
     
     var conn;
     var ingame = document.getElementById("ingame");
@@ -34,6 +41,6 @@ window.onload = async function () {
     initCollapsible();
     initLanding(conn);
     initIngameLeft(conn);
-    initIdiotMouth(conn);
+    initMain(conn);
     ingame.parentNode.removeChild(ingame);
 };
