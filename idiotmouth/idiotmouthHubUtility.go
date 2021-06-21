@@ -99,10 +99,19 @@ func (h *IdiotmouthHub) getPrompt() []string {
 	return []string{string(h.start), string(h.end), fmt.Sprint(h.getWorth()), fmt.Sprint(h.letters[string(h.start)+string(h.end)])}
 }
 
-func (h *IdiotmouthHub) getPlayers() []string {
+func (h *IdiotmouthHub) getPlayers(excepts ...*IdiotmouthClient) []string {
 	keys := make([]*IdiotmouthClient, 0, len(h.Clients))
 	for k := range h.getAssertedClients() {
-		keys = append(keys, k)
+		isExcept := false
+		for _, e := range excepts {
+			if k == e {
+				isExcept = true
+				break
+			}
+		}
+		if !isExcept {
+			keys = append(keys, k)
+		}
 	}
 	sort.Slice(keys, func(i, j int) bool {
 		return keys[i].score > keys[j].score
