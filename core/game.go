@@ -1,8 +1,8 @@
 package core
 
 import (
+	"html/template"
 	"net/http"
-	"text/template"
 
 	"github.com/gorilla/websocket"
 )
