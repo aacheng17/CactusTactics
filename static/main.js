@@ -1,11 +1,13 @@
-import { initCollapsible } from './../collapsible.js';
-import { initLanding } from './../landing.js';
-import { initIngameLeft } from './../ingame-left.js';
-import { appendDataLog } from './../ingame-utility.js';
-import { initHowToPlays } from '../howtoplay.js';
-import { initIdiotMouth } from './idiotmouth.js';
+import { initCollapsible } from './collapsible.js';
+import { initLanding } from './landing.js';
+import { initIngameLeft } from './ingame-left.js';
+import { appendDataLog } from './ingame-utility.js';
+import { initHowToPlays } from './howtoplay.js';
 
-window.onload = function () {
+window.onload = async function () {
+    var pn = window.location.pathname;
+    let { initIdiotMouth } = await import('.' + pn + pn + '.js');
+    
     var conn;
     var ingame = document.getElementById("ingame");
     var gameLog = document.getElementById("game-log");
@@ -20,7 +22,7 @@ window.onload = function () {
             var item = document.createElement("div");
             item.innerHTML = "<b>Connection closed.</b>";
             appendDataLog(gameLog, item);
-        };        
+        };
     } else {
         var item = document.createElement("div");
         item.innerHTML = "<b>Your browser does not support WebSockets.</b>";
