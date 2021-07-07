@@ -2,7 +2,6 @@ package fakeout
 
 import (
 	"fmt"
-	"log"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -68,7 +67,6 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*FakeoutClient)
 	question := questions.getQuestion(h.question)
 	if c.Name == "" && m.MessageType == byte('0') {
-		log.Println("hello")
 		name := m.Data[0]
 		avatar, err1 := strconv.Atoi(m.Data[1])
 		color, err2 := strconv.Atoi(m.Data[2])
@@ -100,7 +98,6 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 	}
 	switch m.MessageType {
 	case byte('1'):
-		log.Println("goodybe")
 		h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
 	}
 	if h.phase == -1 {

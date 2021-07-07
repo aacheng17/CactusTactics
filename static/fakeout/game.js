@@ -61,7 +61,7 @@ export function initMain(conn) {
                 while (players.firstChild) {
                     players.removeChild(players.firstChild);
                 }
-                for (let j = 0; j < data.length; j+=6) {
+                for (let j = 0; j < data.length; j+=4) {
                     var player = document.createElement("div");
                     player.className = "player";
                     var playerInfo = document.createElement("div");
