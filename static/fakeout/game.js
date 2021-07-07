@@ -133,14 +133,25 @@ export function initMain(conn) {
                 }
                 break;
             case 'e':
-                for (let j=0; j<choices.childElementCount; j++) {
-                    var child = choices.children[j];
+                choices.classList.add("revealed");
+                var curChild = choices.firstChild;
+                for (let j=0; j<data.length/2; j++) {
                     var faker = data[j*2];
                     var fakedOut = data[j*2+1];
-                    child.innerText = faker + ":\n" + child.innerText;
-                    if (fakedOut !== "") {
-                        child.innerText += "\nfaked out " + fakedOut;
+                    var item = document.createElement("p");
+                    if (faker === "") {
+                        item.innerText += "ACTUAL ANSWER";
+                        if (fakedOut !== "") {
+                            item.innerText += " picked by " + fakedOut;
+                        }
+                    } else {
+                        item.innerText += faker;
+                        if (fakedOut !== "") {
+                            item.innerText += " faked out " + fakedOut;
+                        }
                     }
+                    choices.insertBefore(item, curChild);
+                    curChild = curChild.nextElementSibling;
                 }
                 choicesWaiting.innerText = "";
                 var item = document.createElement("button");
@@ -148,6 +159,7 @@ export function initMain(conn) {
                 item.onclick = function() {
                     promptField.disabled = false;
                     promptSubmit.disabled = false;
+                    choices.classList.remove("revealed");
                     while (choices.firstChild) {
                         choices.removeChild(choices.firstChild);
                     }

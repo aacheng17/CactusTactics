@@ -181,7 +181,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 						results := []string{}
 						for i, client := range h.answers {
 							if client == nil {
-								results = append(results, "ACTUAL ANSWER")
+								results = append(results, "")
 							} else {
 								results = append(results, client.Name)
 							}
