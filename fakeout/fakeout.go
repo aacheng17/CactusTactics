@@ -14,7 +14,9 @@ func (g *Fakeout) Name() string {
 
 func Init() core.Gamelike {
 	buildQuestions()
-	return &Fakeout{
+	ret := &Fakeout{
 		Game: *core.NewGame(NewFakeoutHub, NewFakeoutClient),
 	}
+	ret.Game.Child = ret
+	return ret
 }

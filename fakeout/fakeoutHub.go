@@ -2,6 +2,7 @@ package fakeout
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"strconv"
 	"strings"
@@ -16,6 +17,8 @@ type FakeoutHub struct {
 	// declaring struct variable
 	core.Hub
 
+	messageNum int
+
 	questions []int
 
 	question int
@@ -26,7 +29,10 @@ type FakeoutHub struct {
 }
 
 func (h *FakeoutHub) DisconnectClientMessage(c core.Clientlike) {
-	h.Broadcast(byte('0'), []string{fmt.Sprint(u.TagId("p", -1), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
+	if c.GetName() != "" {
+		h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p", 0), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
+		h.Broadcast(byte('3'), h.getPlayers())
+	}
 }
 
 func (h *FakeoutHub) getAssertedClients() map[*FakeoutClient]bool {
@@ -37,136 +43,176 @@ func (h *FakeoutHub) getAssertedClients() map[*FakeoutClient]bool {
 	return ret
 }
 
-// MESSAGE TYPES (SERVER TO CLIENT)
-// 0: regular chat messages
-// 1: scores
-// 2: prompt
-// 3: restart (data is inconsequential, probably empty string)
+// RECEIVING:
+// -: disconnect
+// 0: name
+// 1: lobby chat message
+// 2: end game message
+// a: response
+// b: choice
+// c: request prompt
+
+// SENDING:
+// 0: restart
+// 1: lobby chat message
+// 2: end game
+// 3: players
+// a: prompt
+// b: choice response
+// c: choices
+// d: choices response
+// e: results
+// f: winners
 
 func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*FakeoutClient)
 	question := questions.getQuestion(h.question)
-	switch m.MessageType {
-	case byte('0'):
-		if string(m.Data[0]) == "/restart" {
-			h.reset()
+	if c.Name == "" && m.MessageType == byte('0') {
+		log.Println("hello")
+		name := m.Data[0]
+		avatar, err1 := strconv.Atoi(m.Data[1])
+		color, err2 := strconv.Atoi(m.Data[2])
+		if err1 != nil || err2 != nil {
+			return
+		}
+		c.Name = name
+		c.Avatar = avatar
+		c.Color = color
+		h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
+		h.Broadcast(byte('3'), h.getPlayers())
+		h.SendData(c, byte('a'), h.getPrompt())
+		if h.phase == 1 {
+			toSend := []string{}
+			for _, client := range h.answers {
+				s := ""
+				if client == nil {
+					s = question.Answer
+				} else {
+					s = client.answer
+				}
+				toSend = append(toSend, s)
+			}
 			for client := range h.Clients {
-				h.SendData(client, byte('3'), []string{""})
-				h.SendData(client, byte('0'), []string{c.Name + " restarted the game"})
-				h.SendData(client, byte('1'), []string{h.getScores()})
-				h.SendData(client, byte('2'), []string{h.getPrompt()})
-				h.SendData(client, byte('0'), []string{"."})
-				h.SendData(client, byte('0'), []string{"New Prompt: " + h.getPrompt()})
+				h.SendData(client, byte('c'), toSend)
 			}
-		} else if h.phase == 0 {
-			playerAnswer := strings.TrimSpace(strings.ToLower(string(m.Data[0])))
-			alternateSpelling := false
-			for _, x := range question.AlternateSpellings {
-				if playerAnswer == x {
-					alternateSpelling = true
-					break
-				}
-			}
-			if c.answer != "" {
-			} else if playerAnswer == question.Answer || alternateSpelling {
-				h.SendData(c, byte('0'), []string{"Your answer is too close to the actual answer. Please choose another answer."})
-			} else {
-				h.SendData(c, byte('0'), []string{"Your answer has been recorded. Waiting for other players' answers."})
-				c.answer = playerAnswer
-				if h.isAllAnswered() {
-					h.answers = []*FakeoutClient{nil}
-					for client := range h.getAssertedClients() {
-						h.answers = append(h.answers, client)
+		}
+		return
+	}
+	switch m.MessageType {
+	case byte('1'):
+		log.Println("goodybe")
+		h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
+	}
+	if h.phase == -1 {
+		if m.MessageType == byte('2') {
+			h.reset()
+			h.Broadcast(byte('0'), []string{""})
+			h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " restarted the game", u.ENDTAG, u.ENDTAG)})
+			h.Broadcast(byte('3'), h.getPlayers())
+			h.Broadcast(byte('a'), h.getPrompt())
+			h.phase = 0
+		}
+		return
+	}
+	switch m.MessageType {
+	case byte('a'):
+		if h.phase == 0 {
+			if c.answer == "" {
+				playerAnswer := strings.TrimSpace(strings.ToLower(string(m.Data[0])))
+				alternateSpelling := false
+				for _, x := range question.AlternateSpellings {
+					if playerAnswer == x {
+						alternateSpelling = true
+						break
 					}
-					rand.Shuffle(len(h.answers), func(i, j int) { h.answers[i], h.answers[j] = h.answers[j], h.answers[i] })
-					stringToSend := "Choose from these answers:<br/>"
-					for i, client := range h.answers {
-						s := ""
-						if client == nil {
-							s = question.Answer
-						} else {
-							s = client.answer
+				}
+				if c.answer != "" {
+				} else if playerAnswer == question.Answer || alternateSpelling {
+					h.SendData(c, byte('b'), []string{"-1"}) //answer is too close to actual answer
+				} else {
+					h.SendData(c, byte('b'), []string{"0"})
+					c.answer = playerAnswer
+					if h.isAllAnswered() {
+						h.answers = []*FakeoutClient{nil}
+						for client := range h.getAssertedClients() {
+							h.answers = append(h.answers, client)
 						}
-						stringToSend += "(" + fmt.Sprint(i) + ") " + s + "<br/>"
+						rand.Shuffle(len(h.answers), func(i, j int) { h.answers[i], h.answers[j] = h.answers[j], h.answers[i] })
+						toSend := []string{}
+						for _, client := range h.answers {
+							s := ""
+							if client == nil {
+								s = question.Answer
+							} else {
+								s = client.answer
+							}
+							toSend = append(toSend, s)
+						}
+						for client := range h.Clients {
+							h.SendData(client, byte('c'), toSend)
+						}
+						h.phase = 1
 					}
-					for client := range h.Clients {
-						h.SendData(client, byte('0'), []string{stringToSend})
-					}
-					h.phase = 1
 				}
 			}
-		} else if h.phase == 1 {
+		}
+	case byte('b'):
+		if h.phase == 1 {
 			playerChoice := strings.TrimSpace(string(m.Data[0]))
 			choiceIndex, err := strconv.Atoi(playerChoice)
-			if err != nil || choiceIndex < 0 || choiceIndex >= len(h.answers) {
-				h.SendData(c, byte('0'), []string{"Invalid choice. Please enter a valid number choice."})
-			} else if h.answers[choiceIndex] == c {
-				h.SendData(c, byte('0'), []string{"Invalid choice. You can't pick your own answer."})
-			} else {
-				c.choice = choiceIndex
-				wordChoice := ""
-				if h.answers[c.choice] == nil {
-					wordChoice = question.Answer
+			if err == nil {
+				if h.answers[choiceIndex] == c {
+					h.SendData(c, byte('d'), []string{"-1"}) //can't pick your own number
 				} else {
-					wordChoice = h.answers[c.choice].answer
-				}
-				h.SendData(c, byte('0'), []string{"You chose (" + fmt.Sprint(c.choice) + ") " + wordChoice + ". Waiting for other players' choices."})
-				if h.isAllChosen() {
-					choices := make([][]*FakeoutClient, len(h.answers))
-					for i := range choices {
-						choices[i] = make([]*FakeoutClient, 0)
-					}
-					for client := range h.getAssertedClients() {
-						choices[client.choice] = append(choices[client.choice], client)
-						if h.answers[client.choice] == nil {
-							client.score += 100
-						} else {
-							if h.answers[client.choice] != client {
-								h.answers[client.choice].score += 50
+					h.SendData(c, byte('d'), []string{"0"})
+					c.choice = choiceIndex
+					if h.isAllChosen() {
+						choices := make([][]*FakeoutClient, len(h.answers))
+						for i := range choices {
+							choices[i] = make([]*FakeoutClient, 0)
+						}
+						for client := range h.getAssertedClients() {
+							choices[client.choice] = append(choices[client.choice], client)
+							if h.answers[client.choice] == nil {
+								client.score += 100
+							} else {
+								if h.answers[client.choice] != client {
+									h.answers[client.choice].score += 50
+								}
 							}
 						}
-					}
-					stringToSend := "Results:<br/>"
-					for i, client := range h.answers {
-						if client == nil {
-							stringToSend += question.Answer + " (ACTUAL ANSWER)"
-						} else {
-							stringToSend += client.answer + " (" + client.Name + ") faked out"
-							if len(choices[i]) == 0 {
-								stringToSend += " no one"
+						results := []string{}
+						for i, client := range h.answers {
+							if client == nil {
+								results = append(results, "ACTUAL ANSWER")
+							} else {
+								results = append(results, client.Name)
 							}
+							s := ""
+							for _, fakedOut := range choices[i] {
+								s += " " + fakedOut.Name
+							}
+							results = append(results, s)
 						}
-						for _, fakedOut := range choices[i] {
-							stringToSend += " " + fakedOut.Name
+						h.phase = 0
+						h.resetAnswers()
+						h.genNextQuestion()
+						for client := range h.Clients {
+							h.SendData(client, byte('e'), results)
+							h.SendData(client, byte('3'), h.getPlayers())
 						}
-						stringToSend += "<br/>"
-					}
-					h.phase = 0
-					h.resetAnswers()
-					h.genNextQuestion()
-					for client := range h.Clients {
-						h.SendData(client, byte('0'), []string{stringToSend})
-						h.SendData(client, byte('1'), []string{h.getScores()})
-						h.SendData(client, byte('2'), []string{h.getPrompt()})
-						h.SendData(client, byte('0'), []string{"."})
-						h.SendData(client, byte('0'), []string{"New Prompt: " + h.getPrompt()})
+						h.phase = 0
 					}
 				}
 			}
 		}
-	case byte('1'):
-		name := string(m.Data[0])
-		if c.Name == "" {
-			c.Name = name
-		}
-		for client := range h.Clients {
-			h.SendData(client, byte('0'), []string{name + " joined"})
-		}
-		for client := range h.Clients {
-			h.SendData(client, byte('1'), []string{h.getScores()})
-		}
-		h.SendData(c, byte('2'), []string{h.getPrompt()})
-		h.SendData(c, byte('0'), []string{"New Prompt: " + h.getPrompt()})
+	case byte('c'):
+		h.SendData(c, byte('a'), h.getPrompt())
+		break
+	case byte('2'):
+		h.Broadcast(byte('2'), []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
+		h.Broadcast(byte('f'), h.getWinners())
+		h.phase = -1
 	}
 }
 

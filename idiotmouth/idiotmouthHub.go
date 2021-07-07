@@ -99,7 +99,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	case byte('1'):
 		h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
 	}
-	if h.phase == 1 {
+	if h.phase == -1 {
 		if m.MessageType == byte('2') {
 			h.reset()
 			h.Broadcast(byte('0'), []string{""})
@@ -156,7 +156,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	case byte('2'):
 		h.Broadcast(byte('2'), []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
 		h.Broadcast(byte('e'), h.getWinners())
-		h.phase = 1
+		h.phase = -1
 	}
 }
 

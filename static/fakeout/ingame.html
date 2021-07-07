@@ -33,19 +33,16 @@
 </div>
 <div id="ingame-center">
   <div id="prompt">
-      <div id="prompt-text">
-          <h2>Current Letters:</h2>
-          <h2 id="start-letter"></h2>
-          <h2 id="end-letter"></h2>
-          <button id="skip">Vote to skip</button>
-      </div>
-      <a id="prompt-extra-text"></a>
-  </div>
-  <div id="gamebox" class="databox">
-      <div id="game-log" class="data-log"></div>
-      <form id="game-form" class="data-form">
-          <input type="text" id="game-field" class="data-field" maxlength="100" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-          <input type="submit" id="game-send" value="Send" />
+      <div id="prompt-text"></div>
+      <form id="prompt-form">
+          <input type="text" id="prompt-field" maxlength="200" autocomplete="off"/>
+          <input type="submit" id="prompt-submit" value="Submit" />
       </form>
+      <div id="prompt-waiting"></div>
+  </div>
+  <div id="choices-container">
+    <div id="choices"></div>
+    <div id="choices-waiting"></div>
+</div>
   </div>
 </div>

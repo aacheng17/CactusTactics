@@ -16,6 +16,8 @@ type FakeoutClient struct {
 	answer string
 
 	choice int
+
+	fakeouts int
 }
 
 func NewFakeoutClient(hub core.Hublike, conn *websocket.Conn) core.Clientlike {

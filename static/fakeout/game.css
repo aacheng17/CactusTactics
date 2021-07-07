@@ -1,5 +1,17 @@
-.score-message {
+#choices {
     display: flex;
-    flex-direction: row;
+    flex-direction: column;
     gap: 2px;
+}
+
+#prompt {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#choices-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
 }
