@@ -49,6 +49,10 @@ func (h *TimelineHub) getPrompt() []string {
 	return []string{h.event.title}
 }
 
+func (h *TimelineHub) getNextTurn() {
+
+}
+
 func (h *TimelineHub) getTurn() []string {
 	ret := []string{}
 	for k, v := range h.events {
