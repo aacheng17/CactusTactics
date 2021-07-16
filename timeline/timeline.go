@@ -4,19 +4,25 @@ import (
 	"example.com/hello/core"
 )
 
-type Idiotmouth struct {
+type Timeline struct {
 	core.Game
 }
 
-func (g *Idiotmouth) Name() string {
+func (g *Timeline) Name() string {
 	return "idiotmouth"
 }
 
 func Init() core.Gamelike {
-	buildDictionary()
-	ret := &Idiotmouth{
+	buildEvents()
+	ret := &Timeline{
 		Game: *core.NewGame(NewTimelineHub, NewTimelineClient),
 	}
 	ret.Game.Child = ret
 	return ret
+}
+
+type Event struct {
+	year  int
+	title string
+	info  string
 }

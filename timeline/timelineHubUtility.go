@@ -12,91 +12,50 @@ func (h *TimelineHub) useMessageNum() int {
 	return ret
 }
 
-func (h *TimelineHub) validWord(str string) int {
-	if _, ok := h.usedWords[str]; ok {
-		return 2
-	}
-	if _, ok := dictionary[str]; ok {
-		return 0
-	}
-	return 1
+func (h *TimelineHub) newPlayerInitiative() int {
+	ret := h.playerNum
+	h.playerNum++
+	return ret
 }
 
 func (h *TimelineHub) reset() {
 	for client := range h.getAssertedClients() {
-		client.score = 0
-		client.pass = false
-		client.highestWord = ""
-		client.highestScore = 0
 	}
 	h.messageNum = 0
-	h.usedWords = make(map[string]bool)
-	h.whattedWords = make(map[int]string)
-	h.wordsLeft = len(dictionary)
-	for k, v := range letters {
-		h.letters[k] = v
-	}
-	h.genNextLetters()
-}
-
-func (h *TimelineHub) resetPass() {
-	for client := range h.getAssertedClients() {
-		client.pass = false
+	h.events = make(map[string]Event)
+	for k, v := range events {
+		h.events[k] = v
 	}
 }
 
-func (h *TimelineHub) pass() int {
-	h.resetPass()
-	h.wordsLeft -= h.letters[string(h.start)+string(h.end)]
-	h.letters[string(h.start)+string(h.end)] = 0
-	return h.genNextLetters()
-}
-
-func (h *TimelineHub) getMajorityPass() bool {
-	count := 0
-	clientsWithNames := 0
-	for client := range h.getAssertedClients() {
-		if client.Name != "" {
-			clientsWithNames++
-			if client.pass {
-				count++
-			}
+func randMapKey(m map[string]Event) string {
+	r := rand.Intn(len(m))
+	for k := range m {
+		if r == 0 {
+			return k
 		}
+		r--
 	}
-	return count*2 > clientsWithNames
+	panic("unreachable")
 }
 
-func (h *TimelineHub) gotIt(word string) int {
-	h.resetPass()
-	h.usedWords[word] = true
-	h.wordsLeft--
-	h.letters[string(h.start)+string(h.end)]--
-	return h.genNextLetters()
-}
-
-func (h *TimelineHub) genNextLetters() int {
-	if h.wordsLeft <= 0 {
-		return 1
-	}
-	r := rand.Intn(h.wordsLeft)
-	c := 0
-	for lets, freq := range h.letters {
-		c += freq
-		if r < c {
-			h.start = rune(lets[0])
-			h.end = rune(lets[1])
-			break
-		}
-	}
-	return 0
-}
-
-func (h *TimelineHub) getWorth() int {
-	return int(50-50*(float32(letters[string(h.start)+string(h.end)]-minFreq)/float32(maxFreq-minFreq))) + 50
+func (h *TimelineHub) newPrompt() {
+	k := randMapKey(h.events)
+	h.event = h.events[k]
+	delete(h.events, k)
 }
 
 func (h *TimelineHub) getPrompt() []string {
-	return []string{string(h.start), string(h.end), fmt.Sprint(h.getWorth()), fmt.Sprint(h.letters[string(h.start)+string(h.end)])}
+	return []string{h.event.title}
+}
+
+func (h *TimelineHub) getTurn() []string {
+	ret := []string{}
+	for k, v := range h.events {
+		ret = append(ret, fmt.Sprint(v))
+		ret = append(ret, k)
+	}
+	return ret
 }
 
 func (h *TimelineHub) getPlayers(excepts ...*TimelineClient) []string {
@@ -143,14 +102,6 @@ func (h *TimelineHub) getWinners() []string {
 	winner := keys[0]
 	ret = append(ret, winner.Name)
 	ret = append(ret, fmt.Sprint(winner.score))
-
-	sort.Slice(keys, func(i, j int) bool {
-		return keys[i].highestScore > keys[j].highestScore
-	})
-	winner = keys[0]
-	ret = append(ret, winner.Name)
-	ret = append(ret, winner.highestWord)
-	ret = append(ret, fmt.Sprint(winner.highestScore))
 
 	return ret
 }
