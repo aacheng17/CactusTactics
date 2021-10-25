@@ -14,6 +14,8 @@ type TimelineClient struct {
 	initiative int
 
 	hand []Event
+
+	score int
 }
 
 func NewTimelineClient(hub core.Hublike, conn *websocket.Conn) core.Clientlike {

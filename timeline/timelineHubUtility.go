@@ -20,6 +20,7 @@ func (h *TimelineHub) newPlayerInitiative() int {
 
 func (h *TimelineHub) reset() {
 	for client := range h.getAssertedClients() {
+		client.score = 0
 	}
 	h.messageNum = 0
 	h.events = make(map[string]Event)
@@ -88,8 +89,6 @@ func (h *TimelineHub) getPlayers(excepts ...*TimelineClient) []string {
 		players = append(players, fmt.Sprint(client.Avatar))
 		players = append(players, fmt.Sprint((client.Color)))
 		players = append(players, fmt.Sprint(client.score))
-		players = append(players, client.highestWord)
-		players = append(players, fmt.Sprint(client.highestScore))
 	}
 	return players
 }

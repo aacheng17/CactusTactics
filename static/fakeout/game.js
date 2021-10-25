@@ -2,6 +2,7 @@ import * as networking from '../networking.js';
 import { AVATARS } from '../avatars/avatars.js';
 import { COLORS, name } from '../landing.js';
 import { appendDataLog, setChatboxNotification } from '../ingame-utility.js';
+import { initTitles, initHowToPlays } from '../importantStrings.js';
 
 var phase = 0;
 var ingameLeft = document.getElementById("ingame-left");
@@ -17,6 +18,9 @@ var choices = document.getElementById("choices");
 var choicesWaiting = document.getElementById("choices-waiting");
 
 export function initMain(conn) {
+    initTitles("Fakeout");
+    initHowToPlays("Rules\nTry to fool others by filling in the fact.\nThen try to pick the correct fill-in yourself.\n\nScoring\n50 points for faking out someone else\n100 points for guessing the correct answer.");
+    
     promptForm.onsubmit = function (e) {
         e.preventDefault();
         if (!conn) {

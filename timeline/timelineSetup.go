@@ -30,7 +30,9 @@ func buildEvents() {
 		date, err := strconv.Atoi(data[0])
 		if err == nil {
 			event := data[1]
-			events[event] = date
+			events[event] = Event{
+				year: date,
+			}
 		}
 	}
 

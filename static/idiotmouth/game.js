@@ -2,6 +2,7 @@ import * as networking from '../networking.js';
 import { AVATARS } from '../avatars/avatars.js';
 import { COLORS, name } from '../landing.js';
 import { appendDataLog, setChatboxNotification } from '../ingame-utility.js';
+import { initTitles, initHowToPlays } from '../importantStrings.js';
 
 var ingameLeft = document.getElementById("ingame-left");
 var endgame = document.getElementById("endgame");
@@ -16,6 +17,9 @@ var gameForm = document.getElementById("game-form");
 var gameField = document.getElementById("game-field");
 
 export function initMain(conn) {
+    initTitles("Idiotmouth");
+    initHowToPlays("Rules\nTry to think of a word that starts with the first letter and ends with the second letter before your opponents.\nWords must be at least 3 letters long.\n\nScoring\nThe more rare the letter combination, the more points it's worth (up to 100).\nEach word gets a length bonus multiplier as well.");
+    
     skip.onclick = function (e) {
         if (!conn) {
             return false;
