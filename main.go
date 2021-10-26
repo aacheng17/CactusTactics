@@ -59,6 +59,7 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 	}
 
 	hubId := utility.UrlIndexGetPath(r.URL.String(), 1)
+	log.Println(hubId)
 	hub, ok := hubs[game][hubId]
 	if !ok {
 		hub = games[game].NewHub()

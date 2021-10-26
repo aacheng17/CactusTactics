@@ -2,10 +2,11 @@ import { initCollapsible } from './collapsible.js';
 import { initLanding } from './landing.js';
 import { initIngameLeft } from './ingame-left.js';
 import { appendDataLog } from './ingame-utility.js';
-import { initTitles, initHowToPlays } from './importantStrings.js';
 
 window.onload = async function () {
     var gameName = window.location.pathname.slice(1);
+    var firstSlashIndex = gameName.indexOf("/");
+    if (firstSlashIndex !== -1) { gameName = gameName.slice(0, firstSlashIndex); }
     let { initMain } = await import('./' + gameName + '/game.js');
     
     var head = document.getElementsByTagName('head')[0];
