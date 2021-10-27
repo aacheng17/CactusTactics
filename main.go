@@ -36,7 +36,8 @@ func servePage(w http.ResponseWriter, r *http.Request) {
 	}
 	game := utility.UrlIndexGetPath(r.URL.String(), 0)
 	if game == "" {
-		//serve home
+		log.Println("a")
+		http.ServeFile(w, r, "static/home.html")
 		return
 	}
 	_, ok := games[game]
