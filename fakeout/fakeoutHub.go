@@ -79,7 +79,9 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 		h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
 		h.Broadcast(byte('3'), h.getPlayers())
 		h.SendData(c, byte('a'), h.getPrompt())
-		if h.phase == 1 {
+		if h.phase == -1 {
+			h.SendData(c, byte('2'), []string{})
+		} else if h.phase == 1 {
 			toSend := []string{}
 			for _, client := range h.answers {
 				s := ""

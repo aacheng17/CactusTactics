@@ -82,6 +82,9 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 		h.Broadcast(byte('a'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
 		h.Broadcast(byte('3'), h.getPlayers())
 		h.SendData(c, byte('d'), h.getPrompt())
+		if h.phase == -1 {
+			h.SendData(c, '2', []string{})
+		}
 		return
 	}
 	switch m.MessageType {
