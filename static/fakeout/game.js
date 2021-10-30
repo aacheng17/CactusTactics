@@ -4,7 +4,6 @@ import { COLORS, name } from '../landing.js';
 import { appendDataLog, setChatboxNotification } from '../ingame-utility.js';
 import { initTitles, initHowToPlays } from '../importantStrings.js';
 
-var phase = 0;
 var ingameLeft = document.getElementById("ingame-left");
 var endgame = document.getElementById("endgame");
 var players = document.getElementById("players");

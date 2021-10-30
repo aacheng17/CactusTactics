@@ -92,9 +92,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 				}
 				toSend = append(toSend, s)
 			}
-			for client := range h.Clients {
-				h.SendData(client, byte('c'), toSend)
-			}
+			h.SendData(c, byte('c'), toSend)
 		}
 		return
 	}

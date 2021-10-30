@@ -14,6 +14,7 @@ import (
 	"example.com/hello/core"
 	"example.com/hello/fakeout"
 	"example.com/hello/idiotmouth"
+	"example.com/hello/standoff"
 	"example.com/hello/timeline"
 	"example.com/hello/utility"
 )
@@ -26,6 +27,7 @@ var (
 func Init() {
 	games["idiotmouth"] = idiotmouth.Init()
 	games["fakeout"] = fakeout.Init()
+	games["standoff"] = standoff.Init()
 	games["timeline"] = timeline.Init()
 }
 

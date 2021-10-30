@@ -1,0 +1,17 @@
+#choices {
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+}
+
+#round-text {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#choices-container {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
