@@ -15,7 +15,6 @@ import (
 	"example.com/hello/fakeout"
 	"example.com/hello/idiotmouth"
 	"example.com/hello/standoff"
-	"example.com/hello/timeline"
 	"example.com/hello/utility"
 )
 
@@ -28,7 +27,10 @@ func Init() {
 	games["idiotmouth"] = idiotmouth.Init()
 	games["fakeout"] = fakeout.Init()
 	games["standoff"] = standoff.Init()
-	games["timeline"] = timeline.Init()
+}
+
+func deleteHub(h *core.Hub) {
+	delete(hubs[h.Game], h.Id)
 }
 
 func servePage(w http.ResponseWriter, r *http.Request) {
@@ -65,7 +67,7 @@ func handleWs(w http.ResponseWriter, r *http.Request) {
 	log.Println(hubId)
 	hub, ok := hubs[game][hubId]
 	if !ok {
-		hub = games[game].NewHub()
+		hub = games[game].NewHub(game, hubId, deleteHub)
 		go hub.Run()
 		hubs[game][hubId] = hub
 	}

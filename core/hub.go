@@ -34,6 +34,12 @@ type Hub struct {
 	Unregister chan Clientlike
 
 	Messages chan *Message
+
+	Game string
+
+	Id string
+
+	DeleteHubCallback func(*Hub)
 }
 
 func (h *Hub) RemoveClient(client Clientlike, debugMessage string) {
@@ -41,6 +47,10 @@ func (h *Hub) RemoveClient(client Clientlike, debugMessage string) {
 	close(client.GetSend())
 	h.Child.DisconnectClientMessage(client)
 	log.Println(debugMessage)
+	if len(h.Clients) == 0 {
+		log.Println("delete callback")
+		h.DeleteHubCallback(h)
+	}
 }
 
 func (h *Hub) Broadcast(messageType byte, data []string, exceptions ...Clientlike) {
@@ -103,11 +113,14 @@ func (h *Hub) Run() {
 	}
 }
 
-func NewHub() *Hub {
+func NewHub(game string, id string, deleteHubCallback func(*Hub)) *Hub {
 	return &Hub{
-		Register:   make(chan Clientlike),
-		Unregister: make(chan Clientlike),
-		Messages:   make(chan *Message),
-		Clients:    make(map[Clientlike]bool),
+		Register:          make(chan Clientlike),
+		Unregister:        make(chan Clientlike),
+		Messages:          make(chan *Message),
+		Clients:           make(map[Clientlike]bool),
+		Game:              game,
+		Id:                id,
+		DeleteHubCallback: deleteHubCallback,
 	}
 }

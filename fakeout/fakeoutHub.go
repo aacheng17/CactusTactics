@@ -213,9 +213,9 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 	}
 }
 
-func NewFakeoutHub() core.Hublike {
+func NewFakeoutHub(game string, id string, deleteHubCallback func(*core.Hub)) core.Hublike {
 	h := &FakeoutHub{
-		Hub: *core.NewHub(),
+		Hub: *core.NewHub(game, id, deleteHubCallback),
 	}
 	h.Child = h
 	h.reset()

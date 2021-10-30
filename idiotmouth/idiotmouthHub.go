@@ -163,9 +163,9 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	}
 }
 
-func NewIdiotmouthHub() core.Hublike {
+func NewIdiotmouthHub(game string, id string, deleteHubCallback func(*core.Hub)) core.Hublike {
 	h := &IdiotmouthHub{
-		Hub:     *core.NewHub(),
+		Hub:     *core.NewHub(game, id, deleteHubCallback),
 		letters: make(map[string]int),
 	}
 	h.Child = h

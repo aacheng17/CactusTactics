@@ -117,9 +117,9 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 	}
 }
 
-func NewStandoffHub() core.Hublike {
+func NewStandoffHub(game string, id string, deleteHubCallback func(*core.Hub)) core.Hublike {
 	h := &StandoffHub{
-		Hub:          *core.NewHub(),
+		Hub:          *core.NewHub(game, id, deleteHubCallback),
 		phase:        -1,
 		round:        0,
 		nextClientId: 0,

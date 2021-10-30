@@ -10,19 +10,19 @@ import (
 type Gamelike interface {
 	Name() string
 	ExecuteTemplate(w http.ResponseWriter)
-	NewHub() Hublike
+	NewHub(game string, id string, deleteHubCallback func(*Hub)) Hublike
 	NewClient(hub Hublike, conn *websocket.Conn) Clientlike
 }
 
 type Game struct {
 	Child     Gamelike
 	Html      string
-	newHub    func() Hublike
+	newHub    func(game string, id string, deleteHubCallback func(*Hub)) Hublike
 	newClient func(hub Hublike, conn *websocket.Conn) Clientlike
 }
 
-func (g *Game) NewHub() Hublike {
-	return g.newHub()
+func (g *Game) NewHub(game string, id string, deleteHubCallback func(*Hub)) Hublike {
+	return g.newHub(game, id, deleteHubCallback)
 }
 
 func (g *Game) NewClient(hub Hublike, conn *websocket.Conn) Clientlike {
@@ -38,6 +38,6 @@ func (g *Game) ExecuteTemplate(w http.ResponseWriter) {
 	tmpl.ExecuteTemplate(w, "index.html", templateData)
 }
 
-func NewGame(newHub func() Hublike, newClient func(hub Hublike, conn *websocket.Conn) Clientlike) *Game {
+func NewGame(newHub func(game string, id string, deleteHubCallback func(*Hub)) Hublike, newClient func(hub Hublike, conn *websocket.Conn) Clientlike) *Game {
 	return &Game{newHub: newHub, newClient: newClient}
 }
