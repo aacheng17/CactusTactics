@@ -11,7 +11,12 @@ var chatLog = document.getElementById("chat-log");
 var roundText = document.getElementById("round-text");
 var choices = document.getElementById("choices");
 var choicesWaiting = document.getElementById("choices-waiting");
+var resultsDiv = document.getElementById("results-div");
+var outcome = document.getElementById("outcome");
 var results = document.getElementById("results");
+var continueDiv = document.getElementById("continue");
+var gameResultsHeader = document.getElementById("game-results-header");
+var gameResults = document.getElementById("game-results");
 
 export function initMain(conn) {
     initTitles("Standoff");
@@ -29,6 +34,10 @@ export function initMain(conn) {
             var data = networking.decode(m.substring(1,m.length));
             switch (messageType) {
             case '0':
+                gameResultsHeader.innerText = "";
+                while (gameResults.firstChild) {
+                    gameResults.removeChild(gameResults.firstChild);
+                }
                 endgame.innerText = "end game";
                 break;
             case '1':
@@ -39,10 +48,10 @@ export function initMain(conn) {
                     setChatboxNotification(1);
                 }
                 break;
-            case '2':                
+            case '2':
                 endgame.innerText = "new game";
-                var item = networking.decodeToDiv(data[0]);
-                appendDataLog(chatLog, item);
+                roundText.innerText = "Round 0";
+                choices.innerText = "Waiting for new game...";
                 break;
             case '3':
                 while (players.firstChild) {
@@ -53,15 +62,8 @@ export function initMain(conn) {
                     player.className = "player";
                     var playerInfo = document.createElement("div");
                     playerInfo.classList.add("player-info");
-                    var text = "<b>" + data[j] + "</b>" + " "
-                    if (data[j+3].toString() === "false") {
-                        text += "spectating";
-                    } else if (data[j+4].toString() === "true") {
-                        text += "alive";
-                    } else {
-                        text += "dead";
-                    }
-                    playerInfo.innerHTML = text;
+                    playerInfo.innerHTML = "<b>" + data[j] + "</b>" + " " + data[j+3] + "<br/>" + data[j+4] + " kills";
+                    playerInfo
                     player.appendChild(playerInfo);
                     var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                     svg.classList.add("player-avatar");
@@ -77,20 +79,30 @@ export function initMain(conn) {
                 }
                 break;
             case 'a':
+                roundText.innerText = `Round ${data[0]}`;
+                resultsDiv.style.display = "none";
+                outcome.innerText = "";
                 results.innerText = "";
-                roundText.innerText = `Round ${data[0]}\nWho to shoot?`;
+                while (continueDiv.firstChild) {
+                    continueDiv.removeChild(continueDiv.firstChild);
+                }
                 while (choices.firstChild) {
                     choices.removeChild(choices.firstChild);
                 }
-                for (let j = 1; j < data.length; j+=2) {
-                    let clientId = data[j];
-                    let clientName = data[j+1]
-                    var item = document.createElement("button");
-                    item.innerText = clientName;
-                    item.onclick = function() {
-                        networking.send(conn, "a" + clientId.toString());
-                    };
-                    choices.appendChild(item);
+                if (data.length > 1) {
+                    choices.innerText = "Who to shoot?";
+                    for (let j = 1; j < data.length; j+=2) {
+                        let clientId = data[j];
+                        let clientName = data[j+1]
+                        var item = document.createElement("button");
+                        item.innerText = clientName;
+                        item.onclick = function() {
+                            networking.send(conn, "a" + clientId.toString());
+                        };
+                        choices.appendChild(item);
+                    }
+                } else {
+                    choicesWaiting = "You are dead. Waiting for other players..."
                 }
                 break;
             case 'b':
@@ -102,20 +114,33 @@ export function initMain(conn) {
                 break;
             case 'c':
                 choicesWaiting.innerText = "";
-                results.innerText = "Outcome:\n"
-                var item = networking.decodeToDiv(data[0]);
-                results.appendChild(item);
+                resultsDiv.style.display = "flex";
+                resultsDiv.style.flexDirection = "column";
+                outcome.innerText = "Round Outcome"
+                data.forEach(line => {
+                    item = networking.decodeToDiv(line);
+                    results.appendChild(item);
+                });
+                while (continueDiv.firstChild) {
+                    continueDiv.removeChild(continueDiv.firstChild);
+                }
                 item = document.createElement("button");
                 item.innerText = "Continue";
                 item.onclick = function() {
                     networking.send(conn, "b");
                 };
-                results.appendChild(item);
+                continueDiv.appendChild(item);
                 break;
             case 'd':
+                while (continueDiv.firstChild) {
+                    continueDiv.removeChild(continueDiv.firstChild);
+                }
                 choicesWaiting.innerText = "";
-                var item = networking.decodeToDiv(data[0]);
-                results.appendChild(item);
+                gameResultsHeader.innerText = "Game Outcome"
+                data.forEach(line => {
+                    item = networking.decodeToDiv(line);
+                    gameResults.appendChild(item);
+                });
                 break;
             }
         }

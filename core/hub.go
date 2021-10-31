@@ -48,7 +48,6 @@ func (h *Hub) RemoveClient(client Clientlike, debugMessage string) {
 	h.Child.DisconnectClientMessage(client)
 	log.Println(debugMessage)
 	if len(h.Clients) == 0 {
-		log.Println("delete callback")
 		h.DeleteHubCallback(h)
 	}
 }

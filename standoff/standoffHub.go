@@ -25,7 +25,7 @@ type StandoffHub struct {
 
 func (h *StandoffHub) DisconnectClientMessage(c core.Clientlike) {
 	if c.GetName() != "" {
-		h.Broadcast(byte('a'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
+		h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
 		h.Broadcast(byte('3'), h.getPlayers())
 	}
 }
@@ -103,7 +103,7 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 					h.Broadcast(byte('c'), h.calcResult())
 					h.Broadcast(byte('3'), h.getPlayers())
 					if h.numAlive() < 2 {
-						h.SendData(c, byte('2'), []string{""})
+						h.Broadcast(byte('2'), []string{""})
 						h.Broadcast(byte('d'), h.getWinners())
 						h.phase = -1
 					} else {
@@ -112,7 +112,11 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 				}
 			}
 		case byte('b'):
-			h.SendData(c, byte('a'), h.getPrompt())
+			if c.alive {
+				h.SendData(c, byte('a'), h.getPrompt())
+			} else {
+				h.SendData(c, byte('a'), []string{fmt.Sprint(h.round)})
+			}
 		}
 	}
 }

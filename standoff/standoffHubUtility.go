@@ -17,6 +17,7 @@ func (h *StandoffHub) reset() {
 	for client := range h.getAssertedClients() {
 		client.kills = nil
 		client.active = true
+		client.alive = true
 	}
 	h.round = 0
 	h.nextRound()
@@ -33,8 +34,10 @@ func (h *StandoffHub) nextRound() {
 func (h *StandoffHub) getPrompt() []string {
 	ret := []string{fmt.Sprint(h.round)}
 	for client := range h.getAssertedClients() {
-		ret = append(ret, fmt.Sprint(client.id))
-		ret = append(ret, client.Name)
+		if client.active && client.alive {
+			ret = append(ret, fmt.Sprint(client.id))
+			ret = append(ret, client.Name)
+		}
 	}
 	return ret
 }
@@ -61,6 +64,9 @@ func (h *StandoffHub) numAlive() int {
 func (h *StandoffHub) calcResult() []string {
 	ret := []string{}
 	for client := range h.getAssertedClients() {
+		if client.decision == -1 {
+			continue
+		}
 		if client.decision == client.id {
 			reflections := []string{}
 			for client2 := range h.getAssertedClients() {
@@ -76,20 +82,27 @@ func (h *StandoffHub) calcResult() []string {
 			if len(reflections) != 0 {
 				ret = append(ret, h.reflect(client.id, reflections))
 			} else {
+				ret = append(ret, h.kill(client.id, client.Name))
 				client.kills = append(client.kills, client.Name)
 				client.alive = false
 			}
-		}
-		found := false
-		for client2 := range h.getAssertedClients() {
-			if client2.id == client.decision {
-				found = true
-				ret = append(ret, h.kill(client.id, client2.Name))
-				break
+		} else {
+			found := false
+			for client2 := range h.getAssertedClients() {
+				if client2.id == client.decision {
+					found = true
+					if client2.decision == client2.id {
+						break
+					}
+					ret = append(ret, h.kill(client.id, client2.Name))
+					client.kills = append(client.kills, client2.Name)
+					client2.alive = false
+					break
+				}
 			}
-		}
-		if !found {
-			ret = append(ret, h.kill(client.id, ""))
+			if !found {
+				ret = append(ret, h.kill(client.id, ""))
+			}
 		}
 	}
 	return ret
@@ -100,7 +113,7 @@ func (h *StandoffHub) reflect(killer int, victims []string) string {
 		if client.id == killer {
 			victimsString := ""
 			for _, victim := range victims {
-				victimsString += victim
+				victimsString += " " + victim
 			}
 			return fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+client.Name+u.ENDTAG, " reflected "+victimsString, u.ENDTAG)
 		}
@@ -135,7 +148,13 @@ func (h *StandoffHub) getPlayers(excepts ...*StandoffClient) []string {
 		}
 	}
 	sort.Slice(keys, func(i, j int) bool {
-		return keys[i].alive || !keys[j].active
+		if keys[i].active != keys[j].active {
+			return keys[i].active
+		}
+		if keys[i].alive != keys[j].alive {
+			return keys[i].alive
+		}
+		return len(keys[i].kills) > len(keys[j].kills)
 	})
 	players := []string{}
 	for _, client := range keys {
@@ -145,8 +164,14 @@ func (h *StandoffHub) getPlayers(excepts ...*StandoffClient) []string {
 		players = append(players, client.Name)
 		players = append(players, fmt.Sprint(client.Avatar))
 		players = append(players, fmt.Sprint(client.Color))
-		players = append(players, fmt.Sprint(client.active))
-		players = append(players, fmt.Sprint(client.alive))
+		status := "alive"
+		if !client.active {
+			status = "spectating"
+		} else if !client.alive {
+			status = "dead"
+		}
+		players = append(players, fmt.Sprint(status))
+		players = append(players, fmt.Sprint(len(client.kills)))
 	}
 	return players
 }
@@ -158,10 +183,17 @@ func (h *StandoffHub) getWinners() []string {
 		keys = append(keys, k)
 	}
 	sort.Slice(keys, func(i, j int) bool {
+		if keys[i].active != keys[j].active {
+			return keys[i].active
+		}
+		if keys[i].alive != keys[j].alive {
+			return keys[i].alive
+		}
 		return len(keys[i].kills) > len(keys[j].kills)
 	})
 
-	for _, key := range keys {
+	dead := false
+	for i, key := range keys {
 		if !key.active {
 			continue
 		}
@@ -169,11 +201,13 @@ func (h *StandoffHub) getWinners() []string {
 		for _, kill := range key.kills {
 			kills += " " + kill
 		}
-		alive := "DEAD"
-		if key.alive {
-			alive = "ALIVE"
+		if key.alive && i == 0 {
+			ret = append(ret, u.Tag("b")+"ALIVE:"+u.ENDTAG)
 		}
-		ret = append(ret, fmt.Sprint(u.TagId("p", h.useMessageNum()), alive+": ", u.Tag("b")+key.Name+u.ENDTAG, " KILLS: "+kills, u.ENDTAG))
+		if !key.alive && !dead {
+			ret = append(ret, u.Tag("b")+"DEAD:"+u.ENDTAG)
+		}
+		ret = append(ret, fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+key.Name+u.ENDTAG, " KILLED: "+kills, u.ENDTAG))
 	}
 
 	return ret
