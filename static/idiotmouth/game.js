@@ -91,6 +91,7 @@ export function initMain(conn) {
                 promptExtraText.innerText = "Worth " + String(data[2]) + " points. There are " + String(data[3]) + " possible words.";
                 break
             case 'e':
+                playAudio("tap");
                 var item = document.createElement("div");
                 item.innerText = "Winner: " + data[0] + " " + data[1] + " points\nBest word: " + data[2] + " " + data[3] + " " + data[4] + " points";
                 appendDataLog(gameLog, item);
@@ -159,7 +160,6 @@ export function initMain(conn) {
                 appendDataLog(gameLog, item);
                 break;
             case '1':
-                playAudio("tap");
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(chatLog, item);
                 var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
