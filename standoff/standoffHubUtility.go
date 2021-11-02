@@ -44,7 +44,7 @@ func (h *StandoffHub) getPrompt() []string {
 
 func (h *StandoffHub) isAllDecided() bool {
 	for client := range h.getAssertedClients() {
-		if client.decision == -1 {
+		if client.decision == -1 && client.active {
 			return false
 		}
 	}
@@ -65,6 +65,10 @@ func (h *StandoffHub) calcResult() []string {
 	ret := []string{}
 	for client := range h.getAssertedClients() {
 		if client.decision == -1 {
+			continue
+		}
+		if client.decision == -2 {
+			ret = append(ret, fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+client.Name+u.ENDTAG, " shot nobody", u.ENDTAG))
 			continue
 		}
 		if client.decision == client.id {

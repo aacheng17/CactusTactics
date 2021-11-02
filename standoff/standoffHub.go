@@ -99,24 +99,30 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 			h.SendData(c, 'b', []string{""})
 			if c.decision == -1 {
 				c.decision = decision
-				if h.isAllDecided() {
-					h.Broadcast(byte('c'), h.calcResult())
-					h.Broadcast(byte('3'), h.getPlayers())
-					if h.numAlive() < 2 {
-						h.Broadcast(byte('2'), []string{""})
-						h.Broadcast(byte('d'), h.getWinners())
-						h.phase = -1
-					} else {
-						h.nextRound()
-					}
-				}
+				h.calcDecisionResult()
 			}
 		case byte('b'):
-			if c.alive {
-				h.SendData(c, byte('a'), h.getPrompt())
+			if !c.active {
+				h.SendData(c, byte('a'), []string{fmt.Sprint(h.round), "spectating"})
+			} else if !c.alive {
+				h.SendData(c, byte('a'), []string{fmt.Sprint(h.round), "dead"})
 			} else {
-				h.SendData(c, byte('a'), []string{fmt.Sprint(h.round)})
+				h.SendData(c, byte('a'), h.getPrompt())
 			}
+		}
+	}
+}
+
+func (h *StandoffHub) calcDecisionResult() {
+	if h.isAllDecided() {
+		h.Broadcast(byte('c'), h.calcResult())
+		h.Broadcast(byte('3'), h.getPlayers())
+		if h.numAlive() < 2 {
+			h.Broadcast(byte('2'), []string{""})
+			h.Broadcast(byte('d'), h.getWinners())
+			h.phase = -1
+		} else {
+			h.nextRound()
 		}
 	}
 }

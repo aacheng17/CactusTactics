@@ -20,7 +20,7 @@ var gameResults = document.getElementById("game-results");
 
 export function initMain(conn) {
     initTitles("Standoff");
-    initHowToPlays("Shoot someone, or shoot yourself.\n\nIf anyone shoots you while you shoot yourself, they die instead of you.\n\nLast person standing wins.");
+    initHowToPlays("Shoot someone, or yourself, or nobody.\n\nIf anyone shoots you while you shoot yourself, they die instead of you.\n\nLast person standing wins.");
 
     conn.onmessage = function (evt) {
         if (name === undefined) {
@@ -38,7 +38,7 @@ export function initMain(conn) {
                 while (gameResults.firstChild) {
                     gameResults.removeChild(gameResults.firstChild);
                 }
-                endgame.innerText = "end game";
+                endgame.disabled = true;
                 break;
             case '1':
                 var item = networking.decodeToDiv(data[0]);
@@ -49,8 +49,7 @@ export function initMain(conn) {
                 }
                 break;
             case '2':
-                endgame.innerText = "new game";
-                roundText.innerText = "Round 0";
+                endgame.disabled = false;
                 choices.innerText = "Waiting for new game...";
                 break;
             case '3':
@@ -79,6 +78,7 @@ export function initMain(conn) {
                 }
                 break;
             case 'a':
+                endgame.disabled = true;
                 roundText.innerText = `Round ${data[0]}`;
                 resultsDiv.style.display = "none";
                 outcome.innerText = "";
@@ -89,7 +89,7 @@ export function initMain(conn) {
                 while (choices.firstChild) {
                     choices.removeChild(choices.firstChild);
                 }
-                if (data.length > 1) {
+                if (data.length > 2) {
                     choices.innerText = "Who to shoot?";
                     for (let j = 1; j < data.length; j+=2) {
                         let clientId = data[j];
@@ -101,8 +101,14 @@ export function initMain(conn) {
                         };
                         choices.appendChild(item);
                     }
+                    var item = document.createElement("button");
+                    item.innerText = "nobody";
+                    item.onclick = function() {
+                        networking.send(conn, "a-2");
+                    };
+                    choices.appendChild(item);
                 } else {
-                    choicesWaiting = "You are dead. Waiting for other players..."
+                    choicesWaiting.innerText = "You are " + data[1] + ". Waiting for other players...";
                 }
                 break;
             case 'b':
@@ -110,13 +116,13 @@ export function initMain(conn) {
                 for (let i=0; i<childs.length; i++) {
                     childs[i].disabled = true;
                 }
-                choicesWaiting.innerText = "Waiting for other players."
+                choicesWaiting.innerText = "Waiting for other players.";
                 break;
             case 'c':
                 choicesWaiting.innerText = "";
                 resultsDiv.style.display = "flex";
                 resultsDiv.style.flexDirection = "column";
-                outcome.innerText = "Round Outcome"
+                outcome.innerText = "Round Outcome";
                 data.forEach(line => {
                     item = networking.decodeToDiv(line);
                     results.appendChild(item);
