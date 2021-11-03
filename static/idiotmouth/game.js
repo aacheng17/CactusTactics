@@ -3,7 +3,7 @@ import { AVATARS } from '../avatars/avatars.js';
 import { COLORS, name } from '../landing.js';
 import { appendDataLog, setChatboxNotification } from '../ingame-utility.js';
 import { initTitles, initHowToPlays } from '../importantStrings.js';
-import { playAudio } from '../audio.js';
+import { sounds } from '../audio.js';
 
 var ingameLeft = document.getElementById("ingame-left");
 var endgame = document.getElementById("endgame");
@@ -51,6 +51,7 @@ export function initMain(conn) {
             var data = networking.decode(m.substring(1,m.length));
             switch (messageType) {
             case 'a':
+                sounds["bubble"].play();
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(gameLog, item);
                 break;
@@ -91,7 +92,6 @@ export function initMain(conn) {
                 promptExtraText.innerText = "Worth " + String(data[2]) + " points. There are " + String(data[3]) + " possible words.";
                 break
             case 'e':
-                playAudio("tap");
                 var item = document.createElement("div");
                 item.innerText = "Winner: " + data[0] + " " + data[1] + " points\nBest word: " + data[2] + " " + data[3] + " " + data[4] + " points";
                 appendDataLog(gameLog, item);
@@ -103,7 +103,6 @@ export function initMain(conn) {
                 }
                 break
             case 'c':
-                playAudio("bubble");
                 var item = document.createElement("div");
                 item.classList.add("score-message");
                 var message = networking.decodeToDiv(data[0]);

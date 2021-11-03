@@ -1,5 +1,6 @@
 import * as networking from './networking.js';
 import { AVATARS } from './avatars/avatars.js';
+import { initAudio } from './audio.js';
 
 export var COLORS = ["chocolate", "crimson", "coral", "gold", "darkgreen", "springgreen", "turquoise", "cornflowerblue", "indigo", "orchid", "slategrey", "black"];
 
@@ -20,6 +21,7 @@ var ingame = document.getElementById("ingame");
 
 export function initLanding(conn) {
     nameForm.onsubmit = function (e) {
+        initAudio();
         if (!conn) {
             return false;
         }

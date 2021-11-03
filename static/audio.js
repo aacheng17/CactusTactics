@@ -1,12 +1,22 @@
-var sounds = {
-    "bubble": gen("bubble"),
-    "tap": gen("tap"),
+const AudioContext = window.AudioContext || window.webkitAudioContext;
+var audioContext;
+
+export var sounds;
+
+export function initAudio() {
+    audioContext = new AudioContext();
+    audioContext.resume();
+    sounds = {
+        "bubble": gen("bubble"),
+        "tap": gen("tap"),
+        "click1": gen("click1"),
+        "click2": gen("click2"),
+    }
 }
 
 function gen(audioName) {
-    return new Audio("./static/audio/" + audioName + ".mp3");
-}
-
-export function playAudio(audioName) {
-    sounds[audioName].play();
+    let sound = new Audio("./static/audio/" + audioName + ".ogg");
+    let source = audioContext.createMediaElementSource(sound);
+    source.connect(audioContext.destination);
+    return sound;
 }
