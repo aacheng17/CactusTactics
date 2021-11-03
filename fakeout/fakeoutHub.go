@@ -150,6 +150,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 						}
 						h.phase = 1
 					}
+					h.Broadcast(byte('3'), h.getPlayers())
 				}
 			}
 		}
@@ -200,6 +201,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 						}
 						h.phase = 0
 					}
+					h.Broadcast(byte('3'), h.getPlayers())
 				}
 			}
 		}

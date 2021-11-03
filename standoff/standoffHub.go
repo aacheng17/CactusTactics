@@ -101,6 +101,7 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 				c.decision = decision
 				h.calcDecisionResult()
 			}
+			h.Broadcast(byte('3'), h.getPlayers())
 		case byte('b'):
 			if !c.active {
 				h.SendData(c, byte('a'), []string{fmt.Sprint(h.round), "spectating"})
@@ -116,7 +117,6 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 func (h *StandoffHub) calcDecisionResult() {
 	if h.isAllDecided() {
 		h.Broadcast(byte('c'), h.calcResult())
-		h.Broadcast(byte('3'), h.getPlayers())
 		if h.numAlive() < 2 {
 			h.Broadcast(byte('2'), []string{""})
 			h.Broadcast(byte('d'), h.getWinners())

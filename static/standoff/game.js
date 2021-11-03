@@ -56,7 +56,7 @@ export function initMain(conn) {
                 while (players.firstChild) {
                     players.removeChild(players.firstChild);
                 }
-                for (let j = 0; j < data.length; j+=5) {
+                for (let j = 0; j < data.length; j+=6) {
                     var player = document.createElement("div");
                     player.className = "player";
                     var playerInfo = document.createElement("div");
@@ -64,6 +64,8 @@ export function initMain(conn) {
                     playerInfo.innerHTML = "<b>" + data[j] + "</b>" + " " + data[j+3] + "<br/>" + data[j+4] + " kills";
                     playerInfo
                     player.appendChild(playerInfo);
+                    var playerAvatarContainer = document.createElement("div");
+                    playerAvatarContainer.classList.add("player-avatar-container");
                     var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                     svg.classList.add("player-avatar");
                     svg.setAttribute("width", "50px");
@@ -73,7 +75,16 @@ export function initMain(conn) {
                     var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                     svg.appendChild(path);
                     path.setAttribute("d", AVATARS[data[j+1]]);
-                    player.appendChild(svg);
+                    playerAvatarContainer.appendChild(svg);
+                    var playerStatus = document.createElement("a")
+                    playerStatus.classList.add("player-status")
+                    switch (data[j+5]) {
+                        case "dotdotdot": playerStatus.classList.add("dotdotdot"); break;
+                        case "ready": playerStatus.innerHTML = "&#10003;"; break;
+                        case "none": break;
+                    }
+                    playerAvatarContainer.appendChild(playerStatus);
+                    player.appendChild(playerAvatarContainer);
                     players.appendChild(player);
                 }
                 break;

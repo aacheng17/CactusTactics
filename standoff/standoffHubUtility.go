@@ -15,6 +15,9 @@ func (h *StandoffHub) useMessageNum() int {
 
 func (h *StandoffHub) reset() {
 	for client := range h.getAssertedClients() {
+		if client.Name == "" {
+			continue
+		}
 		client.kills = nil
 		client.active = true
 		client.alive = true
@@ -176,6 +179,15 @@ func (h *StandoffHub) getPlayers(excepts ...*StandoffClient) []string {
 		}
 		players = append(players, fmt.Sprint(status))
 		players = append(players, fmt.Sprint(len(client.kills)))
+		dotdotdotStatus := "none"
+		if client.active {
+			if client.decision == -1 {
+				dotdotdotStatus = "dotdotdot"
+			} else {
+				dotdotdotStatus = "ready"
+			}
+		}
+		players = append(players, fmt.Sprint(dotdotdotStatus))
 	}
 	return players
 }

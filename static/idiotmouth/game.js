@@ -70,6 +70,8 @@ export function initMain(conn) {
                     }
                     playerInfo.innerHTML = text;
                     player.appendChild(playerInfo);
+                    var playerAvatarContainer = document.createElement("div");
+                    playerAvatarContainer.classList.add("player-avatar-container");
                     var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
                     svg.classList.add("player-avatar");
                     svg.setAttribute("width", "50px");
@@ -79,7 +81,12 @@ export function initMain(conn) {
                     var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
                     svg.appendChild(path);
                     path.setAttribute("d", AVATARS[data[j+1]]);
-                    player.appendChild(svg);
+                    playerAvatarContainer.appendChild(svg);
+                    var playerStatus = document.createElement("a")
+                    playerStatus.classList.add("player-status")
+                    //playerStatus.innerHTML = "&#10003;";
+                    playerAvatarContainer.appendChild(playerStatus);
+                    player.appendChild(playerAvatarContainer);
                     players.appendChild(player);
                 }
                 break

@@ -97,6 +97,21 @@ func (h *FakeoutHub) getPlayers(excepts ...*FakeoutClient) []string {
 		players = append(players, fmt.Sprint(client.Avatar))
 		players = append(players, fmt.Sprint((client.Color)))
 		players = append(players, fmt.Sprint(client.score))
+		dotdotdotStatus := "none"
+		if h.phase == 0 {
+			if client.answer == "" {
+				dotdotdotStatus = "dotdotdot"
+			} else {
+				dotdotdotStatus = "ready"
+			}
+		} else if h.phase == 1 {
+			if client.choice == -1 {
+				dotdotdotStatus = "dotdotdot"
+			} else {
+				dotdotdotStatus = "ready"
+			}
+		}
+		players = append(players, fmt.Sprint(dotdotdotStatus))
 	}
 	return players
 }

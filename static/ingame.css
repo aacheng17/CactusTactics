@@ -129,6 +129,22 @@
     padding: 5px 0px;
 }
 
+.player-avatar-container {
+    position: relative;
+    display: grid;
+}
+
+.player-avatar-container > * {
+    grid-column: 1;
+    grid-row: 1;
+}
+
+.player-status {
+    position:absolute;
+    bottom:0;
+    right:0;
+}
+
 .databox {
     background-color: #e5e5e5;
     display: flex;
@@ -209,4 +225,30 @@
 
 #game-send {
     padding: 5px 5px;
+}
+
+.dotdotdot {
+    font-size: 30px;
+}
+
+.dotdotdot:after {
+    overflow: hidden;
+    display: inline-block;
+    vertical-align: bottom;
+    -webkit-animation: ellipsis steps(4,end) 2500ms infinite;      
+    animation: ellipsis steps(4,end) 2500ms infinite;
+    content: "\2026"; /* ascii code for the ellipsis character */
+    width: 0px;
+}
+
+@keyframes ellipsis {
+    to {
+        width: 1.25em;    
+    }
+}
+
+@-webkit-keyframes ellipsis {
+    to {
+        width: 1.25em;    
+    }
 }
