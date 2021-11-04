@@ -47,7 +47,7 @@ func (h *StandoffHub) getPrompt() []string {
 
 func (h *StandoffHub) isAllDecided() bool {
 	for client := range h.getAssertedClients() {
-		if client.decision == -1 && client.active {
+		if client.decision == -1 && client.active && client.alive {
 			return false
 		}
 	}
