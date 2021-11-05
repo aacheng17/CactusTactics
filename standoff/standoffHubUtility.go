@@ -180,7 +180,7 @@ func (h *StandoffHub) getPlayers(excepts ...*StandoffClient) []string {
 		players = append(players, fmt.Sprint(status))
 		players = append(players, fmt.Sprint(len(client.kills)))
 		dotdotdotStatus := "none"
-		if client.active {
+		if client.active && client.alive {
 			if client.decision == -1 {
 				dotdotdotStatus = "dotdotdot"
 			} else {
