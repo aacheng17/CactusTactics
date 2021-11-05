@@ -20,14 +20,17 @@ type StandoffClient struct {
 	decision int
 
 	kills []string
+
+	roundsAlive int
 }
 
 func NewStandoffClient(hub core.Hublike, conn *websocket.Conn) core.Clientlike {
 	ret := &StandoffClient{
-		Client:   core.Client{Hub: hub, Conn: conn, Send: make(chan []byte, 256)},
-		active:   false,
-		alive:    true,
-		decision: -1,
+		Client:      core.Client{Hub: hub, Conn: conn, Send: make(chan []byte, 256)},
+		active:      false,
+		alive:       true,
+		decision:    -1,
+		roundsAlive: -1,
 	}
 	ret.Client.Child = ret
 	return ret

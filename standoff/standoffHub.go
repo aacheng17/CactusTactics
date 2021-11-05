@@ -85,6 +85,7 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 		switch m.MessageType {
 		case byte('2'):
 			h.reset()
+			h.phase = 0
 			h.Broadcast(byte('0'), []string{""})
 			h.Broadcast(byte('3'), h.getPlayers())
 			h.Broadcast(byte('a'), h.getPrompt())
@@ -117,6 +118,11 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 func (h *StandoffHub) calcDecisionResult() {
 	if h.isAllDecided() {
 		h.Broadcast(byte('c'), h.calcResult())
+		for client := range h.getAssertedClients() {
+			if client.alive {
+				client.roundsAlive++
+			}
+		}
 		if h.numAlive() < 2 {
 			h.Broadcast(byte('2'), []string{""})
 			h.Broadcast(byte('d'), h.getWinners())

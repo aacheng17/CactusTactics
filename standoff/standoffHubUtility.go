@@ -21,14 +21,15 @@ func (h *StandoffHub) reset() {
 		client.kills = nil
 		client.active = true
 		client.alive = true
+		client.roundsAlive = 0
+		client.decision = -1
 	}
 	h.round = 0
-	h.nextRound()
 }
 
 func (h *StandoffHub) nextRound() {
+	h.phase = 0
 	for client := range h.getAssertedClients() {
-		h.phase = 0
 		client.decision = -1
 	}
 	h.round++
@@ -161,6 +162,9 @@ func (h *StandoffHub) getPlayers(excepts ...*StandoffClient) []string {
 		if keys[i].alive != keys[j].alive {
 			return keys[i].alive
 		}
+		if keys[i].roundsAlive != keys[j].roundsAlive {
+			return keys[i].roundsAlive > keys[j].roundsAlive
+		}
 		return len(keys[i].kills) > len(keys[j].kills)
 	})
 	players := []string{}
@@ -205,25 +209,30 @@ func (h *StandoffHub) getWinners() []string {
 		if keys[i].alive != keys[j].alive {
 			return keys[i].alive
 		}
+		if keys[i].roundsAlive != keys[j].roundsAlive {
+			return keys[i].roundsAlive > keys[j].roundsAlive
+		}
 		return len(keys[i].kills) > len(keys[j].kills)
 	})
 
-	dead := false
-	for i, key := range keys {
+	if keys[0].alive {
+		ret = append(ret, "1")
+	} else {
+		ret = append(ret, "0")
+	}
+
+	for _, key := range keys {
 		if !key.active {
 			continue
 		}
 		kills := ""
-		for _, kill := range key.kills {
-			kills += " " + kill
+		for j, kill := range key.kills {
+			kills += kill
+			if j < len(key.kills)-1 {
+				kills += ", "
+			}
 		}
-		if key.alive && i == 0 {
-			ret = append(ret, u.Tag("b")+"ALIVE:"+u.ENDTAG)
-		}
-		if !key.alive && !dead {
-			ret = append(ret, u.Tag("b")+"DEAD:"+u.ENDTAG)
-		}
-		ret = append(ret, fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+key.Name+u.ENDTAG, " KILLED: "+kills, u.ENDTAG))
+		ret = append(ret, key.Name, fmt.Sprint(key.roundsAlive), kills)
 	}
 
 	return ret

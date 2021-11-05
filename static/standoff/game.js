@@ -153,11 +153,35 @@ export function initMain(conn) {
                     continueDiv.removeChild(continueDiv.firstChild);
                 }
                 choicesWaiting.innerText = "";
-                gameResultsHeader.innerText = "Game Outcome"
-                data.forEach(line => {
-                    item = networking.decodeToDiv(line);
+                gameResultsHeader.innerText = "GAME OVER"
+                item = document.createElement("p");
+                let j = 1;
+                if (data[0] === "1") {
+                    j += 3;
+                    item.innerHTML = `<b>WINNER:<br/>${data[1]}</b> survived for ${data[2]} rounds. `;
+                    let kills = data[3];
+                    if (kills !== "") {
+                        item.innerHTML += `Killed: <b>${kills}</b>`;
+                    } else {
+                        item.innerHTML += "Killed no one";
+                    }
+                    item.innerHTML += "<br/><br/>";
+                } else {
+                    item.innerHTML = "<b>Everyone died</b>";
+                }
+                gameResults.appendChild(item);
+                for (; j<data.length; j+=3) {
+                    item = document.createElement("p");
+                    item.innerHTML = `<b>${data[j]}</b> survived for ${data[j+1]} rounds. `;
+                    let kills = data[j+2];
+                    if (kills !== "") {
+                        item.innerHTML += `Killed: <b>${kills}</b>`;
+                    } else {
+                        item.innerHTML += "Killed no one";
+                    }
+                    item.innerHTML += "<br/>";
                     gameResults.appendChild(item);
-                });
+                }
                 break;
             }
         }
