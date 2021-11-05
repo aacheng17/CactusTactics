@@ -19,6 +19,7 @@ func (h *StandoffHub) reset() {
 			continue
 		}
 		client.kills = nil
+		client.killedBy = nil
 		client.active = true
 		client.alive = true
 		client.roundsAlive = 0
@@ -84,6 +85,7 @@ func (h *StandoffHub) calcResult() []string {
 				if client2.decision == client.id {
 					reflections = append(reflections, client2.Name)
 					client.kills = append(client.kills, client2.Name)
+					client2.killedBy = append(client2.killedBy, client.Name)
 					client2.alive = false
 				}
 			}
@@ -92,6 +94,7 @@ func (h *StandoffHub) calcResult() []string {
 			} else {
 				ret = append(ret, h.kill(client.id, client.Name))
 				client.kills = append(client.kills, client.Name)
+				client.killedBy = append(client.killedBy, client.Name)
 				client.alive = false
 			}
 		} else {
@@ -104,6 +107,7 @@ func (h *StandoffHub) calcResult() []string {
 					}
 					ret = append(ret, h.kill(client.id, client2.Name))
 					client.kills = append(client.kills, client2.Name)
+					client2.killedBy = append(client2.killedBy, client.Name)
 					client2.alive = false
 					break
 				}
@@ -225,14 +229,14 @@ func (h *StandoffHub) getWinners() []string {
 		if !key.active {
 			continue
 		}
-		kills := ""
-		for j, kill := range key.kills {
-			kills += kill
-			if j < len(key.kills)-1 {
-				kills += ", "
+		killedBy := ""
+		for j, kill := range key.killedBy {
+			killedBy += kill
+			if j < len(key.killedBy)-1 {
+				killedBy += ", "
 			}
 		}
-		ret = append(ret, key.Name, fmt.Sprint(key.roundsAlive), kills)
+		ret = append(ret, key.Name, fmt.Sprint(key.roundsAlive), killedBy)
 	}
 
 	return ret

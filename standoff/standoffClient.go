@@ -21,6 +21,8 @@ type StandoffClient struct {
 
 	kills []string
 
+	killedBy []string
+
 	roundsAlive int
 }
 
