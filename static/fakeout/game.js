@@ -64,12 +64,12 @@ export function initMain(conn) {
                 while (players.firstChild) {
                     players.removeChild(players.firstChild);
                 }
-                for (let j = 0; j < data.length; j+=5) {
+                for (let j = 0; j < data.length; j+=6) {
                     var player = document.createElement("div");
                     player.className = "player";
                     var playerInfo = document.createElement("div");
                     playerInfo.classList.add("player-info");
-                    var text = "<b>" + data[j] + "</b>" + ": " + data[j+3].toString() + " points";
+                    var text = "<b>" + data[j] + "</b>" + ": " + data[j+3].toString() + " points<br/>Fakeouts: " + data[j+4];
                     playerInfo.innerHTML = text;
                     player.appendChild(playerInfo);
                     var playerAvatarContainer = document.createElement("div");
@@ -86,7 +86,7 @@ export function initMain(conn) {
                     playerAvatarContainer.appendChild(svg);
                     var playerStatus = document.createElement("a")
                     playerStatus.classList.add("player-status")
-                    switch (data[j+4]) {
+                    switch (data[j+5]) {
                         case "dotdotdot": playerStatus.classList.add("dotdotdot"); break;
                         case "ready": playerStatus.innerHTML = "&#10003;"; break;
                         case "none": break;
@@ -98,7 +98,7 @@ export function initMain(conn) {
                 break;
             case 'f':
                 var item = document.createElement("div");
-                item.innerText = "Winner: " + data[0] + " " + data[1] + " points\nBest word: " + data[2] + " " + data[3] + " " + data[4] + " points";
+                item.innerText = "Winner: " + data[0] + " " + data[1] + " points\nMost fakeouts: " + data[2] + " " + data[3] + " fakeouts";
                 appendDataLog(chatLog, item);
                 break;
             case 'a':

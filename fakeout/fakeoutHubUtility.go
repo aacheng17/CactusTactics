@@ -17,6 +17,7 @@ func (h *FakeoutHub) useMessageNum() int {
 
 func (h *FakeoutHub) reset() {
 	for client := range h.getAssertedClients() {
+		client.fakeouts = 0
 		client.score = 0
 		client.answer = ""
 		client.choice = -1
@@ -97,6 +98,7 @@ func (h *FakeoutHub) getPlayers(excepts ...*FakeoutClient) []string {
 		players = append(players, fmt.Sprint(client.Avatar))
 		players = append(players, fmt.Sprint((client.Color)))
 		players = append(players, fmt.Sprint(client.score))
+		players = append(players, fmt.Sprint(client.fakeouts))
 		dotdotdotStatus := "none"
 		if h.phase == 0 {
 			if client.answer == "" {
