@@ -134,6 +134,9 @@ export function initMain(conn) {
                 resultsDiv.style.display = "flex";
                 resultsDiv.style.flexDirection = "column";
                 outcome.innerText = "Round Outcome";
+                while (results.firstChild) {
+                    results.removeChild(results.firstChild);
+                }
                 data.forEach(line => {
                     item = networking.decodeToDiv(line);
                     results.appendChild(item);
