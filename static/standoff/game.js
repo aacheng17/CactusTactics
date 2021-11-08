@@ -3,6 +3,7 @@ import { AVATARS } from '../avatars/avatars.js';
 import { COLORS, name } from '../landing.js';
 import { appendDataLog, setChatboxNotification } from '../ingame-utility.js';
 import { initTitles, initHowToPlays } from '../importantStrings.js';
+import { playAudio } from '../audio.js';
 
 var ingameLeft = document.getElementById("ingame-left");
 var endgame = document.getElementById("endgame");
@@ -34,6 +35,7 @@ export function initMain(conn) {
             var data = networking.decode(m.substring(1,m.length));
             switch (messageType) {
             case '0':
+                playAudio("start");
                 gameResultsHeader.innerText = "";
                 while (gameResults.firstChild) {
                     gameResults.removeChild(gameResults.firstChild);
@@ -41,6 +43,7 @@ export function initMain(conn) {
                 endgame.disabled = true;
                 break;
             case '1':
+                playAudio("glub");
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(chatLog, item);
                 var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
@@ -89,6 +92,7 @@ export function initMain(conn) {
                 }
                 break;
             case 'a':
+                playAudio("dink2");
                 endgame.disabled = true;
                 roundText.innerText = `Round ${data[0]}`;
                 resultsDiv.style.display = "none";
@@ -108,6 +112,7 @@ export function initMain(conn) {
                         var item = document.createElement("button");
                         item.innerText = clientName;
                         item.onclick = function() {
+                            playAudio("click3")
                             networking.send(conn, "a" + clientId.toString());
                         };
                         choices.appendChild(item);
@@ -115,6 +120,7 @@ export function initMain(conn) {
                     var item = document.createElement("button");
                     item.innerText = "nobody";
                     item.onclick = function() {
+                        playAudio("click3")
                         networking.send(conn, "a-2");
                     };
                     choices.appendChild(item);
@@ -130,6 +136,7 @@ export function initMain(conn) {
                 choicesWaiting.innerText = "Waiting for other players.";
                 break;
             case 'c':
+                playAudio("whoosh");
                 choicesWaiting.innerText = "";
                 resultsDiv.style.display = "flex";
                 resultsDiv.style.flexDirection = "column";
@@ -152,6 +159,7 @@ export function initMain(conn) {
                 continueDiv.appendChild(item);
                 break;
             case 'd':
+                playAudio("fanfare");
                 while (continueDiv.firstChild) {
                     continueDiv.removeChild(continueDiv.firstChild);
                 }
