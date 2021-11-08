@@ -3,7 +3,7 @@ import { AVATARS } from '../avatars/avatars.js';
 import { COLORS, name } from '../landing.js';
 import { appendDataLog, setChatboxNotification } from '../ingame-utility.js';
 import { initTitles, initHowToPlays } from '../importantStrings.js';
-import { sounds } from '../audio.js';
+import { playAudio } from '../audio.js';
 
 var ingameLeft = document.getElementById("ingame-left");
 var endgame = document.getElementById("endgame");
@@ -51,7 +51,7 @@ export function initMain(conn) {
             var data = networking.decode(m.substring(1,m.length));
             switch (messageType) {
             case 'a':
-                sounds["bubble"].play();
+                playAudio("click2");
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(gameLog, item);
                 break;
@@ -104,12 +104,14 @@ export function initMain(conn) {
                 appendDataLog(gameLog, item);
                 break;
             case '0':
+                playAudio("start");
                 endgame.innerText = "end game";
                 while (gameLog.firstChild) {
                     gameLog.removeChild(gameLog.firstChild);
                 }
                 break
             case 'c':
+                playAudio("correct");
                 var item = document.createElement("div");
                 item.classList.add("score-message");
                 var message = networking.decodeToDiv(data[0]);
@@ -161,11 +163,13 @@ export function initMain(conn) {
                 }
                 break
             case '2':
+                playAudio("fanfare");
                 endgame.innerText = "new game";
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(gameLog, item);
                 break;
             case '1':
+                playAudio("bubble");
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(chatLog, item);
                 var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
