@@ -6,15 +6,8 @@ export var sounds;
 export function initAudio() {
     audioContext = new AudioContext();
     audioContext.resume();
-    sounds = {
-        "bubble": gen("bubble"),
-        "tap": gen("tap"),
-        "click1": gen("click1"),
-        "click2": gen("click2"),
-        "correct": gen("correct"),
-        "fanfare": gen("fanfare"),
-        "start": gen("start"),
-    }
+    sounds = {};
+    ["bikebell", "blupblup", "bubble", "click1", "click2", "click3", "correct", "ding1", "dink2", "fanfare", "glub", "start", "tap", "whoosh"].forEach(s => sounds[s] = gen(s));
 }
 
 function gen(audioName) {

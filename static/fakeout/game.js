@@ -50,7 +50,7 @@ export function initMain(conn) {
                 endgame.innerText = "end game";
                 break;
             case '1':
-                playAudio("bubble");
+                playAudio("glub");
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(chatLog, item);
                 var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
@@ -118,12 +118,14 @@ export function initMain(conn) {
                     promptWaiting.innerText = "Your answer is too close to the actual answer. Pick something else"
                     break;
                 default:
+                    playAudio("bubble");
                     promptWaiting.innerText = "Response submitted. Waiting for other players."
                     promptField.disabled = true;
                     promptSubmit.disabled = true;
                 }
                 break;
             case 'c':
+                playAudio("whoosh");
                 promptField.disabled = true;
                 promptSubmit.disabled = true;
                 promptWaiting.innerText = "";
@@ -132,6 +134,7 @@ export function initMain(conn) {
                     var item = document.createElement("button");
                     item.innerText = d;
                     item.onclick = function() {
+                        playAudio("click3");
                         networking.send(conn, "b" + j.toString());
                     };
                     choices.append(item);
@@ -144,6 +147,7 @@ export function initMain(conn) {
                     choicesWaiting.innerText = "You can't pick your own answer."
                     break;
                 default:
+                    playAudio("dink2");
                     choicesWaiting.innerText = "Choice submitted. Waiting for other players."
                     for (let j=0; j<choices.childElementCount; j++) {
                         choices.children[j].disabled = true;
@@ -151,6 +155,7 @@ export function initMain(conn) {
                 }
                 break;
             case 'e':
+                playAudio("blupblup");
                 choices.classList.add("revealed");
                 var curChild = choices.firstChild;
                 for (let j=0; j<data.length/2; j++) {
@@ -175,6 +180,7 @@ export function initMain(conn) {
                 var item = document.createElement("button");
                 item.innerText = "Continue";
                 item.onclick = function() {
+                    playAudio("click3");
                     promptField.disabled = false;
                     promptSubmit.disabled = false;
                     choices.classList.remove("revealed");

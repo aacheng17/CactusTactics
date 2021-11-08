@@ -51,7 +51,7 @@ export function initMain(conn) {
             var data = networking.decode(m.substring(1,m.length));
             switch (messageType) {
             case 'a':
-                playAudio("click2");
+                playAudio("click3");
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(gameLog, item);
                 break;
@@ -91,6 +91,7 @@ export function initMain(conn) {
                 }
                 break
             case 'd':
+                playAudio("correct");
                 var sl = data[0].toUpperCase();
                 var el = data[1].toUpperCase();
                 startLetter.innerText = sl;
@@ -111,7 +112,6 @@ export function initMain(conn) {
                 }
                 break
             case 'c':
-                playAudio("correct");
                 var item = document.createElement("div");
                 item.classList.add("score-message");
                 var message = networking.decodeToDiv(data[0]);
@@ -135,6 +135,7 @@ export function initMain(conn) {
                 appendDataLog(gameLog, item);
                 break
             case 'b':
+                playAudio("dink2");
                 var children = gameLog.children;
                 var found = false;
                 var child = null;
@@ -169,7 +170,7 @@ export function initMain(conn) {
                 appendDataLog(gameLog, item);
                 break;
             case '1':
-                playAudio("bubble");
+                playAudio("glub");
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(chatLog, item);
                 var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
