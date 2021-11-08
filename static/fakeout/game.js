@@ -3,6 +3,7 @@ import { AVATARS } from '../avatars/avatars.js';
 import { COLORS, name } from '../landing.js';
 import { appendDataLog, setChatboxNotification } from '../ingame-utility.js';
 import { initTitles, initHowToPlays } from '../importantStrings.js';
+import { playAudio } from '../audio.js';
 
 var ingameLeft = document.getElementById("ingame-left");
 var endgame = document.getElementById("endgame");
@@ -45,9 +46,11 @@ export function initMain(conn) {
             var data = networking.decode(m.substring(1,m.length));
             switch (messageType) {
             case '0':
+                playAudio("start");
                 endgame.innerText = "end game";
                 break;
             case '1':
+                playAudio("bubble");
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(chatLog, item);
                 var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
@@ -97,6 +100,7 @@ export function initMain(conn) {
                 }
                 break;
             case 'f':
+                playAudio("fanfare");
                 var item = document.createElement("div");
                 item.innerText = "Winner: " + data[0] + " " + data[1] + " points\nMost fakeouts: " + data[2] + " " + data[3] + " fakeouts";
                 appendDataLog(chatLog, item);
