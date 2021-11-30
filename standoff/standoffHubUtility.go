@@ -169,7 +169,7 @@ func (h *StandoffHub) getPlayers(excepts ...*StandoffClient) []string {
 		if keys[i].roundsAlive != keys[j].roundsAlive {
 			return keys[i].roundsAlive > keys[j].roundsAlive
 		}
-		return len(keys[i].kills) > len(keys[j].kills)
+		return keys[i].wins > keys[j].wins
 	})
 	players := []string{}
 	for _, client := range keys {
@@ -186,7 +186,7 @@ func (h *StandoffHub) getPlayers(excepts ...*StandoffClient) []string {
 			status = "dead"
 		}
 		players = append(players, fmt.Sprint(status))
-		players = append(players, fmt.Sprint(len(client.kills)))
+		players = append(players, fmt.Sprint(client.wins))
 		dotdotdotStatus := "none"
 		if client.active && client.alive {
 			if client.decision == -1 {
@@ -216,10 +216,11 @@ func (h *StandoffHub) getWinners() []string {
 		if keys[i].roundsAlive != keys[j].roundsAlive {
 			return keys[i].roundsAlive > keys[j].roundsAlive
 		}
-		return len(keys[i].kills) > len(keys[j].kills)
+		return keys[i].wins > keys[j].wins
 	})
 
 	if keys[0].alive {
+		keys[0].wins++
 		ret = append(ret, "1")
 	} else {
 		ret = append(ret, "0")

@@ -64,7 +64,7 @@ export function initMain(conn) {
                     player.className = "player";
                     var playerInfo = document.createElement("div");
                     playerInfo.classList.add("player-info");
-                    playerInfo.innerHTML = "<b>" + data[j] + "</b>" + " " + data[j+3] + "<br/>" + data[j+4] + " kills";
+                    playerInfo.innerHTML = "<b>" + data[j] + "</b>" + " " + data[j+3] + "<br/>" + data[j+4] + " wins";
                     playerInfo
                     player.appendChild(playerInfo);
                     var playerAvatarContainer = document.createElement("div");

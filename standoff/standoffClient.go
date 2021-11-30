@@ -24,6 +24,8 @@ type StandoffClient struct {
 	killedBy []string
 
 	roundsAlive int
+
+	wins int
 }
 
 func NewStandoffClient(hub core.Hublike, conn *websocket.Conn) core.Clientlike {
