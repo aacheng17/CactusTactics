@@ -69,6 +69,7 @@ func (h *FakeoutHub) genNextQuestion() int {
 func (h *FakeoutHub) getPrompt() []string {
 	ret := questions.getQuestion(h.question).Question
 	ret = strings.Replace(ret, "<BLANK>", "________", 1)
+	ret = utility.ParseAndTag(ret)
 	return []string{ret}
 }
 

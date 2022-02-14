@@ -44,7 +44,7 @@ export function decodeToDivHelper(s, i, tagName) {
                 case "/":
                     return [ret, i];
                 default:
-                    if (["p", "b"].includes(tagName)) {
+                    if (["p", "b", "i"].includes(tagName)) {
                         var result = decodeToDivHelper(s, i+1, tagName);
                         var item = result[0];
                         if (tagId !== "") item.id = tagId;

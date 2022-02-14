@@ -77,3 +77,11 @@ func RemoveEscapes(s string) string {
 	s = strings.ReplaceAll(s, MESSAGESEP, Tag("br"))
 	return s
 }
+
+func ParseAndTag(s string) string {
+	s = strings.Replace(s, "<i>", Tag("i"), -1)
+	s = strings.Replace(s, "</i>", ENDTAG, -1)
+	s = strings.Replace(s, "<b>", Tag("i"), -1)
+	s = strings.Replace(s, "</i>", ENDTAG, -1)
+	return s
+}
