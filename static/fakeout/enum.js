@@ -1,7 +1,8 @@
 export var en = {
     Phase: {
         PREGAME: '0',
-        PLAY: '1'
+        PLAY_PROMPT: '1',
+        PLAY_GUESSES: '2'
     },
     ToServerCode: {
         DISCONNECT: '-',

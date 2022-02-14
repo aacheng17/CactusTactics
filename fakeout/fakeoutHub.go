@@ -22,7 +22,7 @@ type FakeoutHub struct {
 
 	question int
 
-	phase int
+	phase byte
 
 	answers []*FakeoutClient
 }
@@ -58,9 +58,9 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
 		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 		h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
-		if h.phase == -1 {
+		if h.phase == Phase["PREGAME"] {
 			h.SendData(c, ToClientCode["END_GAME"], []string{})
-		} else if h.phase == 1 {
+		} else if h.phase == Phase["PLAY_GUESSES"] {
 			toSend := []string{}
 			for _, client := range h.answers {
 				s := ""
@@ -79,20 +79,20 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 	case ToServerCode["LOBBY_CHAT_MESSAGE"]:
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
 	}
-	if h.phase == -1 {
+	if h.phase == Phase["PREGAME"] {
 		if m.MessageType == ToServerCode["END_GAME"] {
 			h.reset()
 			h.Broadcast(ToClientCode["RESTART"], []string{""})
 			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " restarted the game", u.ENDTAG, u.ENDTAG)})
 			h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 			h.Broadcast(ToClientCode["PROMPT"], h.getPrompt())
-			h.phase = 0
+			h.phase = Phase["PLAY_PROMPT"]
 		}
 		return
 	}
 	switch m.MessageType {
 	case ToServerCode["RESPONSE"]:
-		if h.phase == 0 {
+		if h.phase == Phase["PLAY_PROMPT"] {
 			if c.answer == "" {
 				playerAnswer := strings.TrimSpace(strings.ToLower(string(m.Data[0])))
 				alternateSpelling := false
@@ -134,7 +134,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 			}
 		}
 	case ToServerCode["CHOICE"]:
-		if h.phase == 1 {
+		if h.phase == Phase["PLAY_GUESSES"] {
 			playerChoice := strings.TrimSpace(string(m.Data[0]))
 			choiceIndex, err := strconv.Atoi(playerChoice)
 			if err == nil {
@@ -172,14 +172,14 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 							}
 							results = append(results, s)
 						}
-						h.phase = 0
+						h.phase = Phase["PLAY_PROMPT"]
 						h.resetAnswers()
 						h.genNextQuestion()
 						for client := range h.Clients {
 							h.SendData(client, ToClientCode["RESULTS"], results)
 							h.SendData(client, ToClientCode["PLAYERS"], h.getPlayers())
 						}
-						h.phase = 0
+						h.phase = Phase["PLAY_PROMPT"]
 					}
 					h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 				}
@@ -191,7 +191,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 	case ToServerCode["END_GAME"]:
 		h.Broadcast(ToClientCode["END_GAME"], []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
 		h.Broadcast(ToClientCode["WINNERS"], h.getWinners())
-		h.phase = -1
+		h.phase = Phase["PREGAME"]
 	}
 }
 
