@@ -18,6 +18,8 @@ type FakeoutHub struct {
 
 	messageNum int
 
+	deck string
+
 	questions []int
 
 	question int
@@ -44,7 +46,7 @@ func (h *FakeoutHub) getAssertedClients() map[*FakeoutClient]bool {
 
 func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*FakeoutClient)
-	question := questions.getQuestion(h.question)
+	question := decks[h.deck].getQuestion(h.deck, h.question)
 	if c.Name == "" && m.MessageType == ToServerCode["NAME"] {
 		name := m.Data[0]
 		avatar, err1 := strconv.Atoi(m.Data[1])
@@ -197,7 +199,8 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 
 func NewFakeoutHub(game string, id string, deleteHubCallback func(*core.Hub)) core.Hublike {
 	h := &FakeoutHub{
-		Hub: *core.NewHub(game, id, deleteHubCallback),
+		Hub:  *core.NewHub(game, id, deleteHubCallback),
+		deck: "standard",
 	}
 	h.Child = h
 	h.reset()

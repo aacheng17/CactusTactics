@@ -23,7 +23,7 @@ func (h *FakeoutHub) reset() {
 		client.choice = -1
 	}
 	h.phase = Phase["PLAY_PROMPT"]
-	h.questions = utility.MakeRange(0, questions.size())
+	h.questions = utility.MakeRange(0, len(decks[h.deck].Questions))
 	h.genNextQuestion()
 }
 
@@ -67,7 +67,7 @@ func (h *FakeoutHub) genNextQuestion() int {
 }
 
 func (h *FakeoutHub) getPrompt() []string {
-	ret := questions.getQuestion(h.question).Question
+	ret := decks[h.deck].getQuestion(h.deck, h.question).Question
 	ret = strings.Replace(ret, "<BLANK>", "________", 1)
 	ret = utility.ParseAndTag(ret)
 	return []string{ret}

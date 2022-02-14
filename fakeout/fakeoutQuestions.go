@@ -8,12 +8,16 @@ import (
 	"strings"
 )
 
-var (
-	questions Questions
-)
+var decks map[string]Deck
 
-type Questions struct {
-	Questions []Question `json:"questions"`
+type DeckRaw struct {
+	Instructions string          `json:"instructions"`
+	Questions    json.RawMessage `json:"questions"`
+}
+
+type Deck struct {
+	Instructions string
+	Questions    []Question
 }
 
 type Question struct {
@@ -31,22 +35,28 @@ func buildQuestions() {
 	}
 	defer jsonFile.Close()
 	byteValue, _ := ioutil.ReadAll(jsonFile)
-	json.Unmarshal(byteValue, &questions)
-	for i, x := range questions.Questions {
-		questions.Questions[i].Answer = strings.ToLower(x.Answer)
-		for j, y := range x.AlternateSpellings {
-			questions.Questions[i].AlternateSpellings[j] = strings.ToLower(y)
+	decks = make(map[string]Deck)
+	var decksRaw map[string]json.RawMessage
+	json.Unmarshal(byteValue, &decksRaw)
+	for key := range decksRaw {
+		var deckRaw DeckRaw
+		json.Unmarshal(decksRaw[key], &deckRaw)
+		var deck Deck
+		deck.Instructions = deckRaw.Instructions
+		json.Unmarshal(deckRaw.Questions, &deck.Questions)
+		for i, x := range deck.Questions {
+			deck.Questions[i].Answer = strings.ToLower(x.Answer)
+			for j, y := range x.AlternateSpellings {
+				deck.Questions[i].AlternateSpellings[j] = strings.ToLower(y)
+			}
+			for j, y := range x.Suggestions {
+				deck.Questions[i].Suggestions[j] = strings.ToLower(y)
+			}
 		}
-		for j, y := range x.Suggestions {
-			questions.Questions[i].Suggestions[j] = strings.ToLower(y)
-		}
+		decks[key] = deck
 	}
 }
 
-func (q Questions) size() int {
-	return len(q.Questions)
-}
-
-func (q Questions) getQuestion(n int) Question {
-	return q.Questions[n]
+func (d Deck) getQuestion(deck string, n int) Question {
+	return d.Questions[n]
 }
