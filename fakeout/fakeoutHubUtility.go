@@ -7,6 +7,7 @@ import (
 	"strings"
 
 	"example.com/hello/utility"
+	u "example.com/hello/utility"
 )
 
 func (h *FakeoutHub) useMessageNum() int {
@@ -67,7 +68,8 @@ func (h *FakeoutHub) genNextQuestion() int {
 }
 
 func (h *FakeoutHub) getPrompt() []string {
-	ret := decks[h.deck].getQuestion(h.deck, h.question).Question
+	ret := fmt.Sprint(u.Tag("b"), decks[h.deck].Instructions, ":", u.ENDTAG, u.Tag("br"), u.Tag("br"))
+	ret += decks[h.deck].getQuestion(h.deck, h.question).Question
 	ret = strings.Replace(ret, "<BLANK>", "________", 1)
 	ret = utility.ParseAndTag(ret)
 	return []string{ret}
