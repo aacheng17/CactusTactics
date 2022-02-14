@@ -127,7 +127,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 						for client := range h.Clients {
 							h.SendData(client, ToClientCode["CHOICES"], toSend)
 						}
-						h.phase = 1
+						h.phase = Phase["PLAY_GUESSES"]
 					}
 					h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 				}

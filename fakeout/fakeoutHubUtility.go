@@ -22,7 +22,7 @@ func (h *FakeoutHub) reset() {
 		client.answer = ""
 		client.choice = -1
 	}
-	h.phase = 0
+	h.phase = Phase["PLAY_PROMPT"]
 	h.questions = utility.MakeRange(0, questions.size())
 	h.genNextQuestion()
 }
@@ -101,13 +101,13 @@ func (h *FakeoutHub) getPlayers(excepts ...*FakeoutClient) []string {
 		players = append(players, fmt.Sprint(client.score))
 		players = append(players, fmt.Sprint(client.fakeouts))
 		dotdotdotStatus := "none"
-		if h.phase == 0 {
+		if h.phase == Phase["PLAY_PROMPT"] {
 			if client.answer == "" {
 				dotdotdotStatus = "dotdotdot"
 			} else {
 				dotdotdotStatus = "ready"
 			}
-		} else if h.phase == 1 {
+		} else if h.phase == Phase["PLAY_GUESSES"] {
 			if client.choice == -1 {
 				dotdotdotStatus = "dotdotdot"
 			} else {
