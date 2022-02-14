@@ -4,6 +4,7 @@ import { COLORS, name } from '../landing.js';
 import { appendDataLog, setChatboxNotification } from '../ingame-utility.js';
 import { initTitles, initHowToPlays } from '../importantStrings.js';
 import { playAudio } from '../audio.js';
+import { en } from './enum.js';
 
 var ingameLeft = document.getElementById("ingame-left");
 var endgame = document.getElementById("endgame");
@@ -34,7 +35,7 @@ export function initMain(conn) {
             var messageType = m.charAt(0);
             var data = networking.decode(m.substring(1,m.length));
             switch (messageType) {
-            case '0':
+            case en.ToClientCode.RESTART:
                 playAudio("start");
                 gameResultsHeader.innerText = "";
                 while (gameResults.firstChild) {
@@ -42,7 +43,7 @@ export function initMain(conn) {
                 }
                 endgame.disabled = true;
                 break;
-            case '1':
+            case en.ToClientCode.LOBBY_CHAT_MESSAGE:
                 playAudio("glub");
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(chatLog, item);
@@ -51,11 +52,11 @@ export function initMain(conn) {
                     setChatboxNotification(1);
                 }
                 break;
-            case '2':
+            case en.ToClientCode.END_GAME:
                 endgame.disabled = false;
                 choices.innerText = "Waiting for new game...";
                 break;
-            case '3':
+            case en.ToClientCode.PLAYERS:
                 while (players.firstChild) {
                     players.removeChild(players.firstChild);
                 }
@@ -91,7 +92,7 @@ export function initMain(conn) {
                     players.appendChild(player);
                 }
                 break;
-            case 'a':
+            case en.ToClientCode.PROMPT:
                 playAudio("dink2");
                 endgame.disabled = true;
                 roundText.innerText = `Round ${data[0]}`;
@@ -113,7 +114,7 @@ export function initMain(conn) {
                         item.innerText = clientName;
                         item.onclick = function() {
                             playAudio("click3")
-                            networking.send(conn, "a" + clientId.toString());
+                            networking.send(conn, en.ToServerCode.DECISION + clientId.toString());
                         };
                         choices.appendChild(item);
                     }
@@ -121,21 +122,21 @@ export function initMain(conn) {
                     item.innerText = "nobody";
                     item.onclick = function() {
                         playAudio("click3")
-                        networking.send(conn, "a-2");
+                        networking.send(conn, en.ToServerCode.DECISION + "-2");
                     };
                     choices.appendChild(item);
                 } else {
                     choicesWaiting.innerText = "You are " + data[1] + ". Waiting for other players...";
                 }
                 break;
-            case 'b':
+            case en.ToClientCode.DECISION_ACK:
                 let childs = choices.children;
                 for (let i=0; i<childs.length; i++) {
                     childs[i].disabled = true;
                 }
                 choicesWaiting.innerText = "Waiting for other players.";
                 break;
-            case 'c':
+            case en.ToClientCode.RESULT:
                 playAudio("whoosh");
                 choicesWaiting.innerText = "";
                 resultsDiv.style.display = "flex";
@@ -154,11 +155,11 @@ export function initMain(conn) {
                 item = document.createElement("button");
                 item.innerText = "Continue";
                 item.onclick = function() {
-                    networking.send(conn, "b");
+                    networking.send(conn, en.ToServerCode.PROMPT_REQUEST);
                 };
                 continueDiv.appendChild(item);
                 break;
-            case 'd':
+            case en.ToClientCode.WINNERS:
                 playAudio("fanfare");
                 while (continueDiv.firstChild) {
                     continueDiv.removeChild(continueDiv.firstChild);

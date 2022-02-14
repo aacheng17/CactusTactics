@@ -4,6 +4,7 @@ import { COLORS, name } from '../landing.js';
 import { appendDataLog, setChatboxNotification } from '../ingame-utility.js';
 import { initTitles, initHowToPlays } from '../importantStrings.js';
 import { playAudio } from '../audio.js';
+import { en } from './enum.js';
 
 var ingameLeft = document.getElementById("ingame-left");
 var endgame = document.getElementById("endgame");
@@ -29,7 +30,7 @@ export function initMain(conn) {
         if (!promptField.value.trim()) {
             return false;
         }
-        networking.send(conn, "a" + promptField.value);
+        networking.send(conn, en.ToServerCode.RESPONSE + promptField.value);
         promptField.value = "";
         return false;
     };
@@ -45,11 +46,11 @@ export function initMain(conn) {
             var messageType = m.charAt(0);
             var data = networking.decode(m.substring(1,m.length));
             switch (messageType) {
-            case '0':
+            case en.ToClientCode.RESTART:
                 playAudio("start");
                 endgame.innerText = "end game";
                 break;
-            case '1':
+            case en.ToClientCode.LOBBY_CHAT_MESSAGE:
                 playAudio("glub");
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(chatLog, item);
@@ -58,12 +59,12 @@ export function initMain(conn) {
                     setChatboxNotification(1);
                 }
                 break;
-            case '2':
+            case en.ToClientCode.END_GAME:
                 endgame.innerText = "new game";
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(chatLog, item);
                 break;
-            case '3':
+            case en.ToClientCode.PLAYERS:
                 while (players.firstChild) {
                     players.removeChild(players.firstChild);
                 }
@@ -99,19 +100,19 @@ export function initMain(conn) {
                     players.appendChild(player);
                 }
                 break;
-            case 'f':
+            case en.ToClientCode.WINNERS:
                 playAudio("fanfare");
                 var item = document.createElement("div");
                 item.innerText = "Winner: " + data[0] + " " + data[1] + " points\nMost fakeouts: " + data[2] + " " + data[3] + " fakeouts";
                 appendDataLog(chatLog, item);
                 break;
-            case 'a':
+            case en.ToClientCode.PROMPT:
                 while (promptText.firstChild) {
                     promptText.removeChild(promptText.firstChild);
                 }
                 promptText.appendChild(networking.decodeToDiv(data[0]));
                 break;
-            case 'b':
+            case en.ToClientCode.CHOICE_RESPONSE:
                 var err = parseInt(data[0]);
                 switch (err) {
                 case -1:
@@ -124,7 +125,7 @@ export function initMain(conn) {
                     promptSubmit.disabled = true;
                 }
                 break;
-            case 'c':
+            case en.ToClientCode.CHOICES:
                 playAudio("whoosh");
                 promptField.disabled = true;
                 promptSubmit.disabled = true;
@@ -135,12 +136,12 @@ export function initMain(conn) {
                     item.innerText = d;
                     item.onclick = function() {
                         playAudio("click3");
-                        networking.send(conn, "b" + j.toString());
+                        networking.send(conn, en.ToServerCode.CHOICE + j.toString());
                     };
                     choices.append(item);
                 }
                 break;
-            case 'd':
+            case en.ToClientCode.CHOICES_RESPONSE:
                 var err = parseInt(data[0]);
                 switch (err) {
                 case -1:
@@ -154,7 +155,7 @@ export function initMain(conn) {
                     }
                 }
                 break;
-            case 'e':
+            case en.ToClientCode.RESULTS:
                 playAudio("blupblup");
                 choices.classList.add("revealed");
                 var curChild = choices.firstChild;
@@ -190,7 +191,7 @@ export function initMain(conn) {
                     while (choicesWaiting.firstChild) {
                         choicesWaiting.removeChild(choicesWaiting.firstChild);
                     }
-                    networking.send(conn, "c");
+                    networking.send(conn, en.ToServerCode.PROMPT_REQUEST);
                 };
                 choicesWaiting.appendChild(item);
                 break;

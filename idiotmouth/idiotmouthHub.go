@@ -29,13 +29,13 @@ type IdiotmouthHub struct {
 
 	wordsLeft int
 
-	phase int
+	phase byte
 }
 
 func (h *IdiotmouthHub) DisconnectClientMessage(c core.Clientlike) {
 	if c.GetName() != "" {
-		h.Broadcast(byte('a'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
-		h.Broadcast(byte('3'), h.getPlayers())
+		h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
+		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 	}
 }
 
@@ -47,29 +47,9 @@ func (h *IdiotmouthHub) getAssertedClients() map[*IdiotmouthClient]bool {
 	return ret
 }
 
-// RECEIVING:
-// -: disconnect
-// 0: name
-// 1: lobby chat message
-// 2: end game message
-// a: standard game log message
-// b: vote to skip
-// c: what?
-
-// SENDING:
-// 0: restart
-// 1: lobby chat message
-// 2: end game
-// 3: players
-// a: standard game log message
-// b: what response
-// c: message containing a what
-// d: prompt
-// e: winners
-
 func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*IdiotmouthClient)
-	if c.Name == "" && m.MessageType == byte('0') {
+	if c.Name == "" && m.MessageType == ToServerCode["NAME"] {
 		name := m.Data[0]
 		avatar, err1 := strconv.Atoi(m.Data[1])
 		color, err2 := strconv.Atoi(m.Data[2])
@@ -79,16 +59,16 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 		c.Name = name
 		c.Avatar = avatar
 		c.Color = color
-		h.Broadcast(byte('a'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
-		h.Broadcast(byte('3'), h.getPlayers())
-		h.SendData(c, byte('d'), h.getPrompt())
-		if h.phase == -1 {
-			h.SendData(c, '2', []string{})
+		h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
+		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
+		h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
+		if h.phase == Phase["PREGAME"] {
+			h.SendData(c, ToClientCode["END_GAME"], []string{})
 		}
 		return
 	}
 	switch m.MessageType {
-	case byte('c'):
+	case ToServerCode["WHAT"]:
 		clientMessageNum, err := strconv.Atoi(m.Data[0])
 		if err != nil {
 			break
@@ -96,27 +76,27 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 		if word := h.whattedWords[clientMessageNum]; word != "" {
 			h.whattedWords[clientMessageNum] = ""
 			if definition, ok := dictionary[word]; ok {
-				h.Broadcast(byte('b'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG+" said \"What?\" for the word ", word, u.ENDTAG, u.Tag("p"), word, " - ", definition, u.ENDTAG), fmt.Sprint(clientMessageNum)})
+				h.Broadcast(ToClientCode["WHAT_RESPONSE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG+" said \"What?\" for the word ", word, u.ENDTAG, u.Tag("p"), word, " - ", definition, u.ENDTAG), fmt.Sprint(clientMessageNum)})
 			}
 		}
-	case byte('1'):
-		h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
+	case ToServerCode["LOBBY_CHAT_MESSAGE"]:
+		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
 	}
-	if h.phase == -1 {
-		if m.MessageType == byte('2') {
+	if h.phase == Phase["PREGAME"] {
+		if m.MessageType == ToServerCode["END_GAME"] {
 			h.reset()
-			h.Broadcast(byte('0'), []string{""})
-			h.Broadcast(byte('a'), []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " restarted the game", u.ENDTAG, u.ENDTAG)})
-			h.Broadcast(byte('3'), h.getPlayers())
-			h.Broadcast(byte('d'), h.getPrompt())
-			h.phase = 0
+			h.Broadcast(ToClientCode["RESTART"], []string{""})
+			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " restarted the game", u.ENDTAG, u.ENDTAG)})
+			h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
+			h.Broadcast(ToClientCode["PROMPT"], h.getPrompt())
+			h.phase = Phase["PLAY"]
 		}
 		return
 	}
 	switch m.MessageType {
-	case byte('a'):
+	case ToServerCode["GAME_MESSAGE"]:
 		word := strings.TrimSpace(strings.ToLower(string(m.Data[0])))
-		h.Broadcast(byte('a'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", word)})
+		h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", word)})
 		if len(word) >= 3 && word[0] == byte(h.start) && word[len(word)-1] == byte(h.end) {
 			switch h.validWord(word) {
 			case 0:
@@ -130,36 +110,36 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 				}
 				err := h.gotIt(word)
 				if err == 1 {
-					h.Broadcast(byte('a'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "All possible words have been used or passed. Type restart to restart the game.", u.ENDTAG)})
+					h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "All possible words have been used or passed. Type restart to restart the game.", u.ENDTAG)})
 					break
 				}
 				mNum := h.useMessageNum()
 				h.whattedWords[mNum] = word
-				h.Broadcast(byte('c'), []string{fmt.Sprint(u.TagId("p", mNum), u.Tag("b")+c.Name+u.ENDTAG, " earned ", worth, "x", bonus, "=", finalWorth, " points for ", word, u.ENDTAG), word})
-				h.Broadcast(byte('d'), h.getPrompt())
-				h.Broadcast(byte('3'), h.getPlayers())
+				h.Broadcast(ToClientCode["MESSAGE_WITH_WHAT"], []string{fmt.Sprint(u.TagId("p", mNum), u.Tag("b")+c.Name+u.ENDTAG, " earned ", worth, "x", bonus, "=", finalWorth, " points for ", word, u.ENDTAG), word})
+				h.Broadcast(ToClientCode["PROMPT"], h.getPrompt())
+				h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 			case 2:
-				h.Broadcast(byte('a'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "This word has already been used this game.", u.ENDTAG)})
+				h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "This word has already been used this game.", u.ENDTAG)})
 			}
 		}
-	case byte('b'):
+	case ToServerCode["VOTE_SKIP"]:
 		if !c.pass {
 			c.pass = true
-			h.Broadcast(byte('a'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " voted to skip.", u.ENDTAG)})
+			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " voted to skip.", u.ENDTAG)})
 			if h.getMajorityPass() {
 				err := h.pass()
 				if err == 1 {
-					h.Broadcast(byte('a'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "All possible words have been used or passed. Type restart to restart the game.", u.ENDTAG)})
+					h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "All possible words have been used or passed. Type restart to restart the game.", u.ENDTAG)})
 					break
 				}
-				h.Broadcast(byte('a'), []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), "Majority has voted to skip. New letters generated", u.ENDTAG)})
-				h.Broadcast(byte('d'), h.getPrompt())
+				h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), "Majority has voted to skip. New letters generated", u.ENDTAG)})
+				h.Broadcast(ToClientCode["PROMPT"], h.getPrompt())
 			}
 		}
-	case byte('2'):
-		h.Broadcast(byte('2'), []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
-		h.Broadcast(byte('e'), h.getWinners())
-		h.phase = -1
+	case ToServerCode["END_GAME"]:
+		h.Broadcast(ToClientCode["END_GAME"], []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
+		h.Broadcast(ToClientCode["WINNERS"], h.getWinners())
+		h.phase = Phase["PREGAME"]
 	}
 }
 

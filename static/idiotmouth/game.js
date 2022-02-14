@@ -4,6 +4,7 @@ import { COLORS, name } from '../landing.js';
 import { appendDataLog, setChatboxNotification } from '../ingame-utility.js';
 import { initTitles, initHowToPlays } from '../importantStrings.js';
 import { playAudio } from '../audio.js';
+import { en } from './enum.js';
 
 var ingameLeft = document.getElementById("ingame-left");
 var endgame = document.getElementById("endgame");
@@ -25,7 +26,7 @@ export function initMain(conn) {
         if (!conn) {
             return false;
         }
-        networking.send(conn, "b");
+        networking.send(conn, en.ToServerCode.VOTE_SKIP);
     }
     
     gameForm.onsubmit = function () {
@@ -35,7 +36,7 @@ export function initMain(conn) {
         if (!gameField.value.trim()) {
             return false;
         }
-        networking.send(conn, "a" + gameField.value);
+        networking.send(conn, en.ToServerCode.GAME_MESSAGE + gameField.value);
         gameField.value = "";
         return false;
     };
@@ -50,12 +51,12 @@ export function initMain(conn) {
             var messageType = m.charAt(0);
             var data = networking.decode(m.substring(1,m.length));
             switch (messageType) {
-            case 'a':
+            case en.ToClientCode.GAME_MESSAGE:
                 playAudio("click3");
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(gameLog, item);
                 break;
-            case '3':
+            case en.ToClientCode.PLAYERS:
                 while (players.firstChild) {
                     players.removeChild(players.firstChild);
                 }
@@ -90,7 +91,7 @@ export function initMain(conn) {
                     players.appendChild(player);
                 }
                 break
-            case 'd':
+            case en.ToClientCode.PROMPT:
                 playAudio("correct");
                 var sl = data[0].toUpperCase();
                 var el = data[1].toUpperCase();
@@ -99,19 +100,19 @@ export function initMain(conn) {
                 gameField.placeholder = sl + "___" + el;
                 promptExtraText.innerText = "Worth " + String(data[2]) + " points. There are " + String(data[3]) + " possible words.";
                 break
-            case 'e':
+            case en.ToClientCode.WINNERS:
                 var item = document.createElement("div");
                 item.innerText = "Winner: " + data[0] + " " + data[1] + " points\nBest word: " + data[2] + " " + data[3] + " " + data[4] + " points";
                 appendDataLog(gameLog, item);
                 break;
-            case '0':
+            case en.ToClientCode.RESTART:
                 playAudio("start");
                 endgame.innerText = "end game";
                 while (gameLog.firstChild) {
                     gameLog.removeChild(gameLog.firstChild);
                 }
                 break
-            case 'c':
+            case en.ToClientCode.MESSAGE_WITH_WHAT:
                 var item = document.createElement("div");
                 item.classList.add("score-message");
                 var message = networking.decodeToDiv(data[0]);
@@ -134,7 +135,7 @@ export function initMain(conn) {
                 item.appendChild(what);
                 appendDataLog(gameLog, item);
                 break
-            case 'b':
+            case en.ToClientCode.WHAT_RESPONSE:
                 playAudio("dink2");
                 var children = gameLog.children;
                 var found = false;
@@ -163,13 +164,13 @@ export function initMain(conn) {
                     gameLog.scrollTop = gameLog.scrollHeight - gameLog.clientHeight;
                 }
                 break
-            case '2':
+            case en.ToClientCode.END_GAME:
                 playAudio("fanfare");
                 endgame.innerText = "new game";
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(gameLog, item);
                 break;
-            case '1':
+            case en.ToClientCode.LOBBY_CHAT_MESSAGE:
                 playAudio("glub");
                 var item = networking.decodeToDiv(data[0]);
                 appendDataLog(chatLog, item);

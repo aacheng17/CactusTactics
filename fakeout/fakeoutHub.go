@@ -29,8 +29,8 @@ type FakeoutHub struct {
 
 func (h *FakeoutHub) DisconnectClientMessage(c core.Clientlike) {
 	if c.GetName() != "" {
-		h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p", 0), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
-		h.Broadcast(byte('3'), h.getPlayers())
+		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", 0), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
+		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 	}
 }
 
@@ -42,31 +42,10 @@ func (h *FakeoutHub) getAssertedClients() map[*FakeoutClient]bool {
 	return ret
 }
 
-// RECEIVING:
-// -: disconnect
-// 0: name
-// 1: lobby chat message
-// 2: end game message
-// a: response
-// b: choice
-// c: request prompt
-
-// SENDING:
-// 0: restart
-// 1: lobby chat message
-// 2: end game
-// 3: players
-// a: prompt
-// b: choice response
-// c: choices
-// d: choices response
-// e: results
-// f: winners
-
 func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*FakeoutClient)
 	question := questions.getQuestion(h.question)
-	if c.Name == "" && m.MessageType == byte('0') {
+	if c.Name == "" && m.MessageType == ToServerCode["NAME"] {
 		name := m.Data[0]
 		avatar, err1 := strconv.Atoi(m.Data[1])
 		color, err2 := strconv.Atoi(m.Data[2])
@@ -76,11 +55,11 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 		c.Name = name
 		c.Avatar = avatar
 		c.Color = color
-		h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
-		h.Broadcast(byte('3'), h.getPlayers())
-		h.SendData(c, byte('a'), h.getPrompt())
+		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
+		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
+		h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
 		if h.phase == -1 {
-			h.SendData(c, byte('2'), []string{})
+			h.SendData(c, ToClientCode["END_GAME"], []string{})
 		} else if h.phase == 1 {
 			toSend := []string{}
 			for _, client := range h.answers {
@@ -92,27 +71,27 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 				}
 				toSend = append(toSend, s)
 			}
-			h.SendData(c, byte('c'), toSend)
+			h.SendData(c, ToClientCode["CHOICES"], toSend)
 		}
 		return
 	}
 	switch m.MessageType {
-	case byte('1'):
-		h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
+	case ToServerCode["LOBBY_CHAT_MESSAGE"]:
+		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
 	}
 	if h.phase == -1 {
-		if m.MessageType == byte('2') {
+		if m.MessageType == ToServerCode["END_GAME"] {
 			h.reset()
-			h.Broadcast(byte('0'), []string{""})
-			h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " restarted the game", u.ENDTAG, u.ENDTAG)})
-			h.Broadcast(byte('3'), h.getPlayers())
-			h.Broadcast(byte('a'), h.getPrompt())
+			h.Broadcast(ToClientCode["RESTART"], []string{""})
+			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " restarted the game", u.ENDTAG, u.ENDTAG)})
+			h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
+			h.Broadcast(ToClientCode["PROMPT"], h.getPrompt())
 			h.phase = 0
 		}
 		return
 	}
 	switch m.MessageType {
-	case byte('a'):
+	case ToServerCode["RESPONSE"]:
 		if h.phase == 0 {
 			if c.answer == "" {
 				playerAnswer := strings.TrimSpace(strings.ToLower(string(m.Data[0])))
@@ -125,9 +104,9 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 				}
 				if c.answer != "" {
 				} else if playerAnswer == question.Answer || alternateSpelling {
-					h.SendData(c, byte('b'), []string{"-1"}) //answer is too close to actual answer
+					h.SendData(c, ToClientCode["CHOICE_RESPONSE"], []string{"-1"}) //answer is too close to actual answer
 				} else {
-					h.SendData(c, byte('b'), []string{"0"})
+					h.SendData(c, ToClientCode["CHOICE_RESPONSE"], []string{"0"})
 					c.answer = playerAnswer
 					if h.isAllAnswered() {
 						h.answers = []*FakeoutClient{nil}
@@ -146,23 +125,23 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 							toSend = append(toSend, s)
 						}
 						for client := range h.Clients {
-							h.SendData(client, byte('c'), toSend)
+							h.SendData(client, ToClientCode["CHOICES"], toSend)
 						}
 						h.phase = 1
 					}
-					h.Broadcast(byte('3'), h.getPlayers())
+					h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 				}
 			}
 		}
-	case byte('b'):
+	case ToServerCode["CHOICE"]:
 		if h.phase == 1 {
 			playerChoice := strings.TrimSpace(string(m.Data[0]))
 			choiceIndex, err := strconv.Atoi(playerChoice)
 			if err == nil {
 				if h.answers[choiceIndex] == c {
-					h.SendData(c, byte('d'), []string{"-1"}) //can't pick your own number
+					h.SendData(c, ToClientCode["CHOICES_RESPONSE"], []string{"-1"}) //can't pick your own number
 				} else {
-					h.SendData(c, byte('d'), []string{"0"})
+					h.SendData(c, ToClientCode["CHOICES_RESPONSE"], []string{"0"})
 					c.choice = choiceIndex
 					if h.isAllChosen() {
 						choices := make([][]*FakeoutClient, len(h.answers))
@@ -197,21 +176,21 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 						h.resetAnswers()
 						h.genNextQuestion()
 						for client := range h.Clients {
-							h.SendData(client, byte('e'), results)
-							h.SendData(client, byte('3'), h.getPlayers())
+							h.SendData(client, ToClientCode["RESULTS"], results)
+							h.SendData(client, ToClientCode["PLAYERS"], h.getPlayers())
 						}
 						h.phase = 0
 					}
-					h.Broadcast(byte('3'), h.getPlayers())
+					h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 				}
 			}
 		}
-	case byte('c'):
-		h.SendData(c, byte('a'), h.getPrompt())
+	case ToServerCode["PROMPT_REQUEST"]:
+		h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
 		break
-	case byte('2'):
-		h.Broadcast(byte('2'), []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
-		h.Broadcast(byte('f'), h.getWinners())
+	case ToServerCode["END_GAME"]:
+		h.Broadcast(ToClientCode["END_GAME"], []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
+		h.Broadcast(ToClientCode["WINNERS"], h.getWinners())
 		h.phase = -1
 	}
 }

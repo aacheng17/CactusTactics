@@ -29,7 +29,7 @@ func (h *StandoffHub) reset() {
 }
 
 func (h *StandoffHub) nextRound() {
-	h.phase = 0
+	h.phase = Phase["PLAY"]
 	for client := range h.getAssertedClients() {
 		client.decision = -1
 	}

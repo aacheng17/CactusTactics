@@ -16,7 +16,7 @@ type StandoffHub struct {
 
 	messageNum int
 
-	phase int
+	phase byte
 
 	nextClientId int
 
@@ -25,8 +25,8 @@ type StandoffHub struct {
 
 func (h *StandoffHub) DisconnectClientMessage(c core.Clientlike) {
 	if c.GetName() != "" {
-		h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
-		h.Broadcast(byte('3'), h.getPlayers())
+		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
+		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 	}
 }
 
@@ -38,27 +38,9 @@ func (h *StandoffHub) getAssertedClients() map[*StandoffClient]bool {
 	return ret
 }
 
-// RECEIVING:
-// -: disconnect
-// 0: name
-// 1: lobby chat message
-// 2: end game message
-// a: game decision
-// b: prompt request
-
-// SENDING:
-// 0: restart
-// 1: lobby chat message
-// 2: end game
-// 3: players
-// a: round prompt and choices
-// b: choice ack
-// c: result
-// d: winners
-
 func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*StandoffClient)
-	if c.Name == "" && m.MessageType == byte('0') {
+	if c.Name == "" && m.MessageType == ToServerCode["NAME"] {
 		name := m.Data[0]
 		avatar, err1 := strconv.Atoi(m.Data[1])
 		color, err2 := strconv.Atoi(m.Data[2])
@@ -70,46 +52,46 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 		c.Color = color
 		c.id = h.nextClientId
 		h.nextClientId++
-		h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
-		h.Broadcast(byte('3'), h.getPlayers())
-		if h.phase == -1 {
-			h.SendData(c, byte('2'), []string{""})
+		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
+		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
+		if h.phase == Phase["PREGAME"] {
+			h.SendData(c, ToClientCode["END_GAME"], []string{""})
 		}
 		return
 	}
 	switch m.MessageType {
-	case byte('1'):
-		h.Broadcast(byte('1'), []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
+	case ToServerCode["LOBBY_CHAT_MESSAGE"]:
+		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
 	}
-	if h.phase == -1 {
+	if h.phase == Phase["PREGAME"] {
 		switch m.MessageType {
-		case byte('2'):
+		case ToServerCode["END_GAME"]:
 			h.reset()
-			h.phase = 0
+			h.phase = Phase["PLAY"]
 			h.Broadcast(byte('0'), []string{""})
 			h.Broadcast(byte('3'), h.getPlayers())
 			h.Broadcast(byte('a'), h.getPrompt())
 		}
-	} else if h.phase == 0 {
+	} else if h.phase == Phase["PLAY"] {
 		switch m.MessageType {
-		case byte('a'):
+		case ToServerCode["DECISION"]:
 			decision, err := strconv.Atoi(string(m.Data[0]))
 			if err != nil {
 				return
 			}
-			h.SendData(c, 'b', []string{""})
+			h.SendData(c, ToClientCode["DECISION_ACK"], []string{""})
 			if c.decision == -1 {
 				c.decision = decision
 				h.calcDecisionResult()
 			}
-			h.Broadcast(byte('3'), h.getPlayers())
-		case byte('b'):
+			h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
+		case ToServerCode["PROMPT_REQUEST"]:
 			if !c.active {
-				h.SendData(c, byte('a'), []string{fmt.Sprint(h.round), "spectating"})
+				h.SendData(c, ToClientCode["PROMPT"], []string{fmt.Sprint(h.round), "spectating"})
 			} else if !c.alive {
-				h.SendData(c, byte('a'), []string{fmt.Sprint(h.round), "dead"})
+				h.SendData(c, ToClientCode["PROMPT"], []string{fmt.Sprint(h.round), "dead"})
 			} else {
-				h.SendData(c, byte('a'), h.getPrompt())
+				h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
 			}
 		}
 	}
@@ -117,16 +99,16 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 
 func (h *StandoffHub) calcDecisionResult() {
 	if h.isAllDecided() {
-		h.Broadcast(byte('c'), h.calcResult())
+		h.Broadcast(ToClientCode["RESULT"], h.calcResult())
 		for client := range h.getAssertedClients() {
 			if client.alive {
 				client.roundsAlive++
 			}
 		}
 		if h.numAlive() < 2 {
-			h.Broadcast(byte('2'), []string{""})
-			h.Broadcast(byte('d'), h.getWinners())
-			h.phase = -1
+			h.Broadcast(ToClientCode["END_GAME"], []string{""})
+			h.Broadcast(ToClientCode["WINNERS"], h.getWinners())
+			h.phase = Phase["PREGAME"]
 		} else {
 			h.nextRound()
 		}
@@ -135,10 +117,8 @@ func (h *StandoffHub) calcDecisionResult() {
 
 func NewStandoffHub(game string, id string, deleteHubCallback func(*core.Hub)) core.Hublike {
 	h := &StandoffHub{
-		Hub:          *core.NewHub(game, id, deleteHubCallback),
-		phase:        -1,
-		round:        0,
-		nextClientId: 0,
+		Hub:   *core.NewHub(game, id, deleteHubCallback),
+		phase: Phase["PREGAME"],
 	}
 	h.Child = h
 	h.reset()
