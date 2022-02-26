@@ -4,6 +4,7 @@ import { appendDataLog, setChatboxNotification } from './ingame-utility.js';
 var ingameLeft = document.getElementById("ingame-left");
 var ingameLeftClickableRegion = document.getElementById("ingame-left-clickable-region");
 var leftExpandButton = document.getElementById("ingame-left-expand-button");
+var moreGames = document.getElementById("more-games");
 var ingameHowtoplayButton = document.getElementById("ingame-howtoplay-button");
 var ingameHowtoplay = document.getElementById("ingame-howtoplay");
 var endgame = document.getElementById("endgame");
@@ -30,6 +31,8 @@ export function initIngameLeft(conn) {
             collapseLeft();
         }
     });
+
+    moreGames.href = "https://cactustactics.herokuapp.com/";
 
     ingameHowtoplayButton.addEventListener("click", function() {
         var effected = ingameHowtoplay;
