@@ -7,10 +7,10 @@ var leftExpandButton = document.getElementById("ingame-left-expand-button");
 var moreGames = document.getElementById("more-games");
 var ingameHowtoplayButton = document.getElementById("ingame-howtoplay-button");
 var ingameHowtoplay = document.getElementById("ingame-howtoplay");
-var endgame = document.getElementById("endgame");
 var chatLog = document.getElementById("chat-log");
 var chatForm = document.getElementById("chat-form");
 var chatField = document.getElementById("chat-field");
+import { en } from './enum.js';
 
 export function initIngameLeft(conn) {
     window.addEventListener('click', function(e){
@@ -43,13 +43,6 @@ export function initIngameLeft(conn) {
         } 
     });
     
-    endgame.onclick = function (e) {
-        if (!conn) {
-            return false;
-        }
-        networking.send(conn, "2");
-    }
-    
     chatForm.onsubmit = function (e) {
         if (!conn) {
             return false;
@@ -57,7 +50,7 @@ export function initIngameLeft(conn) {
         if (!chatField.value.trim()) {
             return false;
         }
-        networking.send(conn, "1" + chatField.value);
+        networking.send(conn, en.ToServerCode.LOBBY_CHAT_MESSAGE + chatField.value);
         e.preventDefault();
         chatField.value = "";
     };
