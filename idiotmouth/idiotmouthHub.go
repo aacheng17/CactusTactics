@@ -101,7 +101,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 			switch h.validWord(word) {
 			case 0:
 				worth := h.getWorth()
-				bonus := len(word) - 2
+				bonus := len(word)
 				finalWorth := worth * bonus
 				c.score += finalWorth
 				if finalWorth > c.highestScore {
