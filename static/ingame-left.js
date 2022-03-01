@@ -64,7 +64,6 @@ export function initIngameLeft(conn) {
     
     var emptyLog = document.createElement("div");
     emptyLog.classList.add("emptyLog");
-    emptyLog.innerText = "Nobody's said anything yet.";
     appendDataLog(chatLog, emptyLog);
 }
 
