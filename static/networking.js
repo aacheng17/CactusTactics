@@ -3,6 +3,9 @@ export const DELIM = "\t"
 export const TAG = "\v"
 
 export function send(conn, s) {
+    if (!conn) {
+        return;
+    }
     var toSend = "";
     for (var i = 0; i < s.length; i++) {
         toSend += s.replaceAll(TAG, "");
