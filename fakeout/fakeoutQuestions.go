@@ -2,6 +2,7 @@ package fakeout
 
 import (
 	"encoding/json"
+	"fmt"
 	"io/ioutil"
 	"log"
 	"os"
@@ -54,6 +55,7 @@ func buildQuestions() {
 			}
 		}
 		decks[key] = deck
+		fmt.Println(fmt.Sprint("Fakeout deck [", key, "] with ", len(deck.Questions), " questions"))
 	}
 }
 
