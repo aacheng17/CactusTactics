@@ -8,7 +8,12 @@ import (
 )
 
 func GenerateEnums(name string, Phase map[string]byte, ToServerCode map[string]byte, ToClientCode map[string]byte) {
-	file, err := os.Open("static/" + name + "/enum.js")
+	generateEnumsFromFile("static/"+name+"/enum.js", name, Phase, ToServerCode, ToClientCode)
+	generateEnumsFromFile("static/globalEnum.js", name, Phase, ToServerCode, ToClientCode)
+}
+
+func generateEnumsFromFile(fileName string, name string, Phase map[string]byte, ToServerCode map[string]byte, ToClientCode map[string]byte) {
+	file, err := os.Open(fileName)
 	if err != nil {
 		log.Fatal(err)
 	}
@@ -17,7 +22,11 @@ func GenerateEnums(name string, Phase map[string]byte, ToServerCode map[string]b
 	scanner := bufio.NewScanner(file)
 	currentEnum := ""
 	for scanner.Scan() {
-		text := strings.TrimSpace(scanner.Text())
+		rawText := scanner.Text()
+		text := strings.TrimSpace(rawText)
+		if len(rawText) < 1 || text == rawText {
+			continue
+		}
 		if len(text) < 2 {
 			continue
 		}

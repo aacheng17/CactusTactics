@@ -47,7 +47,7 @@ func (h *FakeoutHub) getAssertedClients() map[*FakeoutClient]bool {
 func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*FakeoutClient)
 	question := decks[h.deck].getQuestion(h.deck, h.question)
-	if c.Name == "" && m.MessageType == ToServerCode["NAME"] {
+	if c.Name == "" && m.MessageCode == ToServerCode["NAME"] {
 		name := m.Data[0]
 		avatar, err1 := strconv.Atoi(m.Data[1])
 		color, err2 := strconv.Atoi(m.Data[2])
@@ -77,12 +77,12 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 		}
 		return
 	}
-	switch m.MessageType {
+	switch m.MessageCode {
 	case ToServerCode["LOBBY_CHAT_MESSAGE"]:
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
 	}
 	if h.phase == Phase["PREGAME"] {
-		if m.MessageType == ToServerCode["END_GAME"] {
+		if m.MessageCode == ToServerCode["END_GAME"] {
 			h.reset()
 			h.Broadcast(ToClientCode["RESTART"], []string{""})
 			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " restarted the game", u.ENDTAG, u.ENDTAG)})
@@ -92,7 +92,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 		}
 		return
 	}
-	switch m.MessageType {
+	switch m.MessageCode {
 	case ToServerCode["RESPONSE"]:
 		if h.phase == Phase["PLAY_PROMPT"] {
 			if c.answer == "" {

@@ -1,5 +1,6 @@
 import * as networking from './networking.js';
 import { appendDataLog, setChatboxNotification } from './ingame-utility.js';
+import { globalEn } from './globalEnum.js';
 
 var ingameLeft = document.getElementById("ingame-left");
 var ingameLeftClickableRegion = document.getElementById("ingame-left-clickable-region");
@@ -10,7 +11,6 @@ var ingameHowtoplay = document.getElementById("ingame-howtoplay");
 var chatLog = document.getElementById("chat-log");
 var chatForm = document.getElementById("chat-form");
 var chatField = document.getElementById("chat-field");
-import { en } from './enum.js';
 
 export function initIngameLeft(conn) {
     window.addEventListener('click', function(e){
@@ -32,7 +32,7 @@ export function initIngameLeft(conn) {
         }
     });
 
-    moreGames.href = "https://cactustactics.herokuapp.com/";
+    moreGames.href = 'https://cactustactics.herokuapp.com/';
 
     ingameHowtoplayButton.addEventListener("click", function() {
         var effected = ingameHowtoplay;
@@ -50,7 +50,7 @@ export function initIngameLeft(conn) {
         if (!chatField.value.trim()) {
             return false;
         }
-        networking.send(conn, en.ToServerCode.LOBBY_CHAT_MESSAGE + chatField.value);
+        networking.send(conn, globalEn.ToServerCode.LOBBY_CHAT_MESSAGE + chatField.value);
         e.preventDefault();
         chatField.value = "";
     };

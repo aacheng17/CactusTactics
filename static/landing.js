@@ -1,6 +1,7 @@
 import * as networking from './networking.js';
 import { AVATARS } from './avatars/avatars.js';
 import { initAudio } from './audio.js';
+import { globalEn } from './globalEnum.js';
 
 export var COLORS = ["chocolate", "crimson", "coral", "gold", "darkgreen", "springgreen", "turquoise", "cornflowerblue", "indigo", "orchid", "slategrey", "black"];
 
@@ -29,7 +30,7 @@ export function initLanding(conn) {
             return false;
         }
         name = nameField.value;
-        networking.send(conn, "0" + name + "\t" + avatarIndex.toString() + "\t" + colorIndex);
+        networking.send(conn, globalEn.ToServerCode.NAME + name + "\t" + avatarIndex.toString() + "\t" + colorIndex);
         e.preventDefault();
         landing.parentNode.removeChild(landing);
         document.body.appendChild(ingame);

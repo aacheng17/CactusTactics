@@ -1,26 +1,31 @@
-export var en = {
+import { globalEn } from '../globalEnum.js';
+
+var en = {
     Phase: {
         PREGAME: '0',
-        PLAY: '1'
+        PLAY: '1',
     },
     ToServerCode: {
-        DISCONNECT: '-',
-        NAME: '0',
-        LOBBY_CHAT_MESSAGE: '1',
-        END_GAME: '2',
-        GAME_MESSAGE: 'a',
-        VOTE_SKIP: 'b',
-        WHAT: 'c'
+        GAMERULE_MIN_WORD_LENGTH: '2',
+        GAMERULE_SCORE_TO_WIN: '3',
+        START_GAME: 'a',
+        END_GAME: 'b',
+        GAME_MESSAGE: 'c',
+        VOTE_SKIP: 'd',
+        WHAT: 'e',
     },
     ToClientCode: {
-        RESTART: '0',
-        LOBBY_CHAT_MESSAGE: '1',
+        START_GAME: '0',
         END_GAME: '2',
         PLAYERS: '3',
+        GAMERULE_MIN_WORD_LENGTH: '5',
+        GAMERULE_SCORE_TO_WIN: '6',
         GAME_MESSAGE: 'a',
         WHAT_RESPONSE: 'b',
         MESSAGE_WITH_WHAT: 'c',
         PROMPT: 'd',
-        WINNERS: 'e'
     }
 }
+Object.assign(en.ToServerCode, globalEn.ToServerCode);
+Object.assign(en.ToClientCode, globalEn.ToClientCode);
+export { en };

@@ -4,6 +4,8 @@ import (
 	"fmt"
 	"math/rand"
 	"sort"
+
+	u "example.com/hello/utility"
 )
 
 func (h *IdiotmouthHub) useMessageNum() int {
@@ -12,11 +14,47 @@ func (h *IdiotmouthHub) useMessageNum() int {
 	return ret
 }
 
-func (h *IdiotmouthHub) validWord(str string) int {
-	if _, ok := h.usedWords[str]; ok {
+func (h *IdiotmouthHub) handleWord(c *IdiotmouthClient, word string) {
+	switch h.isValidWord(word) {
+	case 0:
+		worth := h.getWorth()
+		bonus := len(word)
+		finalWorth := worth * bonus
+		c.score += finalWorth
+		if finalWorth > c.highestScore {
+			c.highestWord = word
+			c.highestScore = finalWorth
+		}
+		err := h.gotAWord(word)
+		mNum := h.useMessageNum()
+		h.dictionary.whattedWords[mNum] = word
+		h.Broadcast(ToClientCode["MESSAGE_WITH_WHAT"], []string{fmt.Sprint(u.TagId("p", mNum), u.Tag("b")+c.Name+u.ENDTAG, " earned ", worth, "x", bonus, "=", finalWorth, " points for ", word, u.ENDTAG), word})
+		h.Broadcast(ToClientCode["PROMPT"], h.getPrompt())
+		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
+		if c.score >= h.scoreToWin {
+			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p prebr", mNum), u.Tag("b")+c.Name+u.ENDTAG, " won the game!", u.ENDTAG)})
+			h.endGame()
+			return
+		}
+		if err == 1 {
+			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "All possible words have been used or passed.", u.ENDTAG)})
+			break
+		}
+	case 2:
+		h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "This word has already been used this game.", u.ENDTAG)})
+	}
+}
+
+func (h *IdiotmouthHub) isValidWord(word string) int {
+	firstLetter := rune(word[0])
+	lastLetter := rune(word[len(word)-1])
+	if len(word) < h.minWordLength || firstLetter != h.start || lastLetter != h.end {
+		return 1
+	}
+	if _, ok := h.dictionary.usedWords[word]; ok {
 		return 2
 	}
-	if _, ok := dictionary[str]; ok {
+	if _, ok := dictionary[word]; ok {
 		return 0
 	}
 	return 1
@@ -30,12 +68,7 @@ func (h *IdiotmouthHub) reset() {
 		client.highestScore = 0
 	}
 	h.messageNum = 0
-	h.usedWords = make(map[string]bool)
-	h.whattedWords = make(map[int]string)
-	h.wordsLeft = len(dictionary)
-	for k, v := range letters {
-		h.letters[k] = v
-	}
+	h.dictionary.generate(h.minWordLength)
 	h.genNextLetters()
 }
 
@@ -47,8 +80,8 @@ func (h *IdiotmouthHub) resetPass() {
 
 func (h *IdiotmouthHub) pass() int {
 	h.resetPass()
-	h.wordsLeft -= h.letters[string(h.start)+string(h.end)]
-	h.letters[string(h.start)+string(h.end)] = 0
+	h.dictionary.wordsLeft -= h.dictionary.letters[string(h.start)+string(h.end)]
+	h.dictionary.letters[string(h.start)+string(h.end)] = 0
 	return h.genNextLetters()
 }
 
@@ -66,21 +99,21 @@ func (h *IdiotmouthHub) getMajorityPass() bool {
 	return count*2 > clientsWithNames
 }
 
-func (h *IdiotmouthHub) gotIt(word string) int {
+func (h *IdiotmouthHub) gotAWord(word string) int {
 	h.resetPass()
-	h.usedWords[word] = true
-	h.wordsLeft--
-	h.letters[string(h.start)+string(h.end)]--
+	h.dictionary.usedWords[word] = true
+	h.dictionary.wordsLeft--
+	h.dictionary.letters[string(h.start)+string(h.end)]--
 	return h.genNextLetters()
 }
 
 func (h *IdiotmouthHub) genNextLetters() int {
-	if h.wordsLeft <= 0 {
+	if h.dictionary.wordsLeft <= 0 {
 		return 1
 	}
-	r := rand.Intn(h.wordsLeft)
+	r := rand.Intn(h.dictionary.wordsLeft)
 	c := 0
-	for lets, freq := range h.letters {
+	for lets, freq := range h.dictionary.letters {
 		c += freq
 		if r < c {
 			h.start = rune(lets[0])
@@ -92,11 +125,11 @@ func (h *IdiotmouthHub) genNextLetters() int {
 }
 
 func (h *IdiotmouthHub) getWorth() int {
-	return int(50-50*(float32(letters[string(h.start)+string(h.end)]-minFreq)/float32(maxFreq-minFreq))) + 50
+	return h.dictionary.getWorth(string(h.start) + string(h.end))
 }
 
 func (h *IdiotmouthHub) getPrompt() []string {
-	return []string{string(h.start), string(h.end), fmt.Sprint(h.getWorth()), fmt.Sprint(h.letters[string(h.start)+string(h.end)])}
+	return []string{string(h.start), string(h.end), fmt.Sprint(h.getWorth()), fmt.Sprint(h.dictionary.letters[string(h.start)+string(h.end)])}
 }
 
 func (h *IdiotmouthHub) getPlayers(excepts ...*IdiotmouthClient) []string {
@@ -131,6 +164,11 @@ func (h *IdiotmouthHub) getPlayers(excepts ...*IdiotmouthClient) []string {
 	return players
 }
 
+func (h *IdiotmouthHub) endGame() {
+	h.Broadcast(ToClientCode["END_GAME"], h.getWinners())
+	h.phase = Phase["PREGAME"]
+}
+
 func (h *IdiotmouthHub) getWinners() []string {
 	ret := []string{}
 	keys := make([]*IdiotmouthClient, 0, len(h.Clients))
@@ -147,10 +185,10 @@ func (h *IdiotmouthHub) getWinners() []string {
 	sort.Slice(keys, func(i, j int) bool {
 		return keys[i].highestScore > keys[j].highestScore
 	})
-	winner = keys[0]
-	ret = append(ret, winner.Name)
-	ret = append(ret, winner.highestWord)
-	ret = append(ret, fmt.Sprint(winner.highestScore))
+	highestWorder := keys[0]
+	ret = append(ret, highestWorder.Name)
+	ret = append(ret, highestWorder.highestWord)
+	ret = append(ret, fmt.Sprint(highestWorder.highestScore))
 
 	return ret
 }

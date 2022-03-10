@@ -68,6 +68,7 @@ func (h *Hub) Broadcast(messageType byte, data []string, exceptions ...Clientlik
 }
 
 func (h *Hub) SendData(client Clientlike, messageType byte, data []string) {
+	fmt.Println(fmt.Sprint("Sending message: ", rune(messageType), " ", data))
 	if len(client.GetSend()) <= cap(client.GetSend()) {
 		message := ""
 		for _, s := range data {
@@ -106,7 +107,7 @@ func (h *Hub) Run() {
 				h.RemoveClient(client, "Removed client that disconnected.")
 			}
 		case message := <-h.Messages:
-			log.Println(fmt.Sprint("Received message\n\tType: ", string(message.MessageType), "\n\tData: ", message.Data))
+			log.Println(fmt.Sprint("Received message\n\tType: ", string(message.MessageCode), "\n\tData: ", message.Data))
 			h.Child.HandleHubMessage(message)
 		}
 	}

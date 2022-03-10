@@ -4,12 +4,14 @@
         <div id="ingame-title-expandable">
             <div id="ingame-title">
                 <div>
-                    <h1 class="title"></h1>
-                    <a id="more-games" target="_blank" rel="noopener noreferrer">more games</a>
-                </div>
-                <div>
-                    <button id="ingame-howtoplay-button">how to play</button>
-                    <button id="endgame">new game</button>
+                    <div class="title-div">
+                        <h1 class="title"></h1>
+                        <a id="more-games" target="_blank" rel="noopener noreferrer">more games</a>
+                    </div>
+                    <div>
+                        <button id="ingame-howtoplay-button">how to play</button>
+                        <button id="end-game-button">end game</button>
+                    </div>
                 </div>
             </div>
             <button id="ingame-left-expand-button"><a class="vertical-text">Expand</a></button>
@@ -24,28 +26,33 @@
             <h3 id="chatbox-title">lobby chat</h3>
             <div id="chat-log" class="data-log"></div>
             <form id="chat-form" class="data-form">
-                <input type="text" id="chat-field" class="data-field" maxlength="200" autocomplete="off"/>
+                <input type="text" id="chat-field" class="data-field" maxlength="200" autocomplete="off" />
                 <input type="submit" id="chat-send" value="Send" />
             </form>
         </div>
         <h3 id="chatbox-notification" class="vertical-text">lobby chat</h3>
     </div>
-  </div>
-  <div id="ingame-center">
-    <div id="round-text-div"><h2 id="round-text">Round 0</h2></div>
+</div>
+<div id="ingame-center">
+    <div id="start-game-div">
+        <p>Game hasn't started yet.</p>
+        <button id="start-game-button">Start Game</button>
+    </div>
+    <div id="round-text-div">
+        <h2 id="round-text">Round 0</h2>
+    </div>
+    <div id="gameover">
+        <h2 id="gameover-header">Game Over</h2>
+        <div id="gameover-results"></div>
+        <button id="gameover-continue-button">Continue</button>
+    </div>
     <div id="choices-container">
-      <div id="choices"></div>
-      <div id="choices-waiting"></div>
+        <div id="choices"></div>
+        <div id="choices-waiting"></div>
     </div>
     <div id="results-div">
         <h2 id="outcome"></h2>
         <div id="results"></div>
-        <div id="continue"></div>
+        <button id="results-continue-button">Continue</button>
     </div>
-    <div id="gameover">
-        <h2 id="game-results-header"></div>
-        <div id="game-results"></div>
-    </div>
-  </div>
-    </div>
-  </div>
+</div>

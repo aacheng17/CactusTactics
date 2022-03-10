@@ -2,7 +2,7 @@ export var en = {
     Phase: {
         PREGAME: '0',
         PLAY_PROMPT: '1',
-        PLAY_GUESSES: '2'
+        PLAY_GUESSES: '2',
     },
     ToServerCode: {
         DISCONNECT: '-',
@@ -11,7 +11,7 @@ export var en = {
         END_GAME: '2',
         RESPONSE: 'a',
         CHOICE: 'b',
-        PROMPT_REQUEST: 'c'
+        PROMPT_REQUEST: 'c',
     },
     ToClientCode: {
         RESTART: '0',
@@ -23,6 +23,6 @@ export var en = {
         CHOICES: 'c',
         CHOICES_RESPONSE: 'd',
         RESULTS: 'e',
-        WINNERS: 'f'
+        WINNERS: 'f',
     }
 }

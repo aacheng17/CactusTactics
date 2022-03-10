@@ -40,7 +40,11 @@ func (h *StandoffHub) getAssertedClients() map[*StandoffClient]bool {
 
 func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*StandoffClient)
-	if c.Name == "" && m.MessageType == ToServerCode["NAME"] {
+	switch m.MessageCode {
+	case ToServerCode["NAME"]:
+		if c.Name != "" {
+			return
+		}
 		name := m.Data[0]
 		avatar, err1 := strconv.Atoi(m.Data[1])
 		color, err2 := strconv.Atoi(m.Data[2])
@@ -54,26 +58,23 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 		h.nextClientId++
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
 		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
-		if h.phase == Phase["PREGAME"] {
-			h.SendData(c, ToClientCode["END_GAME"], []string{""})
-		}
+		h.SendData(c, ToClientCode["IN_MEDIA_RES"], []string{fmt.Sprint(string(h.phase))})
 		return
-	}
-	switch m.MessageType {
 	case ToServerCode["LOBBY_CHAT_MESSAGE"]:
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
 	}
-	if h.phase == Phase["PREGAME"] {
-		switch m.MessageType {
-		case ToServerCode["END_GAME"]:
+
+	switch h.phase {
+	case Phase["PREGAME"]:
+		switch m.MessageCode {
+		case ToServerCode["START_GAME"]:
 			h.reset()
 			h.phase = Phase["PLAY"]
-			h.Broadcast(byte('0'), []string{""})
-			h.Broadcast(byte('3'), h.getPlayers())
-			h.Broadcast(byte('a'), h.getPrompt())
+			h.Broadcast(ToClientCode["START_GAME"], []string{""})
+			h.Broadcast(ToClientCode["PROMPT"], h.getPrompt())
 		}
-	} else if h.phase == Phase["PLAY"] {
-		switch m.MessageType {
+	case Phase["PLAY"]:
+		switch m.MessageCode {
 		case ToServerCode["DECISION"]:
 			decision, err := strconv.Atoi(string(m.Data[0]))
 			if err != nil {

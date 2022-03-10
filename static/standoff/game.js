@@ -5,183 +5,213 @@ import { appendDataLog, setChatboxNotification } from '../ingame-utility.js';
 import { initTitles, initHowToPlays } from '../importantStrings.js';
 import { playAudio } from '../audio.js';
 import { en } from './enum.js';
+import { Noneable } from '../noneable.js';
 
-var ingameLeft = document.getElementById("ingame-left");
-var endgame = document.getElementById("endgame");
-var players = document.getElementById("players");
-var chatLog = document.getElementById("chat-log");
-var roundText = document.getElementById("round-text");
-var choices = document.getElementById("choices");
-var choicesWaiting = document.getElementById("choices-waiting");
-var resultsDiv = document.getElementById("results-div");
-var outcome = document.getElementById("outcome");
-var results = document.getElementById("results");
-var continueDiv = document.getElementById("continue");
-var gameResultsHeader = document.getElementById("game-results-header");
-var gameResults = document.getElementById("game-results");
+const ingameLeft = document.getElementById("ingame-left");
+const endgame = document.getElementById("endgame");
+const players = document.getElementById("players");
+const chatLog = document.getElementById("chat-log");
+const roundText = document.getElementById("round-text");
+const startGameButton = document.getElementById("start-game-button");
+const choices = document.getElementById("choices");
+const choicesWaiting = document.getElementById("choices-waiting");
+const outcome = document.getElementById("outcome");
+const results = document.getElementById("results");
+const continueButton = document.getElementById("continue-button");
+const gameoverResults = document.getElementById("gameover-results");
+
+const startGameDiv = new Noneable(document.getElementById("start-game-div"));
+const choicesContainer = new Noneable(document.getElementById("choices-container"));
+const resultsDiv = new Noneable(document.getElementById("results-div"));
+const resultsContinueButton = new Noneable(document.getElementById("results-continue-button"), true);
+const roundTextDiv = new Noneable(document.getElementById("round-text-div"));
+const gameover = new Noneable(document.getElementById("gameover"));
+
+var handlers = {};
 
 export function initMain(conn) {
+    conn = conn;
     initTitles("Standoff");
     initHowToPlays("Shoot someone, or yourself, or nobody.\n\nIf anyone shoots you while you shoot yourself, they die instead of you.\n\nLast person standing wins.");
 
+    startGameButton.onclick = function (e) {
+        networking.send(conn, en.ToServerCode.START_GAME);
+    }
+
+    resultsContinueButton.element.onclick = function (e) {
+        networking.send(conn, en.ToServerCode.PROMPT_REQUEST);
+    };
+
+    handlers[en.ToClientCode.IN_MEDIA_RES] = (data) => {
+        switch (data[0].charAt(0)) {
+        case en.Phase.PREGAME:
+            startGameDiv.show();
+            break;
+        case en.Phase.PLAY:
+            roundTextDiv.show();
+            break;
+        }
+    }
+
+    // ALL PHASES
+    handlers[en.ToClientCode.PLAYERS] = (data) => {
+        while (players.firstChild) {
+            players.removeChild(players.firstChild);
+        }
+        for (let j = 0; j < data.length; j+=6) {
+            var player = document.createElement("div");
+            player.className = "player";
+            var playerInfo = document.createElement("div");
+            playerInfo.classList.add("player-info");
+            playerInfo.innerHTML = "<b>" + data[j] + "</b>" + " " + data[j+3] + "<br/>" + data[j+4] + " wins";
+            playerInfo
+            player.appendChild(playerInfo);
+            var playerAvatarContainer = document.createElement("div");
+            playerAvatarContainer.classList.add("player-avatar-container");
+            var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
+            svg.classList.add("player-avatar");
+            svg.setAttribute("width", "50px");
+            svg.setAttribute("height", "50px");
+            svg.setAttribute("viewBox", "0 0 1000 1000");
+            svg.setAttribute("fill", COLORS[data[j+2]]);
+            var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
+            svg.appendChild(path);
+            path.setAttribute("d", AVATARS[data[j+1]]);
+            playerAvatarContainer.appendChild(svg);
+            var playerStatus = document.createElement("a")
+            playerStatus.classList.add("player-status")
+            switch (data[j+5]) {
+                case "dotdotdot": playerStatus.classList.add("dotdotdot"); break;
+                case "ready": playerStatus.innerHTML = "&#10003;"; break;
+                case "none": break;
+            }
+            playerAvatarContainer.appendChild(playerStatus);
+            player.appendChild(playerAvatarContainer);
+            players.appendChild(player);
+        }
+    }
+
+    handlers[en.ToClientCode.LOBBY_CHAT_MESSAGE] = (data) => {
+        playAudio("glub");
+        var item = networking.decodeToDiv(data[0]);
+        appendDataLog(chatLog, item);
+        var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
+        if (!ingameLeft.classList.contains("ingame-left-expanded") && width <= 800) {
+            setChatboxNotification(1);
+        }
+    }
+
+    // PREGAME
+    handlers[en.ToClientCode.START_GAME] = (data) => {
+        playAudio("start");
+        startGameDiv.hide();
+        gameover.hide();
+        choicesContainer.show();
+        resultsContinueButton.show();
+        roundTextDiv.show();
+        gameResultsHeader.innerText = "";
+        while (gameResults.firstChild) {
+            gameResults.removeChild(gameResults.firstChild);
+        }
+    }
+
+    // PLAY
+    handlers[en.ToClientCode.PROMPT] = (data) => {
+        playAudio("dink2");
+        roundText.innerText = `Round ${data[0]}`;
+        resultsDiv.hide();
+        outcome.innerText = "";
+        results.innerText = "";
+        while (choices.firstChild) {
+            choices.removeChild(choices.firstChild);
+        }
+        if (data.length > 2) {
+            choices.innerText = "Who to shoot?";
+            for (let j = 1; j < data.length; j+=2) {
+                let clientId = data[j];
+                let clientName = data[j+1]
+                var item = document.createElement("button");
+                item.innerText = clientName;
+                item.onclick = function() {
+                    playAudio("click3")
+                    networking.send(conn, en.ToServerCode.DECISION + clientId.toString());
+                };
+                choices.appendChild(item);
+            }
+            var item = document.createElement("button");
+            item.innerText = "nobody";
+            item.onclick = function() {
+                playAudio("click3")
+                networking.send(conn, en.ToServerCode.DECISION + "-2");
+            };
+            choices.appendChild(item);
+        } else {
+            choicesWaiting.innerText = "You are " + data[1] + ". Waiting for other players...";
+        }
+    }
+
+    handlers[en.ToClientCode.DECISION_ACK] = (data) => {
+        let childs = choices.children;
+        for (let i=0; i<childs.length; i++) {
+            childs[i].disabled = true;
+        }
+        choicesWaiting.innerText = "Waiting for other players.";
+    }
+
+    handlers[en.ToClientCode.RESULT] = (data) => {
+        console.log("ayo");
+        playAudio("whoosh");
+        choicesWaiting.innerText = "";
+        resultsDiv.show();
+        outcome.innerText = "Round Outcome";
+        while (results.firstChild) {
+            results.removeChild(results.firstChild);
+        }
+        data.forEach(line => {
+            var item = networking.decodeToDiv(line);
+            results.appendChild(item);
+        });
+    }
+
+    handlers[en.ToClientCode.WINNERS] = (data) => {
+        playAudio("fanfare");
+        choicesContainer.hide();
+        roundTextDiv.hide();
+        resultsContinueButton.hide();
+        gameover.show();
+        choicesWaiting.innerText = "";
+        var item = document.createElement("p");
+        let j = 1;
+        if (data[0] === "1") {
+            j += 3;
+            item.innerHTML = `<b>WINNER:<br/>${data[1]}</b> survived for ${data[2]} rounds.<br/><br/>`;
+        } else {
+            item.innerHTML = "<b>Everyone died</b>";
+        }
+        gameoverResults.appendChild(item);
+        for (; j<data.length; j+=3) {
+            var item = document.createElement("p");
+            item.innerHTML = `<b>${data[j]}</b> survived for ${data[j+1]} rounds. Killed by: <b>${data[j+2]}</b><br/>`;
+            gameoverResults.appendChild(item);
+        }
+
+        handlers[en.ToClientCode.END_GAME] = (data) => {
+            endgame.disabled = false;
+            choices.innerText = "Waiting for new game...";
+        }
+    }
+    
     conn.onmessage = function (evt) {
         if (name === undefined) {
             return false;
         }
-        var messages = evt.data.split('\n');
+        const messages = evt.data.split('\n');
         for (var i = 0; i < messages.length; i++) {
-            var m = messages[i];
-            console.log(m);
-            var messageType = m.charAt(0);
-            var data = networking.decode(m.substring(1,m.length));
-            switch (messageType) {
-            case en.ToClientCode.RESTART:
-                playAudio("start");
-                gameResultsHeader.innerText = "";
-                while (gameResults.firstChild) {
-                    gameResults.removeChild(gameResults.firstChild);
-                }
-                endgame.disabled = true;
-                break;
-            case en.ToClientCode.LOBBY_CHAT_MESSAGE:
-                playAudio("glub");
-                var item = networking.decodeToDiv(data[0]);
-                appendDataLog(chatLog, item);
-                var width = (window.innerWidth > 0) ? window.innerWidth : screen.width;
-                if (!ingameLeft.classList.contains("ingame-left-expanded") && width <= 800) {
-                    setChatboxNotification(1);
-                }
-                break;
-            case en.ToClientCode.END_GAME:
-                endgame.disabled = false;
-                choices.innerText = "Waiting for new game...";
-                break;
-            case en.ToClientCode.PLAYERS:
-                while (players.firstChild) {
-                    players.removeChild(players.firstChild);
-                }
-                for (let j = 0; j < data.length; j+=6) {
-                    var player = document.createElement("div");
-                    player.className = "player";
-                    var playerInfo = document.createElement("div");
-                    playerInfo.classList.add("player-info");
-                    playerInfo.innerHTML = "<b>" + data[j] + "</b>" + " " + data[j+3] + "<br/>" + data[j+4] + " wins";
-                    playerInfo
-                    player.appendChild(playerInfo);
-                    var playerAvatarContainer = document.createElement("div");
-                    playerAvatarContainer.classList.add("player-avatar-container");
-                    var svg = document.createElementNS("http://www.w3.org/2000/svg", "svg");
-                    svg.classList.add("player-avatar");
-                    svg.setAttribute("width", "50px");
-                    svg.setAttribute("height", "50px");
-                    svg.setAttribute("viewBox", "0 0 1000 1000");
-                    svg.setAttribute("fill", COLORS[data[j+2]]);
-                    var path = document.createElementNS("http://www.w3.org/2000/svg", "path");
-                    svg.appendChild(path);
-                    path.setAttribute("d", AVATARS[data[j+1]]);
-                    playerAvatarContainer.appendChild(svg);
-                    var playerStatus = document.createElement("a")
-                    playerStatus.classList.add("player-status")
-                    switch (data[j+5]) {
-                        case "dotdotdot": playerStatus.classList.add("dotdotdot"); break;
-                        case "ready": playerStatus.innerHTML = "&#10003;"; break;
-                        case "none": break;
-                    }
-                    playerAvatarContainer.appendChild(playerStatus);
-                    player.appendChild(playerAvatarContainer);
-                    players.appendChild(player);
-                }
-                break;
-            case en.ToClientCode.PROMPT:
-                playAudio("dink2");
-                endgame.disabled = true;
-                roundText.innerText = `Round ${data[0]}`;
-                resultsDiv.style.display = "none";
-                outcome.innerText = "";
-                results.innerText = "";
-                while (continueDiv.firstChild) {
-                    continueDiv.removeChild(continueDiv.firstChild);
-                }
-                while (choices.firstChild) {
-                    choices.removeChild(choices.firstChild);
-                }
-                if (data.length > 2) {
-                    choices.innerText = "Who to shoot?";
-                    for (let j = 1; j < data.length; j+=2) {
-                        let clientId = data[j];
-                        let clientName = data[j+1]
-                        var item = document.createElement("button");
-                        item.innerText = clientName;
-                        item.onclick = function() {
-                            playAudio("click3")
-                            networking.send(conn, en.ToServerCode.DECISION + clientId.toString());
-                        };
-                        choices.appendChild(item);
-                    }
-                    var item = document.createElement("button");
-                    item.innerText = "nobody";
-                    item.onclick = function() {
-                        playAudio("click3")
-                        networking.send(conn, en.ToServerCode.DECISION + "-2");
-                    };
-                    choices.appendChild(item);
-                } else {
-                    choicesWaiting.innerText = "You are " + data[1] + ". Waiting for other players...";
-                }
-                break;
-            case en.ToClientCode.DECISION_ACK:
-                let childs = choices.children;
-                for (let i=0; i<childs.length; i++) {
-                    childs[i].disabled = true;
-                }
-                choicesWaiting.innerText = "Waiting for other players.";
-                break;
-            case en.ToClientCode.RESULT:
-                playAudio("whoosh");
-                choicesWaiting.innerText = "";
-                resultsDiv.style.display = "flex";
-                resultsDiv.style.flexDirection = "column";
-                outcome.innerText = "Round Outcome";
-                while (results.firstChild) {
-                    results.removeChild(results.firstChild);
-                }
-                data.forEach(line => {
-                    item = networking.decodeToDiv(line);
-                    results.appendChild(item);
-                });
-                while (continueDiv.firstChild) {
-                    continueDiv.removeChild(continueDiv.firstChild);
-                }
-                item = document.createElement("button");
-                item.innerText = "Continue";
-                item.onclick = function() {
-                    networking.send(conn, en.ToServerCode.PROMPT_REQUEST);
-                };
-                continueDiv.appendChild(item);
-                break;
-            case en.ToClientCode.WINNERS:
-                playAudio("fanfare");
-                while (continueDiv.firstChild) {
-                    continueDiv.removeChild(continueDiv.firstChild);
-                }
-                choicesWaiting.innerText = "";
-                gameResultsHeader.innerText = "GAME OVER"
-                item = document.createElement("p");
-                let j = 1;
-                if (data[0] === "1") {
-                    j += 3;
-                    item.innerHTML = `<b>WINNER:<br/>${data[1]}</b> survived for ${data[2]} rounds.<br/><br/>`;
-                } else {
-                    item.innerHTML = "<b>Everyone died</b>";
-                }
-                gameResults.appendChild(item);
-                for (; j<data.length; j+=3) {
-                    item = document.createElement("p");
-                    item.innerHTML = `<b>${data[j]}</b> survived for ${data[j+1]} rounds. Killed by: <b>${data[j+2]}</b><br/>`;
-                    gameResults.appendChild(item);
-                }
-                break;
-            }
+            const m = messages[i];
+            const toClientMessageCode = m.charAt(0);
+            const data = networking.decode(m.substring(1,m.length));
+            console.log("Got message: " + toClientMessageCode + " " + data);
+            handlers[toClientMessageCode](data);
         }
     };
 }
