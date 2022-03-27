@@ -8,7 +8,7 @@ import { en } from './enum.js';
 import { Noneable } from '../noneable.js';
 
 const ingameLeft = document.getElementById("ingame-left");
-const endgame = document.getElementById("endgame");
+const endGameButton = document.getElementById("end-game-button");
 const players = document.getElementById("players");
 const chatLog = document.getElementById("chat-log");
 const roundText = document.getElementById("round-text");
@@ -17,7 +17,7 @@ const choices = document.getElementById("choices");
 const choicesWaiting = document.getElementById("choices-waiting");
 const outcome = document.getElementById("outcome");
 const results = document.getElementById("results");
-const continueButton = document.getElementById("continue-button");
+const continueButton = document.getElementById("gameover-continue-button");
 const gameoverResults = document.getElementById("gameover-results");
 
 const startGameDiv = new Noneable(document.getElementById("start-game-div"));
@@ -36,10 +36,18 @@ export function initMain(conn) {
 
     startGameButton.onclick = function (e) {
         networking.send(conn, en.ToServerCode.START_GAME);
-    }
+    };
 
     resultsContinueButton.element.onclick = function (e) {
         networking.send(conn, en.ToServerCode.PROMPT_REQUEST);
+    };
+
+    continueButton.onclick = function (e) {
+        networking.send(conn, en.ToServerCode.START_GAME);
+    };
+
+    endGameButton.onclick = function (e) {
+        networking.send(conn, en.ToServerCode.END_GAME);
     };
 
     handlers[en.ToClientCode.IN_MEDIA_RES] = (data) => {
@@ -48,6 +56,8 @@ export function initMain(conn) {
             startGameDiv.show();
             break;
         case en.Phase.PLAY:
+            SetChoicesWaitingStatus("spectating");
+            choicesContainer.show();
             roundTextDiv.show();
             break;
         }
@@ -109,9 +119,8 @@ export function initMain(conn) {
         choicesContainer.show();
         resultsContinueButton.show();
         roundTextDiv.show();
-        gameResultsHeader.innerText = "";
-        while (gameResults.firstChild) {
-            gameResults.removeChild(gameResults.firstChild);
+        while (gameoverResults.firstChild) {
+            gameoverResults.removeChild(gameoverResults.firstChild);
         }
     }
 
@@ -146,7 +155,7 @@ export function initMain(conn) {
             };
             choices.appendChild(item);
         } else {
-            choicesWaiting.innerText = "You are " + data[1] + ". Waiting for other players...";
+            SetChoicesWaitingStatus(data[1]);
         }
     }
 
@@ -194,11 +203,10 @@ export function initMain(conn) {
             item.innerHTML = `<b>${data[j]}</b> survived for ${data[j+1]} rounds. Killed by: <b>${data[j+2]}</b><br/>`;
             gameoverResults.appendChild(item);
         }
+    }
 
-        handlers[en.ToClientCode.END_GAME] = (data) => {
-            endgame.disabled = false;
-            choices.innerText = "Waiting for new game...";
-        }
+    handlers[en.ToClientCode.END_GAME] = (data) => {
+        networking.send(conn, en.ToServerCode.END_GAME);
     }
     
     conn.onmessage = function (evt) {
@@ -215,3 +223,7 @@ export function initMain(conn) {
         }
     };
 }
+
+function SetChoicesWaitingStatus(status) {
+    choicesWaiting.innerText = "You are " + status + ". Waiting for other players...";
+};

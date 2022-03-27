@@ -94,6 +94,8 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 			} else {
 				h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
 			}
+		case ToServerCode["END_GAME"]:
+			h.endGame()
 		}
 	}
 }

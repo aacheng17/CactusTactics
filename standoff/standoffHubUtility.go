@@ -242,3 +242,7 @@ func (h *StandoffHub) getWinners() []string {
 
 	return ret
 }
+
+func (h *StandoffHub) endGame() {
+	h.Broadcast(ToClientCode["END_GAME"], []string{})
+}

@@ -8,7 +8,6 @@ export class Noneable {
     }
 
     show() {
-        console.log(this.display);
         this.element.style.display = this.display;
     }
 
