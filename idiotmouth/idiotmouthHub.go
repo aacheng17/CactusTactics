@@ -64,7 +64,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 		c.Color = color
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
 		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
-		h.SendData(c, ToClientCode["IN_MEDIA_RES"], []string{fmt.Sprint(string(h.phase))})
+		h.SendData(c, ToClientCode["IN_MEDIA_RES"], []string{string(h.phase)})
 		h.SendData(c, ToClientCode["GAMERULE_MIN_WORD_LENGTH"], []string{fmt.Sprint(h.minWordLength)})
 		h.SendData(c, ToClientCode["GAMERULE_SCORE_TO_WIN"], []string{fmt.Sprint(h.scoreToWin)})
 		if h.phase == Phase["PLAY"] {

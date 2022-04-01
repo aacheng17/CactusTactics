@@ -18,7 +18,9 @@ type FakeoutHub struct {
 
 	messageNum int
 
-	deck string
+	scoreToWin int
+
+	deck int
 
 	questions []int
 
@@ -46,8 +48,12 @@ func (h *FakeoutHub) getAssertedClients() map[*FakeoutClient]bool {
 
 func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*FakeoutClient)
-	question := decks[h.deck].getQuestion(h.deck, h.question)
-	if c.Name == "" && m.MessageCode == ToServerCode["NAME"] {
+	question := h.getQuestion()
+	switch m.MessageCode {
+	case ToServerCode["NAME"]:
+		if c.Name != "" {
+			return
+		}
 		name := m.Data[0]
 		avatar, err1 := strconv.Atoi(m.Data[1])
 		color, err2 := strconv.Atoi(m.Data[2])
@@ -59,10 +65,16 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 		c.Color = color
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
 		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
-		h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
-		if h.phase == Phase["PREGAME"] {
-			h.SendData(c, ToClientCode["END_GAME"], []string{})
-		} else if h.phase == Phase["PLAY_GUESSES"] {
+		h.SendData(c, ToClientCode["IN_MEDIA_RES"], []string{string(h.phase)})
+		switch h.phase {
+		case Phase["PREGAME"]:
+			h.SendData(c, ToClientCode["SCORE_TO_WIN"], []string{fmt.Sprint(h.scoreToWin)})
+			h.SendData(c, ToClientCode["DECK_OPTIONS"], getFakeoutDeckOptions())
+			h.SendData(c, ToClientCode["DECK_SELECTION"], []string{fmt.Sprint(h.deck)})
+		case Phase["PLAY_PROMPT"]:
+			h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
+		case Phase["PLAY_GUESSES"]:
+			h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
 			toSend := []string{}
 			for _, client := range h.answers {
 				s := ""
@@ -75,26 +87,38 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 			}
 			h.SendData(c, ToClientCode["CHOICES"], toSend)
 		}
-		return
-	}
-	switch m.MessageCode {
 	case ToServerCode["LOBBY_CHAT_MESSAGE"]:
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})
 	}
-	if h.phase == Phase["PREGAME"] {
-		if m.MessageCode == ToServerCode["END_GAME"] {
-			h.reset()
-			h.Broadcast(ToClientCode["RESTART"], []string{""})
-			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " restarted the game", u.ENDTAG, u.ENDTAG)})
-			h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
+
+	switch h.phase {
+	case Phase["PREGAME"]:
+		switch m.MessageCode {
+		case ToServerCode["SCORE_TO_WIN"]:
+			scoreToWin, err := strconv.Atoi(m.Data[0])
+			if err != nil || scoreToWin < 250 || scoreToWin > 50000 {
+				break
+			}
+			h.scoreToWin = scoreToWin
+			fmt.Println("wope")
+			fmt.Println(scoreToWin)
+			h.Broadcast(ToClientCode["SCORE_TO_WIN"], []string{fmt.Sprint(scoreToWin)})
+		case ToServerCode["DECK_SELECTION"]:
+			deckSelection, err := strconv.Atoi(m.Data[0])
+			if err == nil {
+				h.deck = deckSelection
+				h.Broadcast(ToClientCode["DECK_SELECTION"], []string{fmt.Sprint(h.deck)})
+			}
+		case ToServerCode["START_GAME"]:
+			h.startGame()
+			h.Broadcast(ToClientCode["START_GAME"], []string{""})
+			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " started the game", u.ENDTAG, u.ENDTAG)})
 			h.Broadcast(ToClientCode["PROMPT"], h.getPrompt())
 			h.phase = Phase["PLAY_PROMPT"]
 		}
-		return
-	}
-	switch m.MessageCode {
-	case ToServerCode["RESPONSE"]:
-		if h.phase == Phase["PLAY_PROMPT"] {
+	case Phase["PLAY_PROMPT"]:
+		switch m.MessageCode {
+		case ToServerCode["RESPONSE"]:
 			if c.answer == "" {
 				playerAnswer := strings.TrimSpace(strings.ToLower(string(m.Data[0])))
 				alternateSpelling := false
@@ -135,8 +159,9 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 				}
 			}
 		}
-	case ToServerCode["CHOICE"]:
-		if h.phase == Phase["PLAY_GUESSES"] {
+	case Phase["PLAY_GUESSES"]:
+		switch m.MessageCode {
+		case ToServerCode["CHOICE"]:
 			playerChoice := strings.TrimSpace(string(m.Data[0]))
 			choiceIndex, err := strconv.Atoi(playerChoice)
 			if err == nil {
@@ -174,6 +199,11 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 							}
 							results = append(results, s)
 						}
+						if h.didSomeoneWin() {
+							h.Broadcast(ToClientCode["END_GAME"], []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
+							h.Broadcast(ToClientCode["WINNERS"], h.getWinners())
+							h.phase = Phase["PREGAME"]
+						}
 						h.phase = Phase["PLAY_PROMPT"]
 						h.resetAnswers()
 						h.genNextQuestion()
@@ -181,26 +211,28 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 							h.SendData(client, ToClientCode["RESULTS"], results)
 							h.SendData(client, ToClientCode["PLAYERS"], h.getPlayers())
 						}
-						h.phase = Phase["PLAY_PROMPT"]
 					}
 					h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 				}
 			}
 		}
-	case ToServerCode["PROMPT_REQUEST"]:
-		h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
-		break
-	case ToServerCode["END_GAME"]:
-		h.Broadcast(ToClientCode["END_GAME"], []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
-		h.Broadcast(ToClientCode["WINNERS"], h.getWinners())
-		h.phase = Phase["PREGAME"]
+	}
+	if h.phase != Phase["PREGAME"] {
+		switch m.MessageCode {
+		case ToServerCode["PROMPT_REQUEST"]:
+			h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
+		case ToServerCode["END_GAME"]:
+			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
+			h.Broadcast(ToClientCode["WINNERS"], h.getWinners())
+			h.phase = Phase["PREGAME"]
+		}
 	}
 }
 
 func NewFakeoutHub(game string, id string, deleteHubCallback func(*core.Hub)) core.Hublike {
 	h := &FakeoutHub{
-		Hub:  *core.NewHub(game, id, deleteHubCallback),
-		deck: "standard",
+		Hub:        *core.NewHub(game, id, deleteHubCallback),
+		scoreToWin: 1000,
 	}
 	h.Child = h
 	h.reset()

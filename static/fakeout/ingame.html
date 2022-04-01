@@ -34,15 +34,32 @@
   </div>
 </div>
 <div id="ingame-center">
-  <div id="prompt">
-      <div id="prompt-text"></div>
-      <form id="prompt-form">
-          <input type="text" id="prompt-field" maxlength="200" autocomplete="off"/>
-          <input type="submit" id="prompt-submit" value="Submit" />
-      </form>
-      <div id="prompt-waiting"></div>
-  </div>
-  <div id="choices-container">
+    <div id="topbox">
+        <div id="new-game" style="display: flex">
+            <h2>New Game</h2>
+            <div class="horizontal-div">
+                <a>Score to win:</a><input id="score-to-win" type="number" max="50000" min="250" step="250" onkeydown="return false" style="caret-color: transparent"/>
+            </div>
+            Current deck in play:
+            <div id="deck-description"></div>
+            <div id="deck-selection"></div>
+            <button id="start-game-button">Start Game</button>
+        </div>
+        <div id="prompt" style="display:flex">
+            <div id="prompt-text"></div>
+            <form id="prompt-form">
+                <input type="text" id="prompt-field" maxlength="200" autocomplete="off"/>
+                <input type="submit" id="prompt-submit" value="Submit" />
+            </form>
+            <div id="prompt-waiting"></div>
+        </div>
+        <div id="gameover">
+            <h2>Game Over</h2><br/>
+            <div id="gameover-text"></div><br/>
+            <button id="gameover-continue">New Game</button>
+        </div>
+    </div>
+    <div id="choices-container">
     <div id="choices"></div>
     <div id="choices-waiting"></div>
 </div>

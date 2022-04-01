@@ -65,6 +65,7 @@ export function initMain(conn) {
     };
 
     newGameButton.onclick = function(e) {
+        playAudio("click2");
         newgame.show();
         endgame.hide();
         gamebox.hide();
@@ -132,10 +133,12 @@ export function initMain(conn) {
     
     //PREGAME
     handlers[en.ToClientCode.GAMERULE_MIN_WORD_LENGTH] = (data) => {
+        playAudio("click2");
         newGameMinWordLength.value = data[0];
     }
     
     handlers[en.ToClientCode.GAMERULE_SCORE_TO_WIN] = (data) => {
+        playAudio("click2");
         newGameScoreToWin.value = data[0];
     }
     

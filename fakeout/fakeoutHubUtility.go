@@ -10,6 +10,10 @@ import (
 	u "example.com/hello/utility"
 )
 
+func (h *FakeoutHub) getQuestion() Question {
+	return getFakeoutQuestion(h.deck, h.question)
+}
+
 func (h *FakeoutHub) useMessageNum() int {
 	ret := h.messageNum
 	h.messageNum++
@@ -23,9 +27,13 @@ func (h *FakeoutHub) reset() {
 		client.answer = ""
 		client.choice = -1
 	}
-	h.phase = Phase["PLAY_PROMPT"]
+	h.phase = Phase["PREGAME"]
+}
+
+func (h *FakeoutHub) startGame() {
 	h.questions = utility.MakeRange(0, len(decks[h.deck].Questions))
-	h.genNextQuestion()
+	h.phase = Phase["PLAY_PROMPT"]
+	h.question = h.questions[rand.Intn(len(h.questions))]
 }
 
 func (h *FakeoutHub) resetAnswers() {
@@ -69,7 +77,7 @@ func (h *FakeoutHub) genNextQuestion() int {
 
 func (h *FakeoutHub) getPrompt() []string {
 	ret := fmt.Sprint(u.Tag("b"), decks[h.deck].Instructions, ":", u.ENDTAG, u.Tag("br"), u.Tag("br"))
-	ret += decks[h.deck].getQuestion(h.deck, h.question).Question
+	ret += h.getQuestion().Question
 	ret = strings.Replace(ret, "<BLANK>", "________", 1)
 	ret = utility.ParseAndTag(ret)
 	return []string{ret}
@@ -119,6 +127,17 @@ func (h *FakeoutHub) getPlayers(excepts ...*FakeoutClient) []string {
 		players = append(players, fmt.Sprint(dotdotdotStatus))
 	}
 	return players
+}
+
+func (h *FakeoutHub) didSomeoneWin() bool {
+	for k := range h.getAssertedClients() {
+		if k.score >= h.scoreToWin {
+			fmt.Println("yup")
+			return true
+		}
+	}
+	fmt.Println("nope")
+	return false
 }
 
 func (h *FakeoutHub) getWinners() []string {

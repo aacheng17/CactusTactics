@@ -58,7 +58,7 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 		h.nextClientId++
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
 		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
-		h.SendData(c, ToClientCode["IN_MEDIA_RES"], []string{fmt.Sprint(string(h.phase))})
+		h.SendData(c, ToClientCode["IN_MEDIA_RES"], []string{string(h.phase)})
 		return
 	case ToServerCode["LOBBY_CHAT_MESSAGE"]:
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", m.Data[0], u.ENDTAG)})

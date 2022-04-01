@@ -19,3 +19,27 @@
 .revealed > button {
     margin-bottom: 10px;
 }
+
+#new-game {
+    display: flex;
+    flex-direction: column;
+    gap: 6px;
+}
+
+#deck-selection {
+    display: inline;
+}
+
+#deck-selection > * {
+    margin-right: 8px;
+}
+
+#topbox {
+    background-color: #e5e5e5;
+    padding: 10px;
+}
+
+.selected-deck-button {
+    background-color: #d6d6d6;
+    font-weight: bold;
+}

@@ -32,3 +32,9 @@ button {
 .postbr {
     margin-bottom: 10px;
 }
+
+.horizontal-div {
+    display: flex;
+    flex-direction: row;
+    gap: 5px;
+}
