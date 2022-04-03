@@ -81,7 +81,7 @@ func RemoveEscapes(s string) string {
 func ParseAndTag(s string) string {
 	s = strings.Replace(s, "<i>", Tag("i"), -1)
 	s = strings.Replace(s, "</i>", ENDTAG, -1)
-	s = strings.Replace(s, "<b>", Tag("i"), -1)
-	s = strings.Replace(s, "</i>", ENDTAG, -1)
+	s = strings.Replace(s, "<b>", Tag("b"), -1)
+	s = strings.Replace(s, "</b>", ENDTAG, -1)
 	return s
 }

@@ -76,7 +76,7 @@ func (h *FakeoutHub) genNextQuestion() int {
 }
 
 func (h *FakeoutHub) getPrompt() []string {
-	ret := fmt.Sprint(u.Tag("b"), decks[h.deck].Instructions, ":", u.ENDTAG, u.Tag("br"), u.Tag("br"))
+	ret := fmt.Sprint(decks[h.deck].Instructions, ":", u.Tag("br"), u.Tag("br"))
 	ret += h.getQuestion().Question
 	ret = strings.Replace(ret, "<BLANK>", "________", 1)
 	ret = utility.ParseAndTag(ret)
