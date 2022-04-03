@@ -47,6 +47,9 @@ export function initMain(conn) {
     }
 
     gameoverContinue.onclick = function (e) {
+        while (choices.firstChild) {
+            choices.removeChild(choices.firstChild);
+        }
         gameover.hide();
         newgame.show();
     }
@@ -160,6 +163,11 @@ export function initMain(conn) {
         newgame.hide();
         gameover.hide();
         prompt.show();
+        promptField.disabled = false;
+        promptSubmit.disabled = false;
+        while (choices.firstChild) {
+            choices.removeChild(choices.firstChild);
+        }
     }
 
     //PLAY
@@ -262,11 +270,8 @@ export function initMain(conn) {
         playAudio("fanfare");
         gameoverText.innerText = "Winner: " + data[0] + " " + data[1] + " points\nMost fakeouts: " + data[2] + " " + data[3] + " fakeouts";
         gameover.show();
-        while (choices.firstChild) {
-            choices.removeChild(choices.firstChild);
-        }
         while (choicesWaiting.firstChild) {
-            choicesWaitingremoveChild(choicesWaiting.firstChild);
+            choicesWaiting.removeChild(choicesWaiting.firstChild);
         }
     }
     

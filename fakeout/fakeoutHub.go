@@ -199,17 +199,15 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 							}
 							results = append(results, s)
 						}
+						h.resetAnswers()
+						h.Broadcast(ToClientCode["RESULTS"], results)
+						h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 						if h.didSomeoneWin() {
-							h.Broadcast(ToClientCode["END_GAME"], []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
 							h.Broadcast(ToClientCode["WINNERS"], h.getWinners())
 							h.phase = Phase["PREGAME"]
-						}
-						h.phase = Phase["PLAY_PROMPT"]
-						h.resetAnswers()
-						h.genNextQuestion()
-						for client := range h.Clients {
-							h.SendData(client, ToClientCode["RESULTS"], results)
-							h.SendData(client, ToClientCode["PLAYERS"], h.getPlayers())
+						} else {
+							h.phase = Phase["PLAY_PROMPT"]
+							h.genNextQuestion()
 						}
 					}
 					h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
