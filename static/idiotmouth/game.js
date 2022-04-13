@@ -6,13 +6,14 @@ import { initTitles, initHowToPlays } from '../importantStrings.js';
 import { playAudio } from '../audio.js';
 import { en } from './enum.js';
 import { Noneable } from '../noneable.js';
+import { GameOption } from '../gameoption.js';
 
 const ingameLeft = document.getElementById("ingame-left");
 const endGameButton = document.getElementById("end-game-button");
 const players = document.getElementById("players");
 const chatLog = document.getElementById("chat-log");
-const newGameMinWordLength = document.getElementById("new-game-min-word-length");
-const newGameScoreToWin = document.getElementById("new-game-score-to-win");
+const minWordLengthDiv = document.getElementById("min-word-length-div");
+const scoreToWinDiv = document.getElementById("score-to-win-div");
 const startGameButton = document.getElementById("start-game-button");
 const startLetter = document.getElementById("start-letter");
 const endLetter = document.getElementById("end-letter");
@@ -39,12 +40,34 @@ export function initMain(conn) {
         networking.send(conn, en.ToServerCode.END_GAME);
     }
 
-    newGameMinWordLength.onchange = function (e) {
-        networking.send(conn, en.ToServerCode.GAMERULE_MIN_WORD_LENGTH + newGameMinWordLength.value.toString());
+    const minWordLength = new GameOption(minWordLengthDiv, "min-word-length", "Minimum word length:", 8, 1, 1);
+    minWordLength.left.onclick = function (e) {
+        minWordLength.decrement();
+        networking.send(conn, en.ToServerCode.MIN_WORD_LENGTH + minWordLength.getValue().toString());
     }
 
-    newGameScoreToWin.onchange = function (e) {
-        networking.send(conn, en.ToServerCode.GAMERULE_SCORE_TO_WIN + newGameScoreToWin.value.toString());
+    minWordLength.right.onclick = function (e) {
+        minWordLength.increment();
+        networking.send(conn, en.ToServerCode.MIN_WORD_LENGTH + minWordLength.getValue().toString());
+    }
+    
+    const scoreToWin = new GameOption(scoreToWinDiv, "score-to-win", "Score to win:", 50000, 500, 500);
+    scoreToWin.left.onclick = function (e) {
+        scoreToWin.decrement();
+        networking.send(conn, en.ToServerCode.SCORE_TO_WIN + scoreToWin.getValue().toString());
+    }
+
+    scoreToWin.right.onclick = function (e) {
+        scoreToWin.increment();
+        networking.send(conn, en.ToServerCode.SCORE_TO_WIN + scoreToWin.getValue().toString());
+    }
+
+    minWordLengthDiv.onchange = function (e) {
+        networking.send(conn, en.ToServerCode.MIN_WORD_LENGTH + minWordLengthDiv.value.toString());
+    }
+
+    scoreToWin.onchange = function (e) {
+        networking.send(conn, en.ToServerCode.SCORE_TO_WIN + scoreToWin.value.toString());
     }
 
     startGameButton.onclick = function (e) {
@@ -132,14 +155,14 @@ export function initMain(conn) {
     }
     
     //PREGAME
-    handlers[en.ToClientCode.GAMERULE_MIN_WORD_LENGTH] = (data) => {
+    handlers[en.ToClientCode.MIN_WORD_LENGTH] = (data) => {
         playAudio("click2");
-        newGameMinWordLength.value = data[0];
+        minWordLength.setValue(data[0]);
     }
     
-    handlers[en.ToClientCode.GAMERULE_SCORE_TO_WIN] = (data) => {
+    handlers[en.ToClientCode.SCORE_TO_WIN] = (data) => {
         playAudio("click2");
-        newGameScoreToWin.value = data[0];
+        scoreToWin.setValue(data[0]);
     }
     
     handlers[en.ToClientCode.START_GAME] = (data) => {

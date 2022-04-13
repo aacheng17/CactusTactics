@@ -37,12 +37,8 @@
     <div id="topbox">
         <div id="new-game" style="display: flex">
             <h2>New Game</h2>
-            <div class="horizontal-div">
-                <a>Minimum word length:</a><input id="new-game-min-word-length" type="number" max="8" min="1" onkeydown="return false" style="caret-color: transparent"/>
-            </div>
-            <div class="horizontal-div">
-                <a>Score to win:</a><input id="new-game-score-to-win" type="number" max="50000" min="500" step="500" onkeydown="return false" style="caret-color: transparent"/>
-            </div>
+            <div id="min-word-length-div" class="horizontal-div"></div>
+            <div id="score-to-win-div" class="horizontal-div"></div>
             <button id="start-game-button">Start Game</button>
         </div>
         <div id="prompt">

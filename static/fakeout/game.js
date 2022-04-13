@@ -6,12 +6,13 @@ import { initTitles, initHowToPlays } from '../importantStrings.js';
 import { playAudio } from '../audio.js';
 import { en } from './enum.js';
 import { Noneable } from '../noneable.js';
+import { GameOption } from '../gameoption.js';
 
 const ingameLeft = document.getElementById("ingame-left");
 const endgame = document.getElementById("end-game-button");
 const players = document.getElementById("players");
 const chatLog = document.getElementById("chat-log");
-const scoreToWin = document.getElementById("score-to-win");
+const scoreToWinDiv = document.getElementById("score-to-win-div");
 const deckSelection = document.getElementById("deck-selection");
 const startGame = document.getElementById("start-game-button");
 const promptText = document.getElementById("prompt-text");
@@ -34,8 +35,15 @@ export function initMain(conn) {
     initTitles("Fakeout");
     initHowToPlays("Rules\nTry to fool others by filling in the fact.\nThen try to pick the correct fill-in yourself.\n\nScoring\n50 points for faking out someone else\n100 points for guessing the correct answer.");
 
-    scoreToWin.onchange = function (e) {
-        networking.send(conn, en.ToServerCode.SCORE_TO_WIN + scoreToWin.value.toString());
+    const scoreToWin = new GameOption(scoreToWinDiv, "score-to-win", "Score to win:", 50000, 250, 250);
+    scoreToWin.left.onclick = function (e) {
+        scoreToWin.decrement();
+        networking.send(conn, en.ToServerCode.SCORE_TO_WIN + scoreToWin.getValue().toString());
+    }
+
+    scoreToWin.right.onclick = function (e) {
+        scoreToWin.increment();
+        networking.send(conn, en.ToServerCode.SCORE_TO_WIN + scoreToWin.getValue().toString());
     }
 
     endgame.onclick = function (e) {
@@ -142,7 +150,7 @@ export function initMain(conn) {
 
     handlers[en.ToClientCode.SCORE_TO_WIN] = (data) => {
         playAudio("click2");
-        scoreToWin.value = data[0];
+        scoreToWin.setValue(data[0]);
     }
     
     handlers[en.ToClientCode.DECK_SELECTION] = (data) => {

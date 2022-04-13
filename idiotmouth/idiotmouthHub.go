@@ -65,8 +65,8 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
 		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 		h.SendData(c, ToClientCode["IN_MEDIA_RES"], []string{string(h.phase)})
-		h.SendData(c, ToClientCode["GAMERULE_MIN_WORD_LENGTH"], []string{fmt.Sprint(h.minWordLength)})
-		h.SendData(c, ToClientCode["GAMERULE_SCORE_TO_WIN"], []string{fmt.Sprint(h.scoreToWin)})
+		h.SendData(c, ToClientCode["MIN_WORD_LENGTH"], []string{fmt.Sprint(h.minWordLength)})
+		h.SendData(c, ToClientCode["SCORE_TO_WIN"], []string{fmt.Sprint(h.scoreToWin)})
 		if h.phase == Phase["PLAY"] {
 			h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
 			h.SendData(c, ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+"Minimum word length: "+u.ENDTAG, h.minWordLength, u.ENDTAG)})
@@ -90,20 +90,20 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 	switch h.phase {
 	case Phase["PREGAME"]:
 		switch m.MessageCode {
-		case ToServerCode["GAMERULE_MIN_WORD_LENGTH"]:
+		case ToServerCode["MIN_WORD_LENGTH"]:
 			minWordLength, err := strconv.Atoi(m.Data[0])
 			if err != nil || minWordLength < 1 || minWordLength > 8 {
 				break
 			}
 			h.minWordLength = minWordLength
-			h.Broadcast(ToClientCode["GAMERULE_MIN_WORD_LENGTH"], []string{fmt.Sprint(minWordLength)})
-		case ToServerCode["GAMERULE_SCORE_TO_WIN"]:
+			h.Broadcast(ToClientCode["MIN_WORD_LENGTH"], []string{fmt.Sprint(minWordLength)})
+		case ToServerCode["SCORE_TO_WIN"]:
 			scoreToWin, err := strconv.Atoi(m.Data[0])
 			if err != nil || scoreToWin < 500 || scoreToWin > 50000 {
 				break
 			}
 			h.scoreToWin = scoreToWin
-			h.Broadcast(ToClientCode["GAMERULE_SCORE_TO_WIN"], []string{fmt.Sprint(scoreToWin)})
+			h.Broadcast(ToClientCode["SCORE_TO_WIN"], []string{fmt.Sprint(scoreToWin)})
 		case ToServerCode["START_GAME"]:
 			h.reset()
 			h.Broadcast(ToClientCode["START_GAME"], []string{""})
