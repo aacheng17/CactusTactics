@@ -204,7 +204,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 						h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 						if h.didSomeoneWin() {
 							h.Broadcast(ToClientCode["WINNERS"], h.getWinners())
-							h.phase = Phase["PREGAME"]
+							h.reset()
 						} else {
 							h.phase = Phase["PLAY_PROMPT"]
 							h.genNextQuestion()
