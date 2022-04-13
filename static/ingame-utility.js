@@ -1,12 +1,16 @@
-export function appendDataLog(log, item) {
+export function appendDataLog(log, item, insertAtTop) {
     if (log.firstChild != null) {
         if (log.firstChild.classList.contains("emptyLog")) {
             log.removeChild(log.firstChild);
         }
     }
     var doScroll = log.scrollTop > log.scrollHeight - log.clientHeight - 1;
-    log.appendChild(item);
-    if (doScroll) {
+    if (!insertAtTop) {
+        log.appendChild(item);
+    } else {
+        log.insertBefore(item, log.firstChild);
+    }
+    if (doScroll && !insertAtTop) {
         log.scrollTop = log.scrollHeight - log.clientHeight;
     }
 }

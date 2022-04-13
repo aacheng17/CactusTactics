@@ -157,7 +157,7 @@ export function initMain(conn) {
     handlers[en.ToClientCode.GAME_MESSAGE] = (data) => {
         playAudio("click3");
         var item = networking.decodeToDiv(data[0]);
-        appendDataLog(gameLog, item);
+        appendDataLog(gameLog, item, true);
     }
     
     handlers[en.ToClientCode.PROMPT] = (data) => {
@@ -188,7 +188,7 @@ export function initMain(conn) {
             networking.send(conn, en.ToServerCode.WHAT + what.previousElementSibling.children[0].id);
         }
         item.appendChild(what);
-        appendDataLog(gameLog, item);
+        appendDataLog(gameLog, item, true);
     }
     
     handlers[en.ToClientCode.WHAT_RESPONSE] = (data) => {
