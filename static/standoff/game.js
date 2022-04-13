@@ -17,6 +17,7 @@ const choices = document.getElementById("choices");
 const choicesWaiting = document.getElementById("choices-waiting");
 const outcome = document.getElementById("outcome");
 const results = document.getElementById("results");
+const gameoverHeader = document.getElementById("gameover-header");
 const continueButton = document.getElementById("gameover-continue-button");
 const gameoverResults = document.getElementById("gameover-results");
 
@@ -192,10 +193,12 @@ export function initMain(conn) {
         var item = document.createElement("p");
         let j = 1;
         if (data[0] === "1") {
+            gameoverHeader.innerText = `Winner: ${data[1]}`
+            item.innerHTML = `<b>${data[j]}</b> survived for ${data[j+1]} rounds.<br/>`;
+            gameoverResults.appendChild(item);
             j += 3;
-            item.innerHTML = `<b>WINNER:<br/>${data[1]}</b> survived for ${data[2]} rounds.<br/><br/>`;
         } else {
-            item.innerHTML = "<b>Everyone died</b>";
+            gameoverHeader.innerText = `Everyone died`
         }
         gameoverResults.appendChild(item);
         for (; j<data.length; j+=3) {
