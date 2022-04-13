@@ -115,6 +115,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " started the game", u.ENDTAG, u.ENDTAG)})
 			h.Broadcast(ToClientCode["PROMPT"], h.getPrompt())
 			h.phase = Phase["PLAY_PROMPT"]
+			h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 		}
 	case Phase["PLAY_PROMPT"]:
 		switch m.MessageCode {
