@@ -47,6 +47,9 @@ func Find(slice []string, val string) (int, bool) {
 }
 
 func UrlIndexGetPath(url string, n int) string {
+	if url[len(url)-1] != '/' {
+		url += "/"
+	}
 	firstSlashIndex := strings.Index(url, "/")
 	url = url[firstSlashIndex+1:]
 	for i := 0; i < n; i++ {
