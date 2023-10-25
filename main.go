@@ -15,6 +15,7 @@ import (
 	"example.com/hello/fakeout"
 	"example.com/hello/idiotmouth"
 	"example.com/hello/standoff"
+	"example.com/hello/aaranagrams"
 	"example.com/hello/utility"
 )
 
@@ -27,6 +28,7 @@ func Init() {
 	games["idiotmouth"] = idiotmouth.Init()
 	games["fakeout"] = fakeout.Init()
 	games["standoff"] = standoff.Init()
+	games["aaranagrams"] = aaranagrams.Init()
 }
 
 func deleteHub(h *core.Hub) {
