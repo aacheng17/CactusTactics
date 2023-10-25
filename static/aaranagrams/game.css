@@ -1,0 +1,22 @@
+.score-message {
+    display: flex;
+    flex-direction: row;
+    gap: 2px;
+}
+
+#new-game {
+    display: flex;
+    flex-direction: column;
+    gap: 10px;
+}
+
+#new-game-form {
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+}
+
+#topbox {
+    background-color: #e5e5e5;
+    padding: 10px;
+}
