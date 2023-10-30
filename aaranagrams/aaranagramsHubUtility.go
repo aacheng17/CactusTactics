@@ -1,4 +1,4 @@
-package idiotmouth
+package aaranagrams
 
 import (
 	"fmt"
@@ -8,13 +8,13 @@ import (
 	u "example.com/hello/utility"
 )
 
-func (h *IdiotmouthHub) useMessageNum() int {
+func (h *AaranagramsHub) useMessageNum() int {
 	ret := h.messageNum
 	h.messageNum++
 	return ret
 }
 
-func (h *IdiotmouthHub) handleWord(c *IdiotmouthClient, word string) {
+func (h *AaranagramsHub) handleWord(c *AaranagramsClient, word string) {
 	switch h.isValidWord(word) {
 	case 0:
 		worth := h.getWorth()
@@ -45,7 +45,7 @@ func (h *IdiotmouthHub) handleWord(c *IdiotmouthClient, word string) {
 	}
 }
 
-func (h *IdiotmouthHub) isValidWord(word string) int {
+func (h *AaranagramsHub) isValidWord(word string) int {
 	firstLetter := rune(word[0])
 	lastLetter := rune(word[len(word)-1])
 	if len(word) < h.minWordLength || firstLetter != h.start || lastLetter != h.end {
@@ -60,7 +60,7 @@ func (h *IdiotmouthHub) isValidWord(word string) int {
 	return 1
 }
 
-func (h *IdiotmouthHub) reset() {
+func (h *AaranagramsHub) reset() {
 	for client := range h.getAssertedClients() {
 		client.score = 0
 		client.pass = false
@@ -72,20 +72,20 @@ func (h *IdiotmouthHub) reset() {
 	h.genNextLetters()
 }
 
-func (h *IdiotmouthHub) resetPass() {
+func (h *AaranagramsHub) resetPass() {
 	for client := range h.getAssertedClients() {
 		client.pass = false
 	}
 }
 
-func (h *IdiotmouthHub) pass() int {
+func (h *AaranagramsHub) pass() int {
 	h.resetPass()
 	h.dictionary.wordsLeft -= h.dictionary.letters[string(h.start)+string(h.end)]
 	h.dictionary.letters[string(h.start)+string(h.end)] = 0
 	return h.genNextLetters()
 }
 
-func (h *IdiotmouthHub) getMajorityPass() bool {
+func (h *AaranagramsHub) getMajorityPass() bool {
 	count := 0
 	clientsWithNames := 0
 	for client := range h.getAssertedClients() {
@@ -99,7 +99,7 @@ func (h *IdiotmouthHub) getMajorityPass() bool {
 	return count*2 > clientsWithNames
 }
 
-func (h *IdiotmouthHub) gotAWord(word string) int {
+func (h *AaranagramsHub) gotAWord(word string) int {
 	h.resetPass()
 	h.dictionary.usedWords[word] = true
 	h.dictionary.wordsLeft--
@@ -107,7 +107,7 @@ func (h *IdiotmouthHub) gotAWord(word string) int {
 	return h.genNextLetters()
 }
 
-func (h *IdiotmouthHub) genNextLetters() int {
+func (h *AaranagramsHub) genNextLetters() int {
 	if h.dictionary.wordsLeft <= 0 {
 		return 1
 	}
@@ -124,16 +124,16 @@ func (h *IdiotmouthHub) genNextLetters() int {
 	return 0
 }
 
-func (h *IdiotmouthHub) getWorth() int {
+func (h *AaranagramsHub) getWorth() int {
 	return h.dictionary.getWorth(string(h.start) + string(h.end))
 }
 
-func (h *IdiotmouthHub) getPrompt() []string {
+func (h *AaranagramsHub) getPrompt() []string {
 	return []string{string(h.start), string(h.end), fmt.Sprint(h.getWorth()), fmt.Sprint(h.dictionary.letters[string(h.start)+string(h.end)])}
 }
 
-func (h *IdiotmouthHub) getPlayers(excepts ...*IdiotmouthClient) []string {
-	keys := make([]*IdiotmouthClient, 0, len(h.Clients))
+func (h *AaranagramsHub) getPlayers(excepts ...*AaranagramsClient) []string {
+	keys := make([]*AaranagramsClient, 0, len(h.Clients))
 	for k := range h.getAssertedClients() {
 		isExcept := false
 		for _, e := range excepts {
@@ -164,14 +164,14 @@ func (h *IdiotmouthHub) getPlayers(excepts ...*IdiotmouthClient) []string {
 	return players
 }
 
-func (h *IdiotmouthHub) endGame() {
+func (h *AaranagramsHub) endGame() {
 	h.Broadcast(ToClientCode["END_GAME"], h.getWinners())
 	h.phase = Phase["PREGAME"]
 }
 
-func (h *IdiotmouthHub) getWinners() []string {
+func (h *AaranagramsHub) getWinners() []string {
 	ret := []string{}
-	keys := make([]*IdiotmouthClient, 0, len(h.Clients))
+	keys := make([]*AaranagramsClient, 0, len(h.Clients))
 	for k := range h.getAssertedClients() {
 		keys = append(keys, k)
 	}
