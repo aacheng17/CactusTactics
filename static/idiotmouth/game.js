@@ -34,7 +34,7 @@ var handlers = {};
 
 export function initMain(conn) {
     initTitles("Idiotmouth");
-    initHowToPlays("Rules\nTry to think of a word that starts with the first letter and ends with the second letter before your opponents.\nWords must be at least 3 letters long.\n\nScoring\nThe more rare the letter combination, the more points it's worth (up to 100).\nEach word gets a length bonus multiplier as well.");
+    initHowToPlays("Rules\nTry to think of a word that starts with the first letter and ends with the second letter before your opponents.\n\nScoring\nThe more rare the letter combination, the more points it's worth (up to 100).\nEach word gets a length bonus multiplier as well.");
 
     endGameButton.onclick = function (e) {
         networking.send(conn, en.ToServerCode.END_GAME);
