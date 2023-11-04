@@ -11,11 +11,11 @@ import (
 	"os"
 	"time"
 
+	"example.com/hello/aaranagrams"
 	"example.com/hello/core"
 	"example.com/hello/fakeout"
 	"example.com/hello/idiotmouth"
 	"example.com/hello/standoff"
-	"example.com/hello/aaranagrams"
 	"example.com/hello/utility"
 )
 
