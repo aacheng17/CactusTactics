@@ -32,7 +32,7 @@ export function initIngameLeft(conn) {
         }
     });
 
-    moreGames.href = 'https://cactustactics.herokuapp.com/';
+    moreGames.href = window.location.origin;
 
     ingameHowtoplayButton.addEventListener("click", function() {
         var effected = ingameHowtoplay;
