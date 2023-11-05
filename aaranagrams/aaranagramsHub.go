@@ -25,6 +25,8 @@ type AaranagramsHub struct {
 
 	end rune
 
+	letters []rune
+
 	phase byte
 
 	dictionary AaranagramsDictionary

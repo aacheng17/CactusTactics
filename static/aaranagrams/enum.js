@@ -13,6 +13,8 @@ var en = {
         GAME_MESSAGE: 'c',
         VOTE_SKIP: 'd',
         WHAT: 'e',
+        WORD_ATTEMPT: 'f',
+        WHAT: 'g',
     },
     ToClientCode: {
         START_GAME: '0',
@@ -24,6 +26,8 @@ var en = {
         WHAT_RESPONSE: 'b',
         MESSAGE_WITH_WHAT: 'c',
         PROMPT: 'd',
+        LETTERS: 'e',
+        WORD_SUCCESS: 'f',
     }
 }
 Object.assign(en.ToServerCode, globalEn.ToServerCode);
