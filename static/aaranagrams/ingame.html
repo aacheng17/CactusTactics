@@ -41,14 +41,9 @@
             <div id="score-to-win-div" class="horizontal-div"></div>
             <button id="start-game-button">Start Game</button>
         </div>
-        <div id="prompt">
-            <div id="prompt-text">
-                <h2>Current Letters:</h2>
-                <h2 id="start-letter"></h2>
-                <h2 id="end-letter"></h2>
-                <button id="skip">Vote to skip</button>
-            </div>
-            <a id="prompt-extra-text"></a>
+        <div id="topbox-info" style="display: flex">
+            <div id="topbox-word">word here</div>
+            <button id="topbox-submit-button">Submit</button>
         </div>
         <div id="end-game">
             <h2>Game Over</h2><br/>
@@ -56,11 +51,7 @@
             <button id="new-game-button">New Game</button>
         </div>
     </div>
-    <div id="gamebox" class="databox" style="display: flex">
-        <form id="game-form" class="data-form">
-            <input type="text" id="game-field" class="data-field" maxlength="100" autocomplete="off" autocorrect="off" autocapitalize="off" spellcheck="false"/>
-            <input type="submit" id="game-send" value="Send" />
-        </form>
-        <div id="game-log" class="data-log"></div>
+    <div id="gamebox" style="display: flex">
+        <div id="gamebox-letters"></div>
     </div>
 </div>

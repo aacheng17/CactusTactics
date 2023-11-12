@@ -10,13 +10,22 @@
     gap: 10px;
 }
 
-#new-game-form {
-    display: flex;
-    flex-direction: column;
-    gap: 5px;
-}
-
 #topbox {
     background-color: #e5e5e5;
     padding: 10px;
+}
+
+#topbox-info {
+    gap: 8px;
+}
+
+.gamebox-letter {
+    opacity: 0;
+    transition: opacity 0.5s;
+    border: solid black 2px;
+    padding: 2px 8px;
+}
+
+.gamebox-letter-visible {
+    opacity: 1;
 }

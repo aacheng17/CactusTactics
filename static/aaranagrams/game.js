@@ -15,29 +15,66 @@ const chatLog = document.getElementById("chat-log");
 const minWordLengthDiv = document.getElementById("min-word-length-div");
 const scoreToWinDiv = document.getElementById("score-to-win-div");
 const startGameButton = document.getElementById("start-game-button");
-const startLetter = document.getElementById("start-letter");
-const endLetter = document.getElementById("end-letter");
-const skip = document.getElementById("skip")
-const promptExtraText = document.getElementById("prompt-extra-text");
-const gameLog = document.getElementById("game-log");
-const gameForm = document.getElementById("game-form");
-const gameField = document.getElementById("game-field");
 const winners = document.getElementById("winners");
 const newGameButton = document.getElementById("new-game-button");
+const topboxWord = document.getElementById("topbox-word");
+const topboxSubmitButton = document.getElementById("topbox-submit-button");
+const gameboxLetters = document.getElementById("gamebox-letters");
 
 const newgame = new Noneable(document.getElementById("new-game"));
-const prompt = new Noneable(document.getElementById("prompt"));
+const topboxInfo = new Noneable(document.getElementById("topbox-info"));
 const endgame = new Noneable(document.getElementById("end-game"));
 const gamebox = new Noneable(document.getElementById("gamebox"));
 
 var handlers = {};
 
+function removeLetter(letterElement) {
+    letterElement.className = "gamebox-letter";
+}
+
+async function addLetter(letter) {
+    const element = document.createElement("h2");
+    element.className = "gamebox-letter";
+    element.innerText = letter;
+    gameboxLetters.appendChild(element);
+    await new Promise(r => setTimeout(r, 10));
+    element.className  = "gamebox-letter gamebox-letter-visible";
+}
+
+function setLetters(newLetters) {
+    const existingLetterElements = Array.prototype.slice.call(gameboxLetters.children);
+    let existingIndex = 0, newIndex = 0;
+    while (existingIndex < existingLetterElements.length && newIndex < newLetters.length) {
+        const existingLetterElement = existingLetterElements[existingIndex];
+        const newLetter = newLetters[newIndex];
+        if (existingLetterElement.innerText === newLetter) {
+            newIndex++;
+        } else {
+            removeLetter(existingLetterElement);
+        }
+        existingIndex++;
+    }
+    while (newIndex < newLetters.length) {
+        addLetter(newLetters[newIndex]);
+        newIndex++;
+    }
+}
+
 export function initMain(conn) {
     initTitles("Aaranagrams");
     initHowToPlays("Rules\nTake turns generating letters. Assemble words to score points.\n\nScoring\nThe more rare the letter combination, the more points it's worth (up to 100).\nEach word gets a length bonus multiplier as well.");
 
-    endGameButton.onclick = function (e) {
+    endGameButton.onclick = async function (e) {
         networking.send(conn, en.ToServerCode.END_GAME);
+
+        /*
+        // Can comment this out to debug letter functions
+        setLetters(["A", "B", "D"]);
+        await new Promise(r => setTimeout(r, 1000));
+        setLetters(["A", "B", "D", "E"]);
+        await new Promise(r => setTimeout(r, 1000));
+        setLetters(["A", "D", "E"]);
+        */
     }
 
     const minWordLength = new GameOption(minWordLengthDiv, "min-word-length", "Minimum word length:", 8, 1, 1);
@@ -73,17 +110,12 @@ export function initMain(conn) {
     startGameButton.onclick = function (e) {
         networking.send(conn, en.ToServerCode.START_GAME);
     }
-
-    skip.onclick = function (e) {
-        networking.send(conn, en.ToServerCode.VOTE_SKIP);
-    }
     
-    gameForm.onsubmit = function () {
-        if (!gameField.value.trim()) {
+    topboxSubmitButton.onsubmit = function () {
+        if (!topboxWord.value.trim()) {
             return false;
         }
-        networking.send(conn, en.ToServerCode.GAME_MESSAGE + gameField.value);
-        gameField.value = "";
+        networking.send(conn, en.ToServerCode.GAME_MESSAGE + topboxWord.value);
         return false;
     };
 
@@ -101,7 +133,7 @@ export function initMain(conn) {
             newgame.show();
             break;
         case en.Phase.PLAY:
-            prompt.show();
+            topboxInfo.show();
             gamebox.show();
             break;
         }
@@ -166,17 +198,14 @@ export function initMain(conn) {
     }
     
     handlers[en.ToClientCode.START_GAME] = (data) => {
-        prompt.show();
+        topboxInfo.show();
         gamebox.show();
         newgame.hide();
         endgame.hide();
         playAudio("start");
-        while (gameLog.firstChild) {
-            gameLog.removeChild(gameLog.firstChild);
-        }
     }
     
-    //PLAY
+    //PLAY    
     handlers[en.ToClientCode.GAME_MESSAGE] = (data) => {
         playAudio("click3");
         var item = networking.decodeToDiv(data[0]);
@@ -193,8 +222,9 @@ export function initMain(conn) {
         promptExtraText.innerText = "Worth " + String(data[2]) + " points. There are " + String(data[3]) + " possible words.";
     }
     
+    // TODO: Bring WHAT handlers back in once game is working
     handlers[en.ToClientCode.MESSAGE_WITH_WHAT] = (data) => {
-        var item = document.createElement("div");
+        /*var item = document.createElement("div");
         item.classList.add("score-message");
         var message = networking.decodeToDiv(data[0]);
         item.appendChild(message);
@@ -210,12 +240,11 @@ export function initMain(conn) {
             }
             networking.send(conn, en.ToServerCode.WHAT + what.previousElementSibling.children[0].id);
         }
-        item.appendChild(what);
-        appendDataLog(gameLog, item, true);
+        item.appendChild(what);*/
     }
     
     handlers[en.ToClientCode.WHAT_RESPONSE] = (data) => {
-        playAudio("dink2");
+        /*playAudio("dink2");
         var children = gameLog.children;
         var found = false;
         var child = null;
@@ -241,11 +270,11 @@ export function initMain(conn) {
         }
         if (doScroll) {
             gameLog.scrollTop = gameLog.scrollHeight - gameLog.clientHeight;
-        }
+        }*/
     }
     
     handlers[en.ToClientCode.END_GAME] = (data) => {
-        prompt.hide();
+        topboxInfo.hide();
         endgame.show();
         playAudio("fanfare");
         winners.innerHTML = "Winner: <b>" + data[0] + "</b> (" + data[1] + " points)<br/>Best word: <b>" + data[2] + "</b> - " + data[3] + " (" + data[4] + " points)";
