@@ -19,6 +19,7 @@ const winners = document.getElementById("winners");
 const newGameButton = document.getElementById("new-game-button");
 const topboxWord = document.getElementById("topbox-word");
 const topboxSubmitButton = document.getElementById("topbox-submit-button");
+const topboxAddLetterButton = document.getElementById("topbox-add-letter-button");
 const gameboxLetters = document.getElementById("gamebox-letters");
 
 const newgame = new Noneable(document.getElementById("new-game"));
@@ -66,15 +67,6 @@ export function initMain(conn) {
 
     endGameButton.onclick = async function (e) {
         networking.send(conn, en.ToServerCode.END_GAME);
-
-        /*
-        // Can comment this out to debug letter functions
-        setLetters(["A", "B", "D"]);
-        await new Promise(r => setTimeout(r, 1000));
-        setLetters(["A", "B", "D", "E"]);
-        await new Promise(r => setTimeout(r, 1000));
-        setLetters(["A", "D", "E"]);
-        */
     }
 
     const minWordLength = new GameOption(minWordLengthDiv, "min-word-length", "Minimum word length:", 8, 1, 1);
@@ -111,13 +103,17 @@ export function initMain(conn) {
         networking.send(conn, en.ToServerCode.START_GAME);
     }
     
-    topboxSubmitButton.onsubmit = function () {
-        if (!topboxWord.value.trim()) {
-            return false;
+    topboxSubmitButton.onclick = function () {
+        const word = topboxWord.value.trim();
+        if (!word) {
+            return;
         }
-        networking.send(conn, en.ToServerCode.GAME_MESSAGE + topboxWord.value);
-        return false;
+        networking.send(conn, en.ToServerCode.GAME_MESSAGE + word);
     };
+
+    topboxAddLetterButton.onclick = function () {
+        networking.send(conn, en.ToServerCode.LETTER);
+    }
 
     newGameButton.onclick = function(e) {
         playAudio("click2");
@@ -205,7 +201,12 @@ export function initMain(conn) {
         playAudio("start");
     }
     
-    //PLAY    
+    //PLAY
+    handlers[en.ToClientCode.LETTERS] = (data) => {
+        playAudio("click3");
+        setLetters(data[0]);
+    }
+
     handlers[en.ToClientCode.GAME_MESSAGE] = (data) => {
         playAudio("click3");
         var item = networking.decodeToDiv(data[0]);

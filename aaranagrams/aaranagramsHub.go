@@ -121,20 +121,9 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 			word := strings.TrimSpace(strings.ToLower(string(m.Data[0])))
 			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", word)})
 			h.handleWord(c, word)
-		case ToServerCode["VOTE_SKIP"]:
-			if !c.pass {
-				c.pass = true
-				h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " voted to skip.", u.ENDTAG)})
-				if h.getMajorityPass() {
-					err := h.pass()
-					if err == 1 {
-						h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "All possible words have been used or passed. Type restart to restart the game.", u.ENDTAG)})
-						break
-					}
-					h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), "Majority has voted to skip. New letters generated", u.ENDTAG)})
-					h.Broadcast(ToClientCode["PROMPT"], h.getPrompt())
-				}
-			}
+		case ToServerCode["LETTER"]:
+			h.letters = append(h.letters, u.GetLetterWeighted())
+			h.Broadcast(ToClientCode["LETTERS"], []string{string(h.letters)})
 		case ToServerCode["END_GAME"]:
 			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.Tag("p prebr"), u.Tag("b")+c.Name+u.ENDTAG, " ended the game.", u.ENDTAG)})
 			h.endGame()

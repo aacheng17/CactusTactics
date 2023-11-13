@@ -25,6 +25,7 @@ var (
 )
 
 func Init() {
+	utility.InitUtils()
 	games["idiotmouth"] = idiotmouth.Init()
 	games["fakeout"] = fakeout.Init()
 	games["standoff"] = standoff.Init()

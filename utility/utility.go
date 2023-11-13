@@ -12,6 +12,10 @@ const (
 	ENDTAG     = TAG + "/" + TAG
 )
 
+func InitUtils() {
+	initLetterFrequencies()
+}
+
 func Tag(tagString string) string {
 	return TAG + tagString + TAG
 }

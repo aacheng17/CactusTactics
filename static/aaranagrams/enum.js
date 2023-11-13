@@ -15,6 +15,7 @@ var en = {
         WHAT: 'e',
         WORD_ATTEMPT: 'f',
         WHAT: 'g',
+        LETTER: 'h',
     },
     ToClientCode: {
         START_GAME: '0',
