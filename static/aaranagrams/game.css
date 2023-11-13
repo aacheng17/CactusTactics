@@ -23,7 +23,11 @@
     opacity: 0;
     transition: opacity 0.5s;
     border: solid black 2px;
-    padding: 2px 8px;
+    width: 32px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
 }
 
 .gamebox-letter-visible {
