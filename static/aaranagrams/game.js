@@ -40,6 +40,14 @@ async function addLetter(letter) {
     gameboxLetters.appendChild(element);
     await new Promise(r => setTimeout(r, 10));
     element.className  = "gamebox-letter gamebox-letter-visible";
+
+    element.onclick = function (e) {
+        if (element.classList.contains("selected-letter")) {
+            element.classList.remove("selected-letter")
+        } else {
+            element.classList.add("selected-letter")
+        }
+    }
 }
 
 function setLetters(newLetters) {

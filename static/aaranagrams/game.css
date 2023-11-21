@@ -28,8 +28,19 @@
     display: flex;
     justify-content: center;
     align-items: center;
+    user-select:none;
 }
 
 .gamebox-letter-visible {
     opacity: 1;
+}
+
+.selected-letter{
+    border: green 2px solid;
+    color: green;
+    background-color: lightgreen;
+}
+
+.gamebox-letter:hover{
+    cursor: pointer;
 }
