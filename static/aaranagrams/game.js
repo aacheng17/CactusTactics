@@ -20,7 +20,6 @@ const newGameButton = document.getElementById("new-game-button");
 const topboxWord = document.getElementById("topbox-word");
 const topboxSubmitButton = document.getElementById("topbox-submit-button");
 const topboxAddLetterButton = document.getElementById("topbox-add-letter-button");
-const gameboxLetters = document.getElementById("gamebox-letters");
 
 const newgame = new Noneable(document.getElementById("new-game"));
 const topboxInfo = new Noneable(document.getElementById("topbox-info"));
@@ -29,49 +28,54 @@ const gamebox = new Noneable(document.getElementById("gamebox"));
 
 var handlers = {};
 
-function removeLetter(letterElement) {
-    letterElement.className = "gamebox-letter";
+function initGameboxLetters() {
+    for (let i = 0; i < 20; i++) {
+        const element = document.createElement("h2");
+        element.className = "gamebox-letter";
+        element.innerText = ' ';
+        element.onclick = function (e) {
+            if (element.innerText === ' ') {
+                return;
+            }
+            if (element.classList.contains("selected-letter")) {
+                element.classList.remove("selected-letter")
+            } else {
+                element.classList.add("selected-letter")
+            }
+        }
+        gamebox.element.appendChild(element);
+    }
 }
 
-async function addLetter(letter) {
-    const element = document.createElement("h2");
-    element.className = "gamebox-letter";
-    element.innerText = letter;
-    gameboxLetters.appendChild(element);
-    await new Promise(r => setTimeout(r, 10));
-    element.className  = "gamebox-letter gamebox-letter-visible";
-
-    element.onclick = function (e) {
+async function setGameboxLetters(newLetters) {
+    for (let i = 0; i < newLetters.length; i++) {
+        const existingLetterElement = gamebox.element.children.item(i);
+        const newLetter = newLetters[i];
+        if (existingLetterElement.innerText === newLetter) {
+            continue;
+        }
+        if (newLetter === ' ') {
+            if (existingLetterElement.classList.contains("gamebox-letter-visible")) {
+                await new Promise(r => setTimeout(r, 10));
+                existingLetterElement.classList.remove("gamebox-letter-visible");
+            }
+        } else {
+            if (!existingLetterElement.classList.contains("gamebox-letter-visible")) {
+                await new Promise(r => setTimeout(r, 10));
+                existingLetterElement.classList.add("gamebox-letter-visible");
+            }
+        }
+        existingLetterElement.innerText = newLetter;
         if (element.classList.contains("selected-letter")) {
             element.classList.remove("selected-letter")
-        } else {
-            element.classList.add("selected-letter")
         }
-    }
-}
-
-function setLetters(newLetters) {
-    const existingLetterElements = Array.prototype.slice.call(gameboxLetters.children);
-    let existingIndex = 0, newIndex = 0;
-    while (existingIndex < existingLetterElements.length && newIndex < newLetters.length) {
-        const existingLetterElement = existingLetterElements[existingIndex];
-        const newLetter = newLetters[newIndex];
-        if (existingLetterElement.innerText === newLetter) {
-            newIndex++;
-        } else {
-            removeLetter(existingLetterElement);
-        }
-        existingIndex++;
-    }
-    while (newIndex < newLetters.length) {
-        addLetter(newLetters[newIndex]);
-        newIndex++;
     }
 }
 
 export function initMain(conn) {
     initTitles("Aaranagrams");
     initHowToPlays("Rules\nTake turns generating letters. Assemble words to score points.\n\nScoring\nThe more rare the letter combination, the more points it's worth (up to 100).\nEach word gets a length bonus multiplier as well.");
+    initGameboxLetters();
 
     endGameButton.onclick = async function (e) {
         networking.send(conn, en.ToServerCode.END_GAME);
@@ -212,23 +216,23 @@ export function initMain(conn) {
     //PLAY
     handlers[en.ToClientCode.LETTERS] = (data) => {
         playAudio("click3");
-        setLetters(data[0]);
+        setGameboxLetters(data[0]);
     }
 
     handlers[en.ToClientCode.GAME_MESSAGE] = (data) => {
-        playAudio("click3");
+        /*playAudio("click3");
         var item = networking.decodeToDiv(data[0]);
-        appendDataLog(gameLog, item, true);
+        appendDataLog(gameLog, item, true);*/
     }
     
     handlers[en.ToClientCode.PROMPT] = (data) => {
-        playAudio("correct");
+        /*playAudio("correct");
         var sl = data[0].toUpperCase();
         var el = data[1].toUpperCase();
         startLetter.innerText = sl;
         endLetter.innerText = el;
         gameField.placeholder = sl + "___" + el;
-        promptExtraText.innerText = "Worth " + String(data[2]) + " points. There are " + String(data[3]) + " possible words.";
+        promptExtraText.innerText = "Worth " + String(data[2]) + " points. There are " + String(data[3]) + " possible words.";*/
     }
     
     // TODO: Bring WHAT handlers back in once game is working

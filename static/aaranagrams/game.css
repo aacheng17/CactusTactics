@@ -19,16 +19,21 @@
     gap: 8px;
 }
 
+#gamebox {
+    flex-wrap: wrap;
+}
+
 .gamebox-letter {
     opacity: 0;
     transition: opacity 0.5s;
     border: solid black 2px;
-    width: 32px;
-    height: 32px;
+    width: 20%;
+    height: 64px;
     display: flex;
     justify-content: center;
     align-items: center;
     user-select:none;
+    box-sizing: border-box;
 }
 
 .gamebox-letter-visible {

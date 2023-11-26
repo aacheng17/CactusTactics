@@ -61,6 +61,9 @@ func (h *AaranagramsHub) isValidWord(word string) int {
 }
 
 func (h *AaranagramsHub) reset() {
+	for i := range h.letters {
+		h.letters[i] = ' '
+	}
 	for client := range h.getAssertedClients() {
 		client.score = 0
 		client.pass = false

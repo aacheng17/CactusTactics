@@ -122,8 +122,13 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", word)})
 			h.handleWord(c, word)
 		case ToServerCode["LETTER"]:
-			h.letters = append(h.letters, u.GetLetterWeighted())
-			h.Broadcast(ToClientCode["LETTERS"], []string{string(h.letters)})
+			for i, l := range h.letters {
+				if l == ' ' {
+					h.letters[i] = u.GetLetterWeighted()
+					h.Broadcast(ToClientCode["LETTERS"], []string{string(h.letters)})
+					break
+				}
+			}
 		case ToServerCode["END_GAME"]:
 			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.Tag("p prebr"), u.Tag("b")+c.Name+u.ENDTAG, " ended the game.", u.ENDTAG)})
 			h.endGame()
@@ -137,6 +142,7 @@ func NewAaranagramsHub(game string, id string, deleteHubCallback func(*core.Hub)
 		phase:         Phase["PREGAME"],
 		minWordLength: 3,
 		scoreToWin:    3000,
+		letters:       make([]rune, 20),
 	}
 	h.Child = h
 	return h
