@@ -25,7 +25,7 @@
 
 .gamebox-letter {
     opacity: 0;
-    transition: opacity 0.5s;
+    transition: opacity 0.5s, border 0.2s, color 0.2s, background-color 0.2s;
     border: solid black 2px;
     width: 20%;
     height: 64px;
