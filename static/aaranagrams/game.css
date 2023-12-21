@@ -20,13 +20,36 @@
     gap: 8px;
 }
 
+#topbox-wordrow {
+    display: flex;
+    flex-direction: row;
+    align-items: center;
+}
+
+#topbox-word-container {
+    display: flex;
+    flex-direction: row;
+    flex: 1;
+    align-items: center;
+    background-color: white;
+    border-radius: 10px;
+    padding: 2px;
+    margin-right: 4px;
+    overflow-x: auto;
+    height: 36px;
+}
+
 #topbox-word {
     display: flex;
     flex-direction: row;
+    flex: 1;
+    overflow-x: auto;
+    margin-left: 4px;
 }
 
 .topbox-letter {
-    border: solid black 2px;
+    border: solid black 1px;
+    border-radius: 4px;
     width: 24px;
     height: 32px;
     display: flex;
@@ -35,6 +58,37 @@
     user-select: none;
     box-sizing: border-box;
     cursor: pointer;
+    transition: background-color 0.1s;
+}
+
+.topbox-letter:hover {
+    background-color: gainsboro;
+}
+
+.icon-button {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    color: dimgray;
+}
+
+.icon-button:hover {
+    color: black;
+}
+
+#topbox-backspace-button {
+    transform: translateY(-2px);
+    padding-left: 2px;
+    padding-right: 2px;
+}
+
+#topbox-clear-button {
+    padding-right: 4px;
+}
+
+#topbox-add-letter-button {
+    width: 100%;
 }
 
 #gamebox {
@@ -57,6 +111,10 @@
 .gamebox-letter-visible {
     opacity: 1;
     cursor: pointer;
+}
+
+.gamebox-letter-visible:hover {
+    background-color: gainsboro;
 }
 
 .selected-letter{
