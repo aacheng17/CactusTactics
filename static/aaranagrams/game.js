@@ -18,6 +18,8 @@ const startGameButton = document.getElementById("start-game-button");
 const winners = document.getElementById("winners");
 const newGameButton = document.getElementById("new-game-button");
 const topboxWord = document.getElementById("topbox-word");
+const topboxBackspaceButton = document.getElementById("topbox-backspace-button");
+const topboxClearButton = document.getElementById("topbox-clear-button");
 const topboxSubmitButton = document.getElementById("topbox-submit-button");
 const topboxAddLetterButton = document.getElementById("topbox-add-letter-button");
 
@@ -28,21 +30,54 @@ const gamebox = new Noneable(document.getElementById("gamebox"));
 
 var handlers = {};
 
+const selectedLetterObjects = [];
+
+function toggleGameboxLetter(gameboxLetterElement) {
+    if (gameboxLetterElement.innerText === '') {
+        return;
+    }
+    if (gameboxLetterElement.classList.contains("selected-letter")) {
+        gameboxLetterElement.classList.remove("selected-letter")
+
+        const letterObjectIndex = selectedLetterObjects.findIndex(o => o[0] === gameboxLetterElement);
+        const letterObject = selectedLetterObjects[letterObjectIndex];
+        letterObject[1].parentNode.removeChild(letterObject[1]);
+
+        selectedLetterObjects.splice(letterObjectIndex, 1);
+    } else {
+        gameboxLetterElement.classList.add("selected-letter")
+
+        const newTopboxElement = document.createElement("h3");
+        newTopboxElement.innerText = gameboxLetterElement.innerText;
+        newTopboxElement.className = "topbox-letter";
+        newTopboxElement.onclick = () => toggleGameboxLetter(gameboxLetterElement, true);
+        topboxWord.appendChild(newTopboxElement);
+
+        selectedLetterObjects.push([gameboxLetterElement, newTopboxElement]);
+    }
+}
+
+const backspace = () => {
+    if (selectedLetterObjects.length === 0) {
+        return;
+    }
+    toggleGameboxLetter(selectedLetterObjects[selectedLetterObjects.length - 1][0]);
+}
+
+topboxBackspaceButton.onclick = backspace;
+
+topboxClearButton.onclick = () => {
+    while (selectedLetterObjects.length > 0) {
+        backspace();
+    }
+}
+
 function initGameboxLetters() {
     for (let i = 0; i < 20; i++) {
         const element = document.createElement("h2");
         element.className = "gamebox-letter";
-        element.innerText = ' ';
-        element.onclick = function (e) {
-            if (element.innerText === ' ') {
-                return;
-            }
-            if (element.classList.contains("selected-letter")) {
-                element.classList.remove("selected-letter")
-            } else {
-                element.classList.add("selected-letter")
-            }
-        }
+        element.innerText = '';
+        element.onclick = () => toggleGameboxLetter(element);
         gamebox.element.appendChild(element);
     }
 }
@@ -66,9 +101,6 @@ async function setGameboxLetters(newLetters) {
             }
         }
         existingLetterElement.innerText = newLetter;
-        if (element.classList.contains("selected-letter")) {
-            element.classList.remove("selected-letter")
-        }
     }
 }
 

@@ -16,7 +16,25 @@
 }
 
 #topbox-info {
+    flex-direction: column;
     gap: 8px;
+}
+
+#topbox-word {
+    display: flex;
+    flex-direction: row;
+}
+
+.topbox-letter {
+    border: solid black 2px;
+    width: 24px;
+    height: 32px;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    user-select: none;
+    box-sizing: border-box;
+
 }
 
 #gamebox {
@@ -32,7 +50,7 @@
     display: flex;
     justify-content: center;
     align-items: center;
-    user-select:none;
+    user-select: none;
     box-sizing: border-box;
 }
 
