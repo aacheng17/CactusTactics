@@ -34,7 +34,7 @@
     align-items: center;
     user-select: none;
     box-sizing: border-box;
-
+    cursor: pointer;
 }
 
 #gamebox {
@@ -56,14 +56,11 @@
 
 .gamebox-letter-visible {
     opacity: 1;
+    cursor: pointer;
 }
 
 .selected-letter{
     border: green 2px solid;
     color: green;
     background-color: lightgreen;
-}
-
-.gamebox-letter-visible:hover{
-    cursor: pointer;
 }
