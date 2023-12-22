@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"example.com/hello/core"
 	u "example.com/hello/utility"
@@ -21,6 +22,8 @@ type AaranagramsHub struct {
 
 	scoreToWin int
 
+	chaosMode bool
+
 	start rune
 
 	end rune
@@ -29,10 +32,15 @@ type AaranagramsHub struct {
 
 	phase byte
 
+	turn int
+
 	dictionary AaranagramsDictionary
 }
 
 func (h *AaranagramsHub) DisconnectClientMessage(c core.Clientlike) {
+	if h.turn >= len(h.Clients) {
+		h.turn = 0
+	}
 	if c.GetName() != "" {
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
 		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
@@ -64,11 +72,13 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 		c.Name = name
 		c.Avatar = avatar
 		c.Color = color
+		c.JoinTime = time.Now().UnixNano()
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
 		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 		h.SendData(c, ToClientCode["IN_MEDIA_RES"], []string{string(h.phase)})
 		h.SendData(c, ToClientCode["MIN_WORD_LENGTH"], []string{fmt.Sprint(h.minWordLength)})
 		h.SendData(c, ToClientCode["SCORE_TO_WIN"], []string{fmt.Sprint(h.scoreToWin)})
+		h.SendData(c, ToClientCode["CHAOS_MODE"], []string{h.getChaosModeAsString()})
 		if h.phase == Phase["PLAY"] {
 			h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
 			h.SendData(c, ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+"Minimum word length: "+u.ENDTAG, h.minWordLength, u.ENDTAG)})
@@ -106,6 +116,15 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 			}
 			h.scoreToWin = scoreToWin
 			h.Broadcast(ToClientCode["SCORE_TO_WIN"], []string{fmt.Sprint(scoreToWin)})
+		case ToServerCode["CHAOS_MODE"]:
+			if m.Data[0] != "0" && m.Data[0] != "1" {
+				break
+			}
+			originalChaosMode := h.chaosMode
+			h.chaosMode = m.Data[0] == "1"
+			if originalChaosMode != h.chaosMode {
+				h.Broadcast(ToClientCode["CHAOS_MODE"], []string{h.getChaosModeAsString()})
+			}
 		case ToServerCode["START_GAME"]:
 			h.reset()
 			h.Broadcast(ToClientCode["START_GAME"], []string{""})
@@ -114,6 +133,7 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+"Minimum word length: "+u.ENDTAG, h.minWordLength, u.ENDTAG)})
 			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+"Score to win: "+u.ENDTAG, h.scoreToWin, u.ENDTAG)})
 			h.phase = Phase["PLAY"]
+			h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 		}
 	case Phase["PLAY"]:
 		switch m.MessageCode {
@@ -122,12 +142,19 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", word)})
 			h.handleWord(c, word)
 		case ToServerCode["LETTER"]:
-			for i, l := range h.letters {
-				if l == ' ' {
-					h.letters[i] = u.GetLetterWeighted()
-					h.Broadcast(ToClientCode["LETTERS"], []string{string(h.letters)})
-					break
+			if h.chaosMode || h.getClientOfCurrentTurn() == c {
+				for i, l := range h.letters {
+					if l == ' ' {
+						h.letters[i] = u.GetLetterWeighted()
+						h.Broadcast(ToClientCode["LETTERS"], []string{string(h.letters)})
+						break
+					}
 				}
+				h.turn++
+				if h.turn >= len(h.Clients) {
+					h.turn = 0
+				}
+				h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 			}
 		case ToServerCode["END_GAME"]:
 			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.Tag("p prebr"), u.Tag("b")+c.Name+u.ENDTAG, " ended the game.", u.ENDTAG)})
@@ -142,7 +169,9 @@ func NewAaranagramsHub(game string, id string, deleteHubCallback func(*core.Hub)
 		phase:         Phase["PREGAME"],
 		minWordLength: 3,
 		scoreToWin:    3000,
+		chaosMode:     false,
 		letters:       make([]rune, 20),
+		turn:          0,
 	}
 	h.Child = h
 	return h

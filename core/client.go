@@ -61,6 +61,8 @@ type Client struct {
 
 	Color int
 
+	JoinTime int64
+
 	// Buffered channel of outbound messages.
 	Send chan []byte
 }

@@ -14,6 +14,7 @@ const players = document.getElementById("players");
 const chatLog = document.getElementById("chat-log");
 const minWordLengthDiv = document.getElementById("min-word-length-div");
 const scoreToWinDiv = document.getElementById("score-to-win-div");
+const chaosMode = document.getElementById("chaos-mode");
 const startGameButton = document.getElementById("start-game-button");
 const winners = document.getElementById("winners");
 const newGameButton = document.getElementById("new-game-button");
@@ -143,6 +144,10 @@ export function initMain(conn) {
         networking.send(conn, en.ToServerCode.SCORE_TO_WIN + scoreToWin.value.toString());
     }
 
+    chaosMode.onclick = function (e) {
+        networking.send(conn, en.ToServerCode.CHAOS_MODE + (chaosMode.checked ? "1" : "0"));
+    }
+
     startGameButton.onclick = function (e) {
         networking.send(conn, en.ToServerCode.START_GAME);
     }
@@ -184,7 +189,7 @@ export function initMain(conn) {
         while (players.firstChild) {
             players.removeChild(players.firstChild);
         }
-        for (var j = 0; j < data.length; j+=6) {
+        for (var j = 0; j < data.length; j+=7) {
             var player = document.createElement("div");
             player.className = "player";
             var playerInfo = document.createElement("div");
@@ -207,10 +212,12 @@ export function initMain(conn) {
             svg.appendChild(path);
             path.setAttribute("d", AVATARS[data[j+1]]);
             playerAvatarContainer.appendChild(svg);
-            var playerStatus = document.createElement("a")
-            playerStatus.classList.add("player-status")
-            //playerStatus.innerHTML = "&#10003;";
-            playerAvatarContainer.appendChild(playerStatus);
+            if (data[j+6]) {
+                var playerStatus = document.createElement("a")
+                playerStatus.classList.add("player-status")
+                playerStatus.classList.add("dotdotdot");
+                playerAvatarContainer.appendChild(playerStatus);
+            }
             player.appendChild(playerAvatarContainer);
             players.appendChild(player);
         }
@@ -235,6 +242,11 @@ export function initMain(conn) {
     handlers[en.ToClientCode.SCORE_TO_WIN] = (data) => {
         playAudio("click2");
         scoreToWin.setValue(data[0]);
+    }
+    
+    handlers[en.ToClientCode.CHAOS_MODE] = (data) => {
+        playAudio("click2");
+        chaosMode.checked = data[0] === "1";
     }
     
     handlers[en.ToClientCode.START_GAME] = (data) => {

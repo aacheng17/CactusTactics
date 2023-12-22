@@ -71,6 +71,7 @@ func (h *AaranagramsHub) reset() {
 		client.highestScore = 0
 	}
 	h.messageNum = 0
+	h.turn = 0
 	h.dictionary.generate(h.minWordLength)
 	h.genNextLetters()
 }
@@ -135,6 +136,29 @@ func (h *AaranagramsHub) getPrompt() []string {
 	return []string{string(h.start), string(h.end), fmt.Sprint(h.getWorth()), fmt.Sprint(h.dictionary.letters[string(h.start)+string(h.end)])}
 }
 
+func (h *AaranagramsHub) getChaosModeAsString() string {
+	chaosModeString := "0"
+	if h.chaosMode {
+		chaosModeString = "1"
+	}
+	return chaosModeString
+}
+
+func (h *AaranagramsHub) getClientsSortedByJoinTime() []*AaranagramsClient {
+	keys := make([]*AaranagramsClient, 0, len(h.Clients))
+	for k := range h.getAssertedClients() {
+		keys = append(keys, k)
+	}
+	sort.Slice(keys, func(i, j int) bool {
+		return keys[i].JoinTime < keys[j].JoinTime
+	})
+	return keys
+}
+
+func (h *AaranagramsHub) getClientOfCurrentTurn() *AaranagramsClient {
+	return h.getClientsSortedByJoinTime()[h.turn]
+}
+
 func (h *AaranagramsHub) getPlayers(excepts ...*AaranagramsClient) []string {
 	keys := make([]*AaranagramsClient, 0, len(h.Clients))
 	for k := range h.getAssertedClients() {
@@ -150,7 +174,10 @@ func (h *AaranagramsHub) getPlayers(excepts ...*AaranagramsClient) []string {
 		}
 	}
 	sort.Slice(keys, func(i, j int) bool {
-		return keys[i].score > keys[j].score
+		if keys[i].score != keys[i].score {
+			return keys[i].score > keys[j].score
+		}
+		return keys[i].JoinTime < keys[j].JoinTime
 	})
 	players := []string{}
 	for _, client := range keys {
@@ -163,6 +190,11 @@ func (h *AaranagramsHub) getPlayers(excepts ...*AaranagramsClient) []string {
 		players = append(players, fmt.Sprint(client.score))
 		players = append(players, client.highestWord)
 		players = append(players, fmt.Sprint(client.highestScore))
+		turn := ""
+		if !h.chaosMode && h.phase == Phase["PLAY"] && h.getClientOfCurrentTurn() == client {
+			turn = "turn"
+		}
+		players = append(players, fmt.Sprint(turn))
 	}
 	return players
 }

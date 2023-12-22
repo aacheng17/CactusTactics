@@ -3,6 +3,7 @@ package standoff
 import (
 	"fmt"
 	"strconv"
+	"time"
 
 	"example.com/hello/core"
 	u "example.com/hello/utility"
@@ -55,6 +56,7 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 		c.Avatar = avatar
 		c.Color = color
 		c.id = h.nextClientId
+		c.JoinTime = time.Now().UnixNano()
 		h.nextClientId++
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
 		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())

@@ -4,6 +4,7 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"example.com/hello/core"
 	u "example.com/hello/utility"
@@ -62,6 +63,7 @@ func (h *IdiotmouthHub) HandleHubMessage(m *core.Message) {
 		c.Name = name
 		c.Avatar = avatar
 		c.Color = color
+		c.JoinTime = time.Now().UnixNano()
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+name+u.ENDTAG, " joined", u.ENDTAG)})
 		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 		h.SendData(c, ToClientCode["IN_MEDIA_RES"], []string{string(h.phase)})
