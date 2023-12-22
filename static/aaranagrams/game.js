@@ -153,11 +153,9 @@ export function initMain(conn) {
     }
     
     topboxSubmitButton.onclick = function () {
-        const word = topboxWord.value.trim();
-        if (!word) {
-            return;
-        }
-        networking.send(conn, en.ToServerCode.GAME_MESSAGE + word);
+        let stringToSend = "";
+        selectedLetterObjects.forEach(letterObject => stringToSend += letterObject[0].innerText)
+        networking.send(conn, en.ToServerCode.GAME_MESSAGE + stringToSend);
     };
 
     topboxAddLetterButton.onclick = function () {
