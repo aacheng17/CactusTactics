@@ -5,7 +5,7 @@ import (
 	u "example.com/hello/utility"
 )
 
-var name = "Aaranagrams"
+var name = "aaranagrams"
 var Phase map[string]byte = make(map[string]byte)
 var ToServerCode map[string]byte = make(map[string]byte)
 var ToClientCode map[string]byte = make(map[string]byte)
