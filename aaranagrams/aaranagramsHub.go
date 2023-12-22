@@ -3,7 +3,6 @@ package aaranagrams
 import (
 	"fmt"
 	"strconv"
-	"strings"
 	"time"
 
 	"example.com/hello/core"
@@ -133,7 +132,7 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 			h.reset()
 			h.Broadcast(ToClientCode["START_GAME"], []string{""})
 			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " started the game", u.ENDTAG, u.ENDTAG)})
-			h.Broadcast(ToClientCode["PROMPT"], h.getPrompt())
+			h.Broadcast(ToClientCode["LETTERS"], []string{string(h.letters)})
 			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+"Minimum word length: "+u.ENDTAG, h.minWordLength, u.ENDTAG)})
 			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+"Score to win: "+u.ENDTAG, h.scoreToWin, u.ENDTAG)})
 			h.SendData(h.getClientOfCurrentTurn(), ToClientCode["YOUR_TURN"], []string{"1"})
@@ -143,9 +142,9 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 	case Phase["PLAY"]:
 		switch m.MessageCode {
 		case ToServerCode["GAME_MESSAGE"]:
-			word := strings.TrimSpace(strings.ToLower(string(m.Data[0])))
+			word := m.Data[0]
 			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", word)})
-			h.handleWord(c, word)
+			h.handleWord(c, m.Data[0])
 		case ToServerCode["LETTER"]:
 			if h.chaosMode || h.getClientOfCurrentTurn() == c {
 				for i, l := range h.letters {

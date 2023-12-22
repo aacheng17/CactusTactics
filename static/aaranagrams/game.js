@@ -91,7 +91,10 @@ async function setGameboxLetters(newLetters) {
             continue;
         }
         if (newLetter === ' ') {
-            toggleGameboxLetter(existingLetterElement);
+            const selectedLetterObject = selectedLetterObjects.find(letterObject => letterObject[0] === existingLetterElement);
+            if (selectedLetterObject) {
+                toggleGameboxLetter(existingLetterElement);
+            }
             if (existingLetterElement.classList.contains("gamebox-letter-visible")) {
                 await new Promise(r => setTimeout(r, 10));
                 existingLetterElement.classList.remove("gamebox-letter-visible");
@@ -155,7 +158,7 @@ export function initMain(conn) {
     
     topboxSubmitButton.onclick = function () {
         let stringToSend = "";
-        selectedLetterObjects.forEach(letterObject => stringToSend += letterObject[2])
+        selectedLetterObjects.forEach(letterObject => stringToSend += letterObject[2] + ",")
         networking.send(conn, en.ToServerCode.GAME_MESSAGE + stringToSend);
     };
 

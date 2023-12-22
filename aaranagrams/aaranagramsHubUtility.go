@@ -17,28 +17,29 @@ func (h *AaranagramsHub) useMessageNum() int {
 	return ret
 }
 
-func (h *AaranagramsHub) handleWord(c *AaranagramsClient, word string) {
-	indices_selected := word
-	word = ""
-	for _, c := range indices_selected {
-		index := string(c)                       // string representing position in letters[] that was selected
-		letter_index, err := strconv.Atoi(index) // convert this to an integer
+func (h *AaranagramsHub) handleWord(c *AaranagramsClient, indicesSelectedString string) {
+	indicesSelected := []int{}
+	for _, c := range strings.Split(indicesSelectedString, ",") {
+		if c == "" {
+			continue
+		}
+		letterIndex, err := strconv.Atoi(c) // convert this to an integer
 		if err != nil {
 			return
 		}
-		word += string(h.letters[letter_index])
+		indicesSelected = append(indicesSelected, letterIndex)
 	}
+	word := ""
+	for _, letterIndex := range indicesSelected {
+		word += string(h.letters[letterIndex])
+	}
+	log.Println(word)
 	word = strings.ToLower(word)
 	switch h.isValidWord(word) {
 	case 0:
 		// handle removal of letters
-		for _, c := range indices_selected {
-			index := string(c)                       // string representing position in letters[] that was selected
-			letter_index, err := strconv.Atoi(index) // convert this to an integer
-			if err != nil {
-				return
-			}
-			h.letters[letter_index] = 32
+		for _, letterIndex := range indicesSelected {
+			h.letters[letterIndex] = ' '
 		}
 		h.Broadcast(ToClientCode["LETTERS"], []string{string(h.letters)})
 
