@@ -258,6 +258,10 @@ export function initMain(conn) {
     }
     
     //PLAY
+    handlers[en.ToClientCode.YOUR_TURN] = (data) => {
+        topboxAddLetterButton.disabled = data[0] !== "1";
+    }
+
     handlers[en.ToClientCode.LETTERS] = (data) => {
         playAudio("click3");
         setGameboxLetters(data[0]);

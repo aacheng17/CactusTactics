@@ -31,6 +31,7 @@ var en = {
         PROMPT: 'd',
         LETTERS: 'e',
         WORD_SUCCESS: 'f',
+        YOUR_TURN: 'g'
     }
 }
 Object.assign(en.ToServerCode, globalEn.ToServerCode);
