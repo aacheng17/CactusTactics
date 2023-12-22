@@ -2,8 +2,11 @@ package aaranagrams
 
 import (
 	"fmt"
+	"log"
 	"math/rand"
 	"sort"
+	"strconv"
+	"strings"
 
 	u "example.com/hello/utility"
 )
@@ -15,8 +18,32 @@ func (h *AaranagramsHub) useMessageNum() int {
 }
 
 func (h *AaranagramsHub) handleWord(c *AaranagramsClient, word string) {
+	log.Println(h.letters)
+	log.Println("Submitting " + word)
+	indices_selected := word
+	word = ""
+	for _, c := range indices_selected {
+		index := string(c)                       // string representing position in letters[] that was selected
+		letter_index, err := strconv.Atoi(index) // convert this to an integer
+		if err != nil {
+			return
+		}
+		word += string(h.letters[letter_index])
+	}
+	word = strings.ToLower(word)
 	switch h.isValidWord(word) {
 	case 0:
+		// handle removal of letters
+		for _, c := range indices_selected {
+			index := string(c)                       // string representing position in letters[] that was selected
+			letter_index, err := strconv.Atoi(index) // convert this to an integer
+			if err != nil {
+				return
+			}
+			h.letters[letter_index] = 32
+		}
+		h.Broadcast(ToClientCode["LETTERS"], []string{string(h.letters)})
+
 		worth := h.getWorth()
 		bonus := len(word)
 		finalWorth := worth * bonus
@@ -40,17 +67,14 @@ func (h *AaranagramsHub) handleWord(c *AaranagramsClient, word string) {
 			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "All possible words have been used or passed.", u.ENDTAG)})
 			break
 		}
+	case 1:
+		log.Println("Invalid word")
 	case 2:
 		h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "This word has already been used this game.", u.ENDTAG)})
 	}
 }
 
 func (h *AaranagramsHub) isValidWord(word string) int {
-	firstLetter := rune(word[0])
-	lastLetter := rune(word[len(word)-1])
-	if len(word) < h.minWordLength || firstLetter != h.start || lastLetter != h.end {
-		return 1
-	}
 	if _, ok := h.dictionary.usedWords[word]; ok {
 		return 2
 	}
