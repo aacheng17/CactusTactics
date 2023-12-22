@@ -18,8 +18,6 @@ func (h *AaranagramsHub) useMessageNum() int {
 }
 
 func (h *AaranagramsHub) handleWord(c *AaranagramsClient, word string) {
-	log.Println(h.letters)
-	log.Println("Submitting " + word)
 	indices_selected := word
 	word = ""
 	for _, c := range indices_selected {
