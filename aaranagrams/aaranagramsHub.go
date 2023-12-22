@@ -40,6 +40,9 @@ type AaranagramsHub struct {
 func (h *AaranagramsHub) DisconnectClientMessage(c core.Clientlike) {
 	if h.turn >= len(h.Clients) {
 		h.turn = 0
+		if len(h.Clients) == 0 {
+			return
+		}
 		h.SendData(h.getClientOfCurrentTurn(), ToClientCode["YOUR_TURN"], []string{"1"})
 	}
 	if c.GetName() != "" {
