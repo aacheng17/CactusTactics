@@ -33,7 +33,7 @@ var handlers = {};
 
 const selectedLetterObjects = [];
 
-function toggleGameboxLetter(gameboxLetterElement) {
+function toggleGameboxLetter(gameboxLetterElement, n) {
     if (gameboxLetterElement.innerText === '') {
         return;
     }
@@ -51,10 +51,10 @@ function toggleGameboxLetter(gameboxLetterElement) {
         const newTopboxElement = document.createElement("h3");
         newTopboxElement.innerText = gameboxLetterElement.innerText;
         newTopboxElement.className = "topbox-letter";
-        newTopboxElement.onclick = () => toggleGameboxLetter(gameboxLetterElement, true);
+        newTopboxElement.onclick = () => toggleGameboxLetter(gameboxLetterElement);
         topboxWord.appendChild(newTopboxElement);
 
-        selectedLetterObjects.push([gameboxLetterElement, newTopboxElement]);
+        selectedLetterObjects.push([gameboxLetterElement, newTopboxElement, n]);
     }
 }
 
@@ -78,7 +78,7 @@ function initGameboxLetters() {
         const element = document.createElement("h2");
         element.className = "gamebox-letter";
         element.innerText = '';
-        element.onclick = () => toggleGameboxLetter(element);
+        element.onclick = () => toggleGameboxLetter(element, i);
         gamebox.element.appendChild(element);
     }
 }
@@ -154,7 +154,7 @@ export function initMain(conn) {
     
     topboxSubmitButton.onclick = function () {
         let stringToSend = "";
-        selectedLetterObjects.forEach(letterObject => stringToSend += letterObject[0].innerText)
+        selectedLetterObjects.forEach(letterObject => stringToSend += letterObject[2])
         networking.send(conn, en.ToServerCode.GAME_MESSAGE + stringToSend);
     };
 
