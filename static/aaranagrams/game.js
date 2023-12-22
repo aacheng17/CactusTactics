@@ -91,6 +91,7 @@ async function setGameboxLetters(newLetters) {
             continue;
         }
         if (newLetter === ' ') {
+            toggleGameboxLetter(existingLetterElement);
             if (existingLetterElement.classList.contains("gamebox-letter-visible")) {
                 await new Promise(r => setTimeout(r, 10));
                 existingLetterElement.classList.remove("gamebox-letter-visible");
