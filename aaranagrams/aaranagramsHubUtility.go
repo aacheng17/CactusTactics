@@ -3,7 +3,6 @@ package aaranagrams
 import (
 	"fmt"
 	"log"
-	"math/rand"
 	"sort"
 	"strconv"
 	"strings"
@@ -17,7 +16,7 @@ func (h *AaranagramsHub) useMessageNum() int {
 	return ret
 }
 
-func (h *AaranagramsHub) handleWord(c *AaranagramsClient, indicesSelectedString string) {
+func (h *AaranagramsHub) handleWord(c *AaranagramsClient, indicesSelectedString string) string {
 	indicesSelected := []int{}
 	for _, c := range strings.Split(indicesSelectedString, ",") {
 		if c == "" {
@@ -25,7 +24,7 @@ func (h *AaranagramsHub) handleWord(c *AaranagramsClient, indicesSelectedString 
 		}
 		letterIndex, err := strconv.Atoi(c) // convert this to an integer
 		if err != nil {
-			return
+			return ""
 		}
 		indicesSelected = append(indicesSelected, letterIndex)
 	}
@@ -33,9 +32,12 @@ func (h *AaranagramsHub) handleWord(c *AaranagramsClient, indicesSelectedString 
 	for _, letterIndex := range indicesSelected {
 		word += string(h.letters[letterIndex])
 	}
-	log.Println(word)
 	word = strings.ToLower(word)
-	switch h.isValidWord(word) {
+	isValidWord := h.isValidWord(word)
+	if isValidWord != 0 {
+		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " ", strings.ToUpper(word))})
+	}
+	switch isValidWord {
 	case 0:
 		// handle removal of letters
 		for _, letterIndex := range indicesSelected {
@@ -43,7 +45,7 @@ func (h *AaranagramsHub) handleWord(c *AaranagramsClient, indicesSelectedString 
 		}
 		h.Broadcast(ToClientCode["LETTERS"], []string{string(h.letters)})
 
-		worth := h.getWorth()
+		worth := u.GetWordScore(word) * 15
 		bonus := len(word)
 		finalWorth := worth * bonus
 		c.score += finalWorth
@@ -54,23 +56,23 @@ func (h *AaranagramsHub) handleWord(c *AaranagramsClient, indicesSelectedString 
 		err := h.gotAWord(word)
 		mNum := h.useMessageNum()
 		h.dictionary.whattedWords[mNum] = word
-		h.Broadcast(ToClientCode["MESSAGE_WITH_WHAT"], []string{fmt.Sprint(u.TagId("p", mNum), u.Tag("b")+c.Name+u.ENDTAG, " earned ", worth, "x", bonus, "=", finalWorth, " points for ", word, u.ENDTAG), word})
-		h.Broadcast(ToClientCode["PROMPT"], h.getPrompt())
+		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", mNum), u.Tag("b")+c.Name+u.ENDTAG, " earned ", worth, "x", bonus, "=", finalWorth, " points for ", strings.ToUpper(word), u.ENDTAG), strings.ToUpper(word)})
 		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 		if c.score >= h.scoreToWin {
-			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p prebr", mNum), u.Tag("b")+c.Name+u.ENDTAG, " won the game!", u.ENDTAG)})
+			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p prebr", mNum), u.Tag("b")+c.Name+u.ENDTAG, " won the game!", u.ENDTAG)})
 			h.endGame()
-			return
+			break
 		}
 		if err == 1 {
-			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "All possible words have been used or passed.", u.ENDTAG)})
+			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "All possible words have been used.", u.ENDTAG)})
 			break
 		}
 	case 1:
 		log.Println("Invalid word")
 	case 2:
-		h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "This word has already been used this game.", u.ENDTAG)})
+		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), "This word has already been used this game.", u.ENDTAG)})
 	}
+	return word
 }
 
 func (h *AaranagramsHub) isValidWord(word string) int {
@@ -89,74 +91,21 @@ func (h *AaranagramsHub) reset() {
 	}
 	for client := range h.getAssertedClients() {
 		client.score = 0
-		client.pass = false
 		client.highestWord = ""
 		client.highestScore = 0
 	}
 	h.messageNum = 0
 	h.turn = 0
 	h.dictionary.generate(h.minWordLength)
-	h.genNextLetters()
-}
-
-func (h *AaranagramsHub) resetPass() {
-	for client := range h.getAssertedClients() {
-		client.pass = false
-	}
-}
-
-func (h *AaranagramsHub) pass() int {
-	h.resetPass()
-	h.dictionary.wordsLeft -= h.dictionary.letters[string(h.start)+string(h.end)]
-	h.dictionary.letters[string(h.start)+string(h.end)] = 0
-	return h.genNextLetters()
-}
-
-func (h *AaranagramsHub) getMajorityPass() bool {
-	count := 0
-	clientsWithNames := 0
-	for client := range h.getAssertedClients() {
-		if client.Name != "" {
-			clientsWithNames++
-			if client.pass {
-				count++
-			}
-		}
-	}
-	return count*2 > clientsWithNames
 }
 
 func (h *AaranagramsHub) gotAWord(word string) int {
-	h.resetPass()
 	h.dictionary.usedWords[word] = true
 	h.dictionary.wordsLeft--
-	h.dictionary.letters[string(h.start)+string(h.end)]--
-	return h.genNextLetters()
-}
-
-func (h *AaranagramsHub) genNextLetters() int {
-	if h.dictionary.wordsLeft <= 0 {
+	if h.dictionary.wordsLeft < 1 {
 		return 1
 	}
-	r := rand.Intn(h.dictionary.wordsLeft)
-	c := 0
-	for lets, freq := range h.dictionary.letters {
-		c += freq
-		if r < c {
-			h.start = rune(lets[0])
-			h.end = rune(lets[1])
-			break
-		}
-	}
 	return 0
-}
-
-func (h *AaranagramsHub) getWorth() int {
-	return h.dictionary.getWorth(string(h.start) + string(h.end))
-}
-
-func (h *AaranagramsHub) getPrompt() []string {
-	return []string{string(h.start), string(h.end), fmt.Sprint(h.getWorth()), fmt.Sprint(h.dictionary.letters[string(h.start)+string(h.end)])}
 }
 
 func (h *AaranagramsHub) getChaosModeAsString() string {

@@ -1,12 +1,22 @@
 package utility
 
-import "math/rand"
+import (
+	"math/rand"
+	"strings"
+)
 
 var letterFrequencies map[rune]int = make(map[rune]int)
+
+var letterScores map[rune]int = make(map[rune]int)
 
 var bag []rune
 
 var bagSize int
+
+func initLetterUtils() {
+	initLetterFrequencies()
+	initLetterScores()
+}
 
 func initLetterFrequencies() {
 	letterFrequencies['E'] = 11
@@ -53,4 +63,41 @@ func initLetterFrequencies() {
 
 func GetLetterWeighted() rune {
 	return bag[rand.Intn(bagSize)]
+}
+
+func initLetterScores() {
+	letterFrequencies['E'] = 1
+	letterFrequencies['A'] = 1
+	letterFrequencies['R'] = 1
+	letterFrequencies['I'] = 1
+	letterFrequencies['O'] = 1
+	letterFrequencies['T'] = 1
+	letterFrequencies['N'] = 1
+	letterFrequencies['S'] = 1
+	letterFrequencies['L'] = 1
+	letterFrequencies['C'] = 3
+	letterFrequencies['U'] = 1
+	letterFrequencies['D'] = 2
+	letterFrequencies['P'] = 3
+	letterFrequencies['M'] = 3
+	letterFrequencies['H'] = 4
+	letterFrequencies['G'] = 2
+	letterFrequencies['B'] = 3
+	letterFrequencies['F'] = 4
+	letterFrequencies['Y'] = 4
+	letterFrequencies['W'] = 4
+	letterFrequencies['K'] = 5
+	letterFrequencies['V'] = 4
+	letterFrequencies['X'] = 8
+	letterFrequencies['Z'] = 10
+	letterFrequencies['J'] = 8
+	letterFrequencies['Q'] = 10
+}
+
+func GetWordScore(word string) int {
+	score := 0
+	for _, letter := range strings.ToUpper(word) {
+		score += letterFrequencies[letter]
+	}
+	return score
 }

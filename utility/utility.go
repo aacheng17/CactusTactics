@@ -13,7 +13,7 @@ const (
 )
 
 func InitUtils() {
-	initLetterFrequencies()
+	initLetterUtils()
 }
 
 func Tag(tagString string) string {

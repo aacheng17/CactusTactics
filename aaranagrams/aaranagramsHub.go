@@ -23,10 +23,6 @@ type AaranagramsHub struct {
 
 	chaosMode bool
 
-	start rune
-
-	end rune
-
 	letters []rune
 
 	phase byte
@@ -42,8 +38,8 @@ func (h *AaranagramsHub) DisconnectClientMessage(c core.Clientlike) {
 		if len(h.Clients) == 0 {
 			return
 		}
-		h.SendData(h.getClientOfCurrentTurn(), ToClientCode["YOUR_TURN"], []string{"1"})
 	}
+	h.SendData(h.getClientOfCurrentTurn(), ToClientCode["YOUR_TURN"], []string{"1"})
 	if c.GetName() != "" {
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
 		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
@@ -82,10 +78,10 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 		h.SendData(c, ToClientCode["MIN_WORD_LENGTH"], []string{fmt.Sprint(h.minWordLength)})
 		h.SendData(c, ToClientCode["SCORE_TO_WIN"], []string{fmt.Sprint(h.scoreToWin)})
 		h.SendData(c, ToClientCode["CHAOS_MODE"], []string{h.getChaosModeAsString()})
+		h.Broadcast(ToClientCode["LETTERS"], []string{string(h.letters)})
 		if h.phase == Phase["PLAY"] {
-			h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
-			h.SendData(c, ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+"Minimum word length: "+u.ENDTAG, h.minWordLength, u.ENDTAG)})
-			h.SendData(c, ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+"Score to win: "+u.ENDTAG, h.scoreToWin, u.ENDTAG)})
+			h.SendData(c, ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+"Minimum word length: "+u.ENDTAG, h.minWordLength, u.ENDTAG)})
+			h.SendData(c, ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+"Score to win: "+u.ENDTAG, h.scoreToWin, u.ENDTAG)})
 		}
 	case ToServerCode["WHAT"]:
 		clientMessageNum, err := strconv.Atoi(m.Data[0])
@@ -131,10 +127,10 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 		case ToServerCode["START_GAME"]:
 			h.reset()
 			h.Broadcast(ToClientCode["START_GAME"], []string{""})
-			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " started the game", u.ENDTAG, u.ENDTAG)})
+			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " started the game", u.ENDTAG, u.ENDTAG)})
 			h.Broadcast(ToClientCode["LETTERS"], []string{string(h.letters)})
-			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+"Minimum word length: "+u.ENDTAG, h.minWordLength, u.ENDTAG)})
-			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+"Score to win: "+u.ENDTAG, h.scoreToWin, u.ENDTAG)})
+			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+"Minimum word length: "+u.ENDTAG, h.minWordLength, u.ENDTAG)})
+			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+"Score to win: "+u.ENDTAG, h.scoreToWin, u.ENDTAG)})
 			h.SendData(h.getClientOfCurrentTurn(), ToClientCode["YOUR_TURN"], []string{"1"})
 			h.phase = Phase["PLAY"]
 			h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
@@ -142,17 +138,20 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 	case Phase["PLAY"]:
 		switch m.MessageCode {
 		case ToServerCode["GAME_MESSAGE"]:
-			word := m.Data[0]
-			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, ": ", word)})
 			h.handleWord(c, m.Data[0])
 		case ToServerCode["LETTER"]:
 			if h.chaosMode || h.getClientOfCurrentTurn() == c {
+				letterCreated := false
 				for i, l := range h.letters {
 					if l == ' ' {
 						h.letters[i] = u.GetLetterWeighted()
 						h.Broadcast(ToClientCode["LETTERS"], []string{string(h.letters)})
+						letterCreated = true
 						break
 					}
+				}
+				if !letterCreated {
+					return
 				}
 				h.SendData(h.getClientOfCurrentTurn(), ToClientCode["YOUR_TURN"], []string{"0"})
 				h.turn++
@@ -164,7 +163,7 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 			}
 		case ToServerCode["END_GAME"]:
 			h.SendData(h.getClientOfCurrentTurn(), ToClientCode["YOUR_TURN"], []string{"0"})
-			h.Broadcast(ToClientCode["GAME_MESSAGE"], []string{fmt.Sprint(u.Tag("p prebr"), u.Tag("b")+c.Name+u.ENDTAG, " ended the game.", u.ENDTAG)})
+			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.Tag("p prebr"), u.Tag("b")+c.Name+u.ENDTAG, " ended the game.", u.ENDTAG)})
 			h.endGame()
 		}
 	}
