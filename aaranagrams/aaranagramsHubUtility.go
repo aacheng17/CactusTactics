@@ -160,7 +160,7 @@ func (h *AaranagramsHub) getPlayers(excepts ...*AaranagramsClient) []string {
 		players = append(players, fmt.Sprint(client.Avatar))
 		players = append(players, fmt.Sprint((client.Color)))
 		players = append(players, fmt.Sprint(client.score))
-		players = append(players, client.highestWord)
+		players = append(players, strings.ToUpper(client.highestWord))
 		players = append(players, fmt.Sprint(client.highestScore))
 		turn := ""
 		if !h.chaosMode && h.phase == Phase["PLAY"] && h.getClientOfCurrentTurn() == client {
