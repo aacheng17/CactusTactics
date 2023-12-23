@@ -76,6 +76,9 @@ func (h *AaranagramsHub) handleWord(c *AaranagramsClient, indicesSelectedString 
 }
 
 func (h *AaranagramsHub) isValidWord(word string) int {
+	if len(word) < h.minWordLength {
+		return 1
+	}
 	if _, ok := h.dictionary.usedWords[word]; ok {
 		return 2
 	}

@@ -138,6 +138,9 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 	case Phase["PLAY"]:
 		switch m.MessageCode {
 		case ToServerCode["GAME_MESSAGE"]:
+			if len(m.Data[0]) == 0 {
+				break
+			}
 			h.handleWord(c, m.Data[0])
 		case ToServerCode["LETTER"]:
 			if h.chaosMode || h.getClientOfCurrentTurn() == c {

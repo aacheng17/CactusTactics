@@ -157,6 +157,9 @@ export function initMain(conn) {
     }
     
     topboxSubmitButton.onclick = function () {
+        if (selectedLetterObjects.length === 0) {
+            return;
+        }
         let stringToSend = "";
         selectedLetterObjects.forEach(letterObject => stringToSend += letterObject[2] + ",")
         networking.send(conn, en.ToServerCode.GAME_MESSAGE + stringToSend);
