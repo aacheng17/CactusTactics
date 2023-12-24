@@ -88,6 +88,25 @@ func (h *AaranagramsHub) isValidWord(word string) int {
 	return 1
 }
 
+func (h *AaranagramsHub) broadcastYourTurn(isYourTurn bool) {
+	yourTurnString := "0"
+	if isYourTurn {
+		yourTurnString = "1"
+	}
+	h.Broadcast(ToClientCode["YOUR_TURN"], []string{yourTurnString})
+}
+
+func (h *AaranagramsHub) sendYourTurn(isYourTurn bool) {
+	if h.chaosMode {
+		return
+	}
+	yourTurnString := "0"
+	if isYourTurn {
+		yourTurnString = "1"
+	}
+	h.SendData(h.getClientOfCurrentTurn(), ToClientCode["YOUR_TURN"], []string{yourTurnString})
+}
+
 func (h *AaranagramsHub) reset() {
 	for i := range h.letters {
 		h.letters[i] = ' '

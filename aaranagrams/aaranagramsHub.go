@@ -39,7 +39,7 @@ func (h *AaranagramsHub) DisconnectClientMessage(c core.Clientlike) {
 			return
 		}
 	}
-	h.SendData(h.getClientOfCurrentTurn(), ToClientCode["YOUR_TURN"], []string{"1"})
+	h.sendYourTurn(true)
 	if c.GetName() != "" {
 		h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+c.GetName()+u.ENDTAG, " disconnected", u.ENDTAG)})
 		h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
@@ -131,7 +131,11 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 			h.Broadcast(ToClientCode["LETTERS"], []string{string(h.letters)})
 			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p", h.useMessageNum()), u.Tag("b")+"Minimum word length: "+u.ENDTAG, h.minWordLength, u.ENDTAG)})
 			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+"Score to win: "+u.ENDTAG, h.scoreToWin, u.ENDTAG)})
-			h.SendData(h.getClientOfCurrentTurn(), ToClientCode["YOUR_TURN"], []string{"1"})
+			if h.chaosMode {
+				h.broadcastYourTurn(true)
+			} else {
+				h.sendYourTurn(true)
+			}
 			h.phase = Phase["PLAY"]
 			h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 		}
@@ -156,16 +160,16 @@ func (h *AaranagramsHub) HandleHubMessage(m *core.Message) {
 				if !letterCreated {
 					return
 				}
-				h.SendData(h.getClientOfCurrentTurn(), ToClientCode["YOUR_TURN"], []string{"0"})
+				h.sendYourTurn(false)
 				h.turn++
 				if h.turn >= len(h.Clients) {
 					h.turn = 0
 				}
-				h.SendData(h.getClientOfCurrentTurn(), ToClientCode["YOUR_TURN"], []string{"1"})
+				h.sendYourTurn(true)
 				h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 			}
 		case ToServerCode["END_GAME"]:
-			h.SendData(h.getClientOfCurrentTurn(), ToClientCode["YOUR_TURN"], []string{"0"})
+			h.broadcastYourTurn(false)
 			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.Tag("p prebr"), u.Tag("b")+c.Name+u.ENDTAG, " ended the game.", u.ENDTAG)})
 			h.endGame()
 		}
