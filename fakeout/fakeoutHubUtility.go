@@ -20,14 +20,19 @@ func (h *FakeoutHub) useMessageNum() int {
 	return ret
 }
 
+func (h *FakeoutHub) endGame() {
+	for client := range h.getAssertedClients() {
+		client.answer = ""
+	}
+	h.phase = Phase["PREGAME"]
+}
+
 func (h *FakeoutHub) reset() {
 	for client := range h.getAssertedClients() {
 		client.fakeouts = 0
 		client.score = 0
-		client.answer = ""
 		client.choice = -1
 	}
-	h.phase = Phase["PREGAME"]
 }
 
 func (h *FakeoutHub) startGame() {

@@ -49,7 +49,6 @@ func (h *FakeoutHub) getAssertedClients() map[*FakeoutClient]bool {
 
 func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 	c := (m.Client).(*FakeoutClient)
-	question := h.getQuestion()
 	switch m.MessageCode {
 	case ToServerCode["NAME"]:
 		if c.Name != "" {
@@ -76,6 +75,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 		case Phase["PLAY_PROMPT"]:
 			h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
 		case Phase["PLAY_GUESSES"]:
+			question := h.getQuestion()
 			h.SendData(c, ToClientCode["PROMPT"], h.getPrompt())
 			toSend := []string{}
 			for _, client := range h.answers {
@@ -112,6 +112,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 				h.Broadcast(ToClientCode["DECK_SELECTION"], []string{fmt.Sprint(h.deck)})
 			}
 		case ToServerCode["START_GAME"]:
+			h.reset()
 			h.startGame()
 			h.Broadcast(ToClientCode["START_GAME"], []string{""})
 			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p postbr", h.useMessageNum()), u.Tag("b")+c.Name+u.ENDTAG, " started the game", u.ENDTAG, u.ENDTAG)})
@@ -122,6 +123,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 	case Phase["PLAY_PROMPT"]:
 		switch m.MessageCode {
 		case ToServerCode["RESPONSE"]:
+			question := h.getQuestion()
 			if c.answer == "" {
 				playerAnswer := strings.TrimSpace(strings.ToLower(string(m.Data[0])))
 				alternateSpelling := false
@@ -207,7 +209,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 						h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 						if h.didSomeoneWin() {
 							h.Broadcast(ToClientCode["WINNERS"], h.getWinners())
-							h.reset()
+							h.endGame()
 						} else {
 							h.phase = Phase["PLAY_PROMPT"]
 							h.genNextQuestion()
@@ -225,7 +227,7 @@ func (h *FakeoutHub) HandleHubMessage(m *core.Message) {
 		case ToServerCode["END_GAME"]:
 			h.Broadcast(ToClientCode["LOBBY_CHAT_MESSAGE"], []string{fmt.Sprint(u.TagId("p prebr postbr", h.useMessageNum()), "Game ended by ", u.Tag("b")+c.Name+u.ENDTAG, u.ENDTAG)})
 			h.Broadcast(ToClientCode["WINNERS"], h.getWinners())
-			h.phase = Phase["PREGAME"]
+			h.endGame()
 		}
 	}
 }
@@ -234,6 +236,7 @@ func NewFakeoutHub(game string, id string, deleteHubCallback func(*core.Hub)) co
 	h := &FakeoutHub{
 		Hub:        *core.NewHub(game, id, deleteHubCallback),
 		scoreToWin: 1000,
+		phase:      Phase["PREGAME"],
 	}
 	h.Child = h
 	h.reset()
