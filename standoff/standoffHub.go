@@ -74,6 +74,7 @@ func (h *StandoffHub) HandleHubMessage(m *core.Message) {
 			h.phase = Phase["PLAY"]
 			h.Broadcast(ToClientCode["START_GAME"], []string{""})
 			h.Broadcast(ToClientCode["PROMPT"], h.getPrompt())
+			h.Broadcast(ToClientCode["PLAYERS"], h.getPlayers())
 		}
 	case Phase["PLAY"]:
 		switch m.MessageCode {
